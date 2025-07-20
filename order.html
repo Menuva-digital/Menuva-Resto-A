@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Order Makanan - Menuva</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fefefe;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .menu-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #ccc;
+      padding: 10px 0;
+    }
+    .menu-name {
+      font-weight: bold;
+    }
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .qty-controls button {
+      padding: 5px 10px;
+      font-size: 16px;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    label {
+      font-weight: bold;
+    }
+    .summary {
+      margin-top: 30px;
+    }
+    .summary p {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+    .submit-btn {
+      margin-top: 20px;
+      padding: 12px 20px;
+      font-size: 16px;
+      background: orange;
+      border: none;
+      color: white;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+    .logo-container {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .logo-container img {
+      max-width: 300px;
+      max-height: 300px;
+    }
+  </style>
+</head>
+<body>
+  <div class="logo-container" id="logoContainer"></div>
+  <h1>📝 Pesan Menu</h1>
+
+  <label for="kategoriFilter">Filter Kategori Menu:</label>
+  <select id="kategoriFilter" onchange="tampilkanMenu()">
+    <option value="Semua">Semua Kategori</option>
+  </select>
+
+  <div id="menu-list"></div>
+
+  <div class="summary">
+    <p>Total Item: <span id="total-item">0</span></p>
+    <p>Total Harga: Rp<span id="total-harga">0</span></p>
+
+    <label for="nama">Nama Pemesan</label>
+    <input type="text" id="nama" placeholder="Contoh: Budi">
+
+    <label for="alamat">Alamat Pengantaran</label>
+    <textarea id="alamat" placeholder="Contoh: Jl. Kenanga No. 123"></textarea>
+
+    <label for="waktuAntar">Waktu Pengantaran (opsional)</label>
+    <input type="datetime-local" id="waktuAntar" />
+
+    <label for="catatan">Catatan Tambahan</label>
+    <textarea id="catatan" placeholder="Contoh: Daging jangan terlalu matang"></textarea>
+
+    <label for="ruangan">Catatan Pemakaian Ruangan</label>
+    <input type="text" id="ruangan" placeholder="Contoh: Superior Room">
+
+    <button class="submit-btn" onclick="kirimPesanan()">Kirim Pesanan</button>
+  </div>
+
+  <script>
+    const data = JSON.parse(localStorage.getItem("menuvaData"));
+    const menuList = document.getElementById("menu-list");
+    const totalItem = document.getElementById("total-item");
+    const totalHarga = document.getElementById("total-harga");
+    const kategoriFilter = document.getElementById("kategoriFilter");
+    const logoContainer = document.getElementById("logoContainer");
+
+    const pesanan = {};
+
+    if (data && data.menu && data.menu.length) {
+      // Tampilkan logo jika ada
+      if (data.logo) {
+        logoContainer.innerHTML = `<img src="${data.logo}" alt="Logo Resto" />`;
+      }
+
+      // Ambil semua kategori unik dan masukkan ke filter
+      const kategoriUnik = [...new Set(data.menu.map(m => m.kategori).filter(k => k && k.trim() !== ""))];
+      kategoriUnik.forEach(k => {
+        const opt = document.createElement("option");
+        opt.value = k;
+        opt.textContent = k;
+        kategoriFilter.appendChild(opt);
+      });
+
+      tampilkanMenu();
+    } else {
+      menuList.innerHTML = "<p>⚠️ Tidak ada menu tersedia</p>";
+    }
+
+    function tampilkanMenu() {
+      const kategoriDipilih = kategoriFilter.value;
+      menuList.innerHTML = "";
+
+      data.menu.forEach((item, index) => {
+        if (kategoriDipilih !== "Semua" && item.kategori !== kategoriDipilih) return;
+
+        if (pesanan[index] === undefined) pesanan[index] = 0;
+
+        const itemEl = document.createElement("div");
+        itemEl.className = "menu-item";
+        itemEl.innerHTML = `
+          <div>
+            <div class="menu-name">${item.nama}</div>
+            <div>Rp${item.harga}</div>
+          </div>
+          <div class="qty-controls">
+            <button onclick="ubahJumlah(${index}, -1)">➖</button>
+            <span id="qty-${index}">${pesanan[index]}</span>
+            <button onclick="ubahJumlah(${index}, 1)">➕</button>
+          </div>
+        `;
+        menuList.appendChild(itemEl);
+      });
+
+      updateRingkasan();
+    }
+
+    function ubahJumlah(index, delta) {
+      pesanan[index] = Math.max(0, (pesanan[index] || 0) + delta);
+      document.getElementById(`qty-${index}`).innerText = pesanan[index];
+      updateRingkasan();
+    }
+
+    function updateRingkasan() {
+      let totalQty = 0;
+      let totalHargaValue = 0;
+
+      Object.entries(pesanan).forEach(([i, jumlah]) => {
+        totalQty += jumlah;
+        totalHargaValue += jumlah * parseInt(data.menu[i].harga || 0);
+      });
+
+      totalItem.innerText = totalQty;
+      totalHarga.innerText = totalHargaValue.toLocaleString();
+    }
+
+    function kirimPesanan() {
+      const nama = document.getElementById("nama").value.trim();
+      const alamat = document.getElementById("alamat").value.trim();
+      const waktuAntar = document.getElementById("waktuAntar").value;
+      const catatan = document.getElementById("catatan").value.trim();
+      const ruangan = document.getElementById("ruangan").value.trim();
+      const now = new Date();
+      const waktuOrder = now.toLocaleString("id-ID");
+
+      let listPesanan = Object.entries(pesanan)
+        .filter(([_, jumlah]) => jumlah > 0)
+        .map(([i, jumlah]) => `${data.menu[i].nama} x${jumlah} (Rp${jumlah * parseInt(data.menu[i].harga)})`)
+        .join("\n");
+
+      if (!listPesanan) {
+        alert("Belum ada item yang dipilih.");
+        return;
+      }
+
+      let totalHargaAll = Object.entries(pesanan).reduce((sum, [i, jml]) => sum + (jml * parseInt(data.menu[i].harga || 0)), 0);
+
+      let pesanWA = `🧾 Pesanan Baru dari ${nama || "Customer"}\n\n` +
+        `📅 Tanggal Order: ${waktuOrder}\n` +
+        (waktuAntar ? `🕒 Waktu Antar: ${new Date(waktuAntar).toLocaleString("id-ID")}\n` : "") +
+        (ruangan ? `🏨 Ruangan: ${ruangan}\n` : "") +
+        `\n📍 Alamat:\n${alamat}\n` +
+        `\n🛒 Pesanan:\n${listPesanan}\n\n` +
+        `💰 Total: Rp${totalHargaAll.toLocaleString()}\n` +
+        (catatan ? `\n📌 Catatan:\n${catatan}` : "");
+
+        const nomorAdminList = data.nomorWaAdmin || [];
+
+        if (nomorAdminList.length === 0) {
+        alert("⚠️ Tidak ada nomor admin yang tersedia.");
+        return;
+        }
+
+        // Kirim ke semua nomor admin
+        nomorAdminList.forEach(nomor => {
+        const waLink = `https://wa.me/${nomor}?text=${encodeURIComponent(pesanWA)}`;
+        window.open(waLink, "_blank");
+       });
+
+    }
+  </script>
+</body>
+</html>
