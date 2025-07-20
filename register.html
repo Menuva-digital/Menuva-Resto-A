@@ -135,13 +135,13 @@
       const userExists = users.some(user => user.email === email);
 
       if (userExists) {
-        errorMsg.textContent = "❌ Email sudah terdaftar bro! Gunakan email lain.";
+        errorMsg.textContent = "❌ Email sudah terdaftar! Gunakan email lain.";
       } else {
         // Simpan user baru
         users.push({ email, password });
         localStorage.setItem('menuvaUsers', JSON.stringify(users));
-        alert('✅ Registrasi berhasil! Silakan login bro 🚀');
-        window.location.href = 'login.html';
+        alert('✅ Registrasi berhasil! Silakan login 🚀');
+        window.location.href = 'index.html';
       }
     });
   </script>
