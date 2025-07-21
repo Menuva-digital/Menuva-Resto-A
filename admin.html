@@ -212,49 +212,23 @@
   }
 
   function simpanData() {
-    try {
-      const namaRestoran = document.getElementById("namaRestoran")?.value.trim();
-      const logo = document.getElementById("previewLogo")?.src || '';
-      const nomorWaAdmin = Array.from(document.querySelectorAll('.nomor-wa'))
-                                .map(input => input.value.trim())
-                                .filter(val => val !== '');
-      const menu = [
-        ...ambilMenu('menuFoodContainer'),
-        ...ambilMenu('menuSnackContainer'),
-        ...ambilMenu('menuDrinkContainer')
-      ];
+  try {
+    const menuData = ambilDataDariForm();
+    console.log("Data yang akan disimpan:", menuData);
 
-      if (!namaRestoran || menu.length === 0) {
-        alert("⚠️ Lengkapi nama restoran dan minimal 1 item menu.");
-        return;
-      }
+    const jsonString = JSON.stringify(menuData);
+    console.log("JSON berhasil dibuat");
 
-      const data = {
-        namaRestoran,
-        logo,
-        nomorWaAdmin,
-        flipbookRuanganImages,
-        flipbookMenuImages,
-        menu,
-        disimpanPada: new Date().toISOString()
-      };
+    localStorage.setItem("menuvaData", jsonString);
+    console.log("Data berhasil disimpan di localStorage");
 
-      localStorage.setItem('menuvaData', JSON.stringify(data));
-      alert("✅ Data berhasil disimpan!");
-
-      const linkMenu = `${window.location.origin}/menu.html`;
-      if (confirm("Ingin membuka halaman customer (menu.html)?")) {
-        window.open(linkMenu, '_blank');
-      } else {
-        navigator.clipboard.writeText(linkMenu)
-          .then(() => alert("📋 Link menu.html telah disalin ke clipboard!"))
-          .catch(err => console.warn("❌ Gagal salin ke clipboard:", err));
-      }
-    } catch (err) {
-      console.error("❌ Gagal menyimpan:", err);
-      alert("Terjadi kesalahan saat menyimpan data. Silakan cek kembali input dan koneksi Anda.");
-    }
+    alert("Data berhasil disimpan!");
+  } catch (error) {
+    console.error("Gagal menyimpan data:", error);
+    alert("Terjadi kesalahan saat menyimpan data. Silakan cek kembali input dan koneksi Anda.");
   }
+}
+
 
   function resetData() {
     if (confirm("Yakin ingin menghapus semua data?")) {
