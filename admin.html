@@ -163,6 +163,33 @@
   </div>
   
 <script>
+  function muatDataKeForm() {
+  const data = JSON.parse(localStorage.getItem("menuvaData")) || {};
+  if (data.namaRestoran) document.getElementById("namaRestoran").value = data.namaRestoran;
+  if (data.alamatRestoran) document.getElementById("alamatRestoran").value = data.alamatRestoran;
+  if (data.nomorWhatsApp) document.getElementById("nomorWhatsApp").value = data.nomorWhatsApp;
+  if (data.linkMaps) document.getElementById("linkMaps").value = data.linkMaps;
+
+  if (data.logo) {
+    const logoPreview = document.getElementById("previewLogo");
+    logoPreview.src = data.logo;
+    logoPreview.style.display = "block";
+  }
+
+  if (data.galeriRuangan?.length) {
+    document.getElementById("jumlahRuanganDiupload").textContent = `${data.galeriRuangan.length} gambar diinput`;
+  }
+
+  if (data.flipbookMenu?.length) {
+    document.getElementById("jumlahMenuDiupload").textContent = `${data.flipbookMenu.length} gambar diinput`;
+  }
+
+  // Jika ada menu, tampilkan ulang ke tabel
+  if (Array.isArray(data.menuItems)) {
+    tampilkanMenuKeTabel(data.menuItems);
+  }
+}
+
   let flipbookRuanganImages = [];
   let flipbookMenuImages = [];
 
@@ -189,6 +216,10 @@
     `;
     container.appendChild(div);
   }
+  document.addEventListener("DOMContentLoaded", () => {
+  muatDataKeForm();
+});
+
 
   function tambahNomorWa(value = '') {
     const container = document.getElementById('nomorWaContainer');
