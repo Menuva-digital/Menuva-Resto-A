@@ -47,57 +47,55 @@
 <body>
 
   <div id="content"></div>
+<script>
+  const data = localStorage.getItem("menuvaData");
+  const content = document.getElementById("content");
 
-  <script>
-    const data = localStorage.getItem("menuvaData");
-const content = document.getElementById("content");
+  if (!data) {
+    content.innerHTML = "<p class='warning'>⚠️ Data menu tidak ditemukan</p>";
+  } else {
+    const menuva = JSON.parse(data);
+    content.innerHTML = `
+      ${menuva.logo ? `<img src="${menuva.logo}" class="logo-resto" alt="Logo Restoran" />` : ''}
+      <h1>${menuva.namaRestoran || 'Menu Restoran'}</h1>
 
-if (!data) {
-  content.innerHTML = "<p class='warning'>⚠️ Data menu tidak ditemukan</p>";
-} else {
-  const menuva = JSON.parse(data);
-  content.innerHTML = `
-
-    ${menuva.logo ? `<img src="${menuva.logo}" class="logo-resto" alt="Logo Restoran" />` : ''}
-    <h1>${menuva.namaRestoran || 'Menu Restoran'}</h1>
-
-    ${menuva.flipbookRuanganImages && menuva.flipbookRuanganImages.length ? `
-      <div class="flipbook-section">
-        <div class="flipbook-title">Galeri Ruangan</div>
-        <div class="flipbook-gallery">
-          ${menuva.flipbookRuanganImages.map(src => `<img src="${src}" />`).join('')}
+      ${menuva.galeriRuangan && menuva.galeriRuangan.length ? `
+        <div class="flipbook-section">
+          <div class="flipbook-title">Galeri Ruangan</div>
+          <div class="flipbook-gallery">
+            ${menuva.galeriRuangan.map(src => `<img src="${src}" />`).join('')}
+          </div>
         </div>
-      </div>
-    ` : '<p class="warning">Belum ada foto ruangan yang diunggah.</p>'}
+      ` : '<p class="warning">Belum ada foto ruangan yang diunggah.</p>'}
 
-    ${menuva.flipbookMenuImages && menuva.flipbookMenuImages.length ? `
-      <div class="flipbook-section">
-        <div class="flipbook-title">Menu Makanan & Minuman</div>
-        <div class="flipbook-gallery">
-          ${menuva.flipbookMenuImages.map(src => `<img src="${src}" />`).join('')}
+      ${menuva.flipbookMenu && menuva.flipbookMenu.length ? `
+        <div class="flipbook-section">
+          <div class="flipbook-title">Menu Makanan & Minuman</div>
+          <div class="flipbook-gallery">
+            ${menuva.flipbookMenu.map(src => `<img src="${src}" />`).join('')}
+          </div>
         </div>
+      ` : '<p class="warning">Belum ada gambar menu yang diunggah.</p>'}
+    `;
+
+    content.innerHTML += `
+      <div style="text-align:center; margin-top: 40px;">
+        <a href="order.html" style="
+          background-color: #ff8800;
+          color: white;
+          padding: 12px 24px;
+          text-decoration: none;
+          border-radius: 8px;
+          font-weight: bold;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+          display: inline-block;
+        ">
+          🍽️ Pesan Sekarang
+        </a>
       </div>
-    ` : '<p class="warning">Belum ada gambar menu yang diunggah.</p>'}
-  `;
-  content.innerHTML += `
-  <div style="text-align:center; margin-top: 40px;">
-    <a href="order.html" style="
-      background-color: #ff8800;
-      color: white;
-      padding: 12px 24px;
-      text-decoration: none;
-      border-radius: 8px;
-      font-weight: bold;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      display: inline-block;
-    ">
-      🍽️ Pesan Sekarang
-    </a>
-  </div>
-`;
+    `;
+  }
+</script>
 
-}
-
-  </script>
 </body>
 </html>
