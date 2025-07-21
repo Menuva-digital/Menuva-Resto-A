@@ -210,51 +210,68 @@
     });
     return list;
   }
-
-  function simpanData() {
+function simpanData() {
   try {
     const namaRestoran = document.getElementById("namaRestoran").value;
-    const deskripsi = document.getElementById("deskripsi").value;
-    const logo = document.getElementById("logoPreview").src;
-    const flipbook = document.getElementById("flipbookPreview")?.src || "";
+    const logo = document.getElementById("previewLogo")?.src || "";
     const menuItems = [];
 
-    document.querySelectorAll(".menu-item").forEach((item) => {
-      const nama = item.querySelector(".nama-menu").value;
-      const harga = item.querySelector(".harga-menu").value;
-      const kategori = item.querySelector(".kategori-menu").value;
-      const gambar = item.querySelector(".gambar-preview").src;
+    // Gabungkan dari 3 kategori: food, snack, drink
+    ["food", "snack", "drink"].forEach((kategori) => {
+      const container = document.getElementById(`menu${capitalize(kategori)}Container`);
+      const items = container.querySelectorAll(".menu-item");
 
-      if (nama && harga && kategori) {
-        menuItems.push({ nama, harga, kategori, gambar });
+      items.forEach((item) => {
+        const nama = item.querySelector(".nama-menu")?.value || "";
+        const harga = item.querySelector(".harga-menu")?.value || "";
+        const gambar = item.querySelector(".gambar-preview")?.src || "";
+
+        if (nama && harga) {
+          menuItems.push({ nama, harga, kategori, gambar });
+        }
+      });
+    });
+
+    // Ambil nomor WA
+    const nomorWaList = [];
+    document.querySelectorAll(".nomor-wa").forEach((input) => {
+      if (input.value) {
+        nomorWaList.push(input.value);
       }
     });
 
-    // Ambil galeri foto ruangan
-    const fotoRuangan = [];
-    document.querySelectorAll(".foto-ruangan-preview").forEach((img) => {
-      if (img.src) {
-        fotoRuangan.push(img.src);
-      }
+    // Ambil preview gambar Flipbook Menu
+    const flipbookMenu = [];
+    document.querySelectorAll("#flipbookMenuPreview img").forEach((img) => {
+      flipbookMenu.push(img.src);
+    });
+
+    // Ambil preview gambar Ruangan
+    const galeriRuangan = [];
+    document.querySelectorAll("#flipbookRuanganPreview img").forEach((img) => {
+      galeriRuangan.push(img.src);
     });
 
     const data = {
       namaRestoran,
-      deskripsi,
       logo,
-      flipbook,
-      galeriRuangan: fotoRuangan,
       menu: menuItems,
+      nomorWa: nomorWaList,
+      flipbookMenu,
+      galeriRuangan
     };
 
     localStorage.setItem("menuvaData", JSON.stringify(data));
-    alert("Data berhasil disimpan!");
+    alert("✅ Data berhasil disimpan!");
   } catch (error) {
     console.error("Gagal menyimpan data:", error);
-    alert("Terjadi kesalahan saat menyimpan data. Silakan cek kembali input dan koneksi Anda.");
+    alert("❌ Terjadi kesalahan saat menyimpan data. Cek kembali form!");
   }
 }
 
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
 
   function resetData() {
     if (confirm("Yakin ingin menghapus semua data?")) {
