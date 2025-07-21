@@ -177,8 +177,9 @@
     const div = document.createElement('div');
     div.className = 'menu-item';
     div.innerHTML = `
-      <input type="text" placeholder="Nama Menu" value="${nama}" />
-      <input type="number" placeholder="Harga" value="${harga}" />
+     <input type="text" class="nama-menu" placeholder="Nama Menu" value="${nama}" />
+     <input type="number" class="harga-menu" placeholder="Harga" value="${harga}" />
+
       <select>
         <option value="food" ${kategori === 'food' ? 'selected' : ''}>Food</option>
         <option value="snack" ${kategori === 'snack' ? 'selected' : ''}>Snack</option>
@@ -212,45 +213,30 @@
   }
 function simpanData() {
   try {
-    const namaRestoran = document.getElementById("namaRestoran").value;
+    const namaRestoran = document.getElementById("namaRestoran").value.trim();
     const logo = document.getElementById("previewLogo")?.src || "";
-    const menuItems = [];
 
-    // Gabungkan dari 3 kategori: food, snack, drink
+    const menuItems = [];
     ["food", "snack", "drink"].forEach((kategori) => {
       const container = document.getElementById(`menu${capitalize(kategori)}Container`);
       const items = container.querySelectorAll(".menu-item");
-
       items.forEach((item) => {
-        const nama = item.querySelector(".nama-menu")?.value || "";
-        const harga = item.querySelector(".harga-menu")?.value || "";
-        const gambar = item.querySelector(".gambar-preview")?.src || "";
-
+        const nama = item.querySelector("input[type='text']")?.value.trim();
+        const harga = item.querySelector("input[type='number']")?.value.trim();
         if (nama && harga) {
-          menuItems.push({ nama, harga, kategori, gambar });
+          menuItems.push({ nama, harga, kategori });
         }
       });
     });
 
-    // Ambil nomor WA
     const nomorWaList = [];
     document.querySelectorAll(".nomor-wa").forEach((input) => {
-      if (input.value) {
-        nomorWaList.push(input.value);
-      }
+      const val = input.value.trim();
+      if (val) nomorWaList.push(val);
     });
 
-    // Ambil preview gambar Flipbook Menu
-    const flipbookMenu = [];
-    document.querySelectorAll("#flipbookMenuPreview img").forEach((img) => {
-      flipbookMenu.push(img.src);
-    });
-
-    // Ambil preview gambar Ruangan
-    const galeriRuangan = [];
-    document.querySelectorAll("#flipbookRuanganPreview img").forEach((img) => {
-      galeriRuangan.push(img.src);
-    });
+    const flipbookMenu = Array.from(document.querySelectorAll("#flipbookMenuPreview img")).map(img => img.src);
+    const galeriRuangan = Array.from(document.querySelectorAll("#flipbookRuanganPreview img")).map(img => img.src);
 
     const data = {
       namaRestoran,
@@ -268,6 +254,7 @@ function simpanData() {
     alert("❌ Terjadi kesalahan saat menyimpan data. Cek kembali form!");
   }
 }
+
 
 function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -365,36 +352,40 @@ function capitalize(str) {
   }
 
   window.onload = function() {
-    const saved = localStorage.getItem('menuvaData');
-    if (saved) {
-      const data = JSON.parse(saved);
-      document.getElementById('namaRestoran').value = data.namaRestoran || '';
-      if (data.logo) document.getElementById('previewLogo').src = data.logo;
+  const saved = localStorage.getItem('menuvaData');
+  if (saved) {
+    const data = JSON.parse(saved);
+    document.getElementById('namaRestoran').value = data.namaRestoran || '';
+    if (data.logo) document.getElementById('previewLogo').src = data.logo;
 
-      (data.menu || []).forEach(m => tambahMenu(m.kategori, m.nama, m.harga));
-      (data.nomorWaAdmin || []).forEach(no => tambahNomorWa(no));
-
-      if (data.flipbookRuanganImages) {
-        flipbookRuanganImages = data.flipbookRuanganImages;
-        const preview = document.getElementById('flipbookRuanganPreview');
-        flipbookRuanganImages.forEach(src => {
-          const img = document.createElement('img');
-          img.src = src;
-          preview.appendChild(img);
-        });
-      }
-
-      if (data.flipbookMenuImages) {
-        flipbookMenuImages = data.flipbookMenuImages;
-        const preview = document.getElementById('flipbookMenuPreview');
-        flipbookMenuImages.forEach(src => {
-          const img = document.createElement('img');
-          img.src = src;
-          preview.appendChild(img);
-        });
-      }
+    if (Array.isArray(data.menu)) {
+      data.menu.forEach(m => tambahMenu(m.kategori, m.nama, m.harga));
     }
-  };
+
+    if (Array.isArray(data.nomorWa)) {
+      data.nomorWa.forEach(no => tambahNomorWa(no));
+    }
+
+    if (Array.isArray(data.flipbookMenu)) {
+      const preview = document.getElementById('flipbookMenuPreview');
+      data.flipbookMenu.forEach(src => {
+        const img = document.createElement('img');
+        img.src = src;
+        preview.appendChild(img);
+      });
+    }
+
+    if (Array.isArray(data.galeriRuangan)) {
+      const preview = document.getElementById('flipbookRuanganPreview');
+      data.galeriRuangan.forEach(src => {
+        const img = document.createElement('img');
+        img.src = src;
+        preview.appendChild(img);
+      });
+    }
+  }
+};
+
 </script>
 
 
