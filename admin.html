@@ -213,15 +213,41 @@
 
   function simpanData() {
   try {
-    const menuData = ambilDataDariForm();
-    console.log("Data yang akan disimpan:", menuData);
+    const namaRestoran = document.getElementById("namaRestoran").value;
+    const deskripsi = document.getElementById("deskripsi").value;
+    const logo = document.getElementById("logoPreview").src;
+    const flipbook = document.getElementById("flipbookPreview")?.src || "";
+    const menuItems = [];
 
-    const jsonString = JSON.stringify(menuData);
-    console.log("JSON berhasil dibuat");
+    document.querySelectorAll(".menu-item").forEach((item) => {
+      const nama = item.querySelector(".nama-menu").value;
+      const harga = item.querySelector(".harga-menu").value;
+      const kategori = item.querySelector(".kategori-menu").value;
+      const gambar = item.querySelector(".gambar-preview").src;
 
-    localStorage.setItem("menuvaData", jsonString);
-    console.log("Data berhasil disimpan di localStorage");
+      if (nama && harga && kategori) {
+        menuItems.push({ nama, harga, kategori, gambar });
+      }
+    });
 
+    // Ambil galeri foto ruangan
+    const fotoRuangan = [];
+    document.querySelectorAll(".foto-ruangan-preview").forEach((img) => {
+      if (img.src) {
+        fotoRuangan.push(img.src);
+      }
+    });
+
+    const data = {
+      namaRestoran,
+      deskripsi,
+      logo,
+      flipbook,
+      galeriRuangan: fotoRuangan,
+      menu: menuItems,
+    };
+
+    localStorage.setItem("menuvaData", JSON.stringify(data));
     alert("Data berhasil disimpan!");
   } catch (error) {
     console.error("Gagal menyimpan data:", error);
