@@ -161,8 +161,8 @@
     <button onclick="window.location.href='index.html'" class="btn-secondary" style="margin-top: 10px;">🔒 Logout</button>
     <button onclick="resetData()" class="btn-danger" style="margin-top: 10px;">🗑️ Reset Semua Data</button>
   </div>
-
- <script>
+  
+<script>
   let flipbookRuanganImages = [];
   let flipbookMenuImages = [];
 
@@ -203,9 +203,9 @@
     const items = document.querySelectorAll(`#${containerId} .menu-item`);
     const list = [];
     items.forEach(item => {
-      const nama = item.children[0].value.trim();
-      const harga = parseFloat(item.children[1].value.trim());
-      const kategori = item.children[2].value;
+      const nama = item.children[0]?.value.trim();
+      const harga = parseFloat(item.children[1]?.value.trim());
+      const kategori = item.children[2]?.value;
       if (nama && !isNaN(harga)) list.push({ nama, harga, kategori });
     });
     return list;
@@ -213,8 +213,8 @@
 
   function simpanData() {
     try {
-      const namaRestoran = document.getElementById("namaRestoran").value.trim();
-      const logo = document.getElementById("previewLogo").src;
+      const namaRestoran = document.getElementById("namaRestoran")?.value.trim();
+      const logo = document.getElementById("previewLogo")?.src || '';
       const nomorWaAdmin = Array.from(document.querySelectorAll('.nomor-wa'))
                                 .map(input => input.value.trim())
                                 .filter(val => val !== '');
@@ -252,7 +252,7 @@
       }
     } catch (err) {
       console.error("❌ Gagal menyimpan:", err);
-      alert("Terjadi kesalahan saat menyimpan data.");
+      alert("Terjadi kesalahan saat menyimpan data. Silakan cek kembali input dan koneksi Anda.");
     }
   }
 
@@ -263,7 +263,7 @@
     }
   }
 
-  document.getElementById('logoInput').addEventListener('change', function(e) {
+  document.getElementById('logoInput')?.addEventListener('change', function(e) {
     const reader = new FileReader();
     reader.onload = function(event) {
       document.getElementById('previewLogo').src = event.target.result;
@@ -271,7 +271,7 @@
     reader.readAsDataURL(e.target.files[0]);
   });
 
-  document.getElementById('flipbookRuanganUpload').addEventListener('change', function(e) {
+  document.getElementById('flipbookRuanganUpload')?.addEventListener('change', function(e) {
     const files = Array.from(e.target.files);
     const previewDiv = document.getElementById('flipbookRuanganPreview');
     previewDiv.innerHTML = '';
@@ -289,7 +289,7 @@
     });
   });
 
-  document.getElementById('flipbookMenuUpload').addEventListener('change', function(e) {
+  document.getElementById('flipbookMenuUpload')?.addEventListener('change', function(e) {
     const files = Array.from(e.target.files);
     const previewDiv = document.getElementById('flipbookMenuPreview');
     previewDiv.innerHTML = '';
@@ -319,7 +319,7 @@
     URL.revokeObjectURL(url);
   }
 
-  document.getElementById('restoreInput').addEventListener('change', function(e) {
+  document.getElementById('restoreInput')?.addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -380,6 +380,6 @@
   };
 </script>
 
-  
+
 </body>
 </html>
