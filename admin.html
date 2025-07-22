@@ -116,8 +116,10 @@
   </div>
   
   <h3>📱 Nomor WhatsApp Admin (Penerima Pesanan/Reservasi)</h3>
-  <input type="text" id="waAdmin"><br>
-
+  <div id="nomorWaContainer">
+  <input type="text" class="nomor-wa" placeholder="Contoh: 6281234567890">
+  </div>
+  <button onclick="tambahNomorWa()">Tambah Nomor WA</button>
 
   <div class="section">
     <h2>📸 Galeri Ruangan</h2>
@@ -158,136 +160,216 @@
     <button onclick="window.location.href='index.html'" class="btn-secondary" style="margin-top: 10px;">🔒 Logout</button>
     <button onclick="resetData()" class="btn-danger" style="margin-top: 10px;">🗑️ Reset Semua Data</button>
   </div>
-   <script>
-    const imgbbAPIKey = "1f46c24e61ffbffb9c1d62102899e11c";
+ <script>
+    let menuCounter = 0;
+    let flipbookRuanganImages = JSON.parse(localStorage.getItem('menuvaData'))?.flipbookRuanganImages || [];
+    let flipbookMenuImages = JSON.parse(localStorage.getItem('menuvaData'))?.flipbookMenuImages || [];
 
-    let flipbookMenuImages = [];
-    let flipbookRuanganImages = [];
-
-    async function uploadToImgBB(file) {
-      const form = new FormData();
-      form.append("image", file);
-      const response = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbAPIKey}`, {
-        method: "POST",
-        body: form
-      });
-      const result = await response.json();
-      if (result.success) return result.data.url;
-      else throw new Error("Gagal upload ke imgBB");
+  
+    function tambahMenu(kategori = 'food', nama = '', harga = '') {
+      const containerId = {
+        food: 'menuFoodContainer',
+        snack: 'menuSnackContainer',
+        drink: 'menuDrinkContainer'
+      }[kategori];
+  
+      const container = document.getElementById(containerId);
+      const div = document.createElement('div');
+      div.className = 'menu-item';
+      div.innerHTML = `
+        <input type="text" placeholder="Nama Menu" value="${nama}" />
+        <input type="number" placeholder="Harga" value="${harga}" />
+        <select>
+          <option value="food" ${kategori === 'food' ? 'selected' : ''}>Food</option>
+          <option value="snack" ${kategori === 'snack' ? 'selected' : ''}>Snack</option>
+          <option value="drink" ${kategori === 'drink' ? 'selected' : ''}>Drink</option>
+        </select>
+        <button class="btn-danger" onclick="this.parentElement.remove()">Hapus</button>
+      `;
+      container.appendChild(div);
     }
-
-    document.getElementById("logo").addEventListener("change", async function () {
-      const file = this.files[0];
-      if (!file) return;
-      try {
-        const url = await uploadToImgBB(file);
-        document.getElementById("previewLogo").src = url;
-        document.getElementById("previewLogo").style.display = 'block';
-      } catch (err) {
-        alert("Gagal upload logo");
-      }
-    });
-
-    document.getElementById("fotoRuangan").addEventListener("change", async function () {
-      const files = Array.from(this.files);
-      const preview = document.getElementById("previewRuangan");
-      preview.innerHTML = "";
-      flipbookRuanganImages = [];
-
-      for (const file of files) {
-        try {
-          const url = await uploadToImgBB(file);
-          flipbookRuanganImages.push(url);
-          const img = document.createElement("img");
-          img.src = url;
-          img.className = "preview-img";
-          preview.appendChild(img);
-        } catch (err) {
-          alert("Gagal upload salah satu foto ruangan");
-        }
-      }
-    });
-
-    document.getElementById("flipbookMenu").addEventListener("change", async function () {
-      const files = Array.from(this.files);
-      const preview = document.getElementById("previewMenu");
-      preview.innerHTML = "";
-      flipbookMenuImages = [];
-
-      for (const file of files) {
-        try {
-          const url = await uploadToImgBB(file);
-          flipbookMenuImages.push(url);
-          const img = document.createElement("img");
-          img.src = url;
-          img.className = "preview-img";
-          preview.appendChild(img);
-        } catch (err) {
-          alert("Gagal upload salah satu gambar menu");
-        }
-      }
-    });
-
+  
+    function tambahNomorWa() {
+      const container = document.getElementById('nomorWaContainer');
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'nomor-wa';
+      input.placeholder = 'Contoh: 6281234567890';
+      container.appendChild(input);
+    }
+  
     function simpanData() {
-      try {
-        const namaRestoran = document.getElementById("namaRestoran").value.trim();
-        const waAdmin = document.getElementById("waAdmin").value.trim();
-        const logo = document.getElementById("previewLogo")?.src || "";
-
-        if (!namaRestoran || !waAdmin) {
-          alert("Isi nama restoran dan WA admin dulu!");
-          return;
-        }
-
-        const data = {
-          namaRestoran,
-          waAdmin,
-          logo,
-          galeriRuangan: flipbookRuanganImages,
-          flipbookMenu: flipbookMenuImages
-        };
-
-        localStorage.setItem("menuvaData", JSON.stringify(data));
-        alert("✅ Data berhasil disimpan!");
-      } catch (err) {
-        alert("❌ Terjadi kesalahan saat menyimpan data.");
-        console.error("Gagal menyimpan data:", err);
+      const namaRestoran = document.getElementById('namaRestoran').value;
+      const logo = document.getElementById('previewLogo').src;
+  
+      function ambilMenu(containerId) {
+        const items = document.querySelectorAll(`#${containerId} .menu-item`);
+        const list = [];
+        items.forEach(item => {
+          const nama = item.children[0].value;
+          const harga = item.children[1].value;
+          const kategori = item.children[2].value;
+          if (nama && harga) list.push({ nama, harga, kategori });
+        });
+        return list;
+      }
+  
+      const nomorWaInputs = document.querySelectorAll('.nomor-wa');
+      const nomorWaAdmin = [];
+      nomorWaInputs.forEach(input => {
+        const value = input.value.trim();
+        if (value !== '') nomorWaAdmin.push(value);
+      });
+  
+      const data = {
+        namaRestoran,
+        logo,
+        nomorWaAdmin,
+        flipbookRuanganImages,
+        flipbookMenuImages,
+        menu: [
+          ...ambilMenu('menuFoodContainer'),
+          ...ambilMenu('menuSnackContainer'),
+          ...ambilMenu('menuDrinkContainer')
+        ]
+      };
+  
+      localStorage.setItem('menuvaData', JSON.stringify(data));
+      alert('✅ Data berhasil disimpan!');
+      // Tampilkan tombol salin link setelah simpan
+       document.getElementById('btnSalinLink').style.display = 'inline-block';
+    }
+  
+    function resetData() {
+      if (confirm("Yakin ingin menghapus semua data?")) {
+        localStorage.removeItem('menuvaData');
+        location.reload();
       }
     }
-
-    // Restore jika sudah ada
-    window.onload = function () {
-      const data = localStorage.getItem("menuvaData");
-      if (data) {
-        const parsed = JSON.parse(data);
-        document.getElementById("namaRestoran").value = parsed.namaRestoran || "";
-        document.getElementById("waAdmin").value = parsed.waAdmin || "";
-
-        if (parsed.logo) {
-          document.getElementById("previewLogo").src = parsed.logo;
-          document.getElementById("previewLogo").style.display = 'block';
+  
+    document.getElementById('logoInput').addEventListener('change', function(e) {
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        document.getElementById('previewLogo').src = event.target.result;
+      };
+      reader.readAsDataURL(e.target.files[0]);
+    });
+  
+    document.getElementById('flipbookRuanganUpload').addEventListener('change', function(e) {
+      const files = Array.from(e.target.files);
+      const previewDiv = document.getElementById('flipbookRuanganPreview');
+      previewDiv.innerHTML = '';
+      flipbookRuanganImages = [];
+  
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          flipbookRuanganImages.push(event.target.result);
+          const img = document.createElement('img');
+          img.src = event.target.result;
+          previewDiv.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+  
+    document.getElementById('flipbookMenuUpload').addEventListener('change', function(e) {
+      const files = Array.from(e.target.files);
+      const previewDiv = document.getElementById('flipbookMenuPreview');
+      previewDiv.innerHTML = '';
+      flipbookMenuImages = [];
+  
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          flipbookMenuImages.push(event.target.result);
+          const img = document.createElement('img');
+          img.src = event.target.result;
+          previewDiv.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+  
+    function backupData() {
+      const data = localStorage.getItem('menuvaData');
+      if (!data) return alert('Tidak ada data untuk dibackup.');
+      const blob = new Blob([data], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "backup-menuva.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  
+    document.getElementById('restoreInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+  
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        try {
+          const data = JSON.parse(event.target.result);
+          localStorage.setItem('menuvaData', JSON.stringify(data));
+          alert('✅ Data berhasil di-restore!');
+          location.reload();
+        } catch (err) {
+          alert('❌ Format file tidak valid.');
         }
+      };
+      reader.readAsText(file);
+    });
 
-        if (parsed.galeriRuangan && Array.isArray(parsed.galeriRuangan)) {
-          const preview = document.getElementById("previewRuangan");
-          parsed.galeriRuangan.forEach(url => {
-            const img = document.createElement("img");
-            img.src = url;
-            img.className = "preview-img";
-            preview.appendChild(img);
-          });
-          flipbookRuanganImages = parsed.galeriRuangan;
+    function salinLinkMenu() {
+  const origin = window.location.origin;
+  const linkMenu = `${origin}/menu.html`;
+
+  navigator.clipboard.writeText(linkMenu)
+    .then(() => {
+      alert(`✅ Link menu berhasil disalin:\n${linkMenu}`);
+      window.open(linkMenu, '_blank'); // <- buka setelah sukses salin
+    })
+    .catch(() => alert('❌ Gagal menyalin link'));
+}
+
+
+  
+    window.onload = function() {
+      const saved = localStorage.getItem('menuvaData');
+      if (saved) {
+        const data = JSON.parse(saved);
+        document.getElementById('namaRestoran').value = data.namaRestoran || '';
+        if (data.logo) document.getElementById('previewLogo').src = data.logo;
+        if (data.menu) {
+          data.menu.forEach(m => tambahMenu(m.kategori || 'food', m.nama, m.harga));
         }
-
-        if (parsed.flipbookMenu && Array.isArray(parsed.flipbookMenu)) {
-          const preview = document.getElementById("previewMenu");
-          parsed.flipbookMenu.forEach(url => {
-            const img = document.createElement("img");
-            img.src = url;
-            img.className = "preview-img";
-            preview.appendChild(img);
+  
+        if (data.nomorWaAdmin) {
+          data.nomorWaAdmin.forEach(no => {
+            tambahNomorWa();
+            document.querySelectorAll('.nomor-wa')[document.querySelectorAll('.nomor-wa').length - 1].value = no;
           });
-          flipbookMenuImages = parsed.flipbookMenu;
+        }
+  
+        if (data.flipbookRuanganImages) {
+          flipbookRuanganImages = data.flipbookRuanganImages;
+          const previewDiv = document.getElementById('flipbookRuanganPreview');
+          flipbookRuanganImages.forEach(src => {
+            const img = document.createElement('img');
+            img.src = src;
+            previewDiv.appendChild(img);
+          });
+        }
+  
+        if (data.flipbookMenuImages) {
+          flipbookMenuImages = data.flipbookMenuImages;
+          const previewDiv = document.getElementById('flipbookMenuPreview');
+          flipbookMenuImages.forEach(src => {
+            const img = document.createElement('img');
+            img.src = src;
+            previewDiv.appendChild(img);
+          });
         }
       }
     };
