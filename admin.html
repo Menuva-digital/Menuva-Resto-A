@@ -161,10 +161,11 @@
     <button onclick="resetData()" class="btn-danger" style="margin-top: 10px;">🗑️ Reset Semua Data</button>
   </div>
 <script>
-  let menuCounter = 0;
+  // Variabel global untuk menyimpan gambar flipbook yang sedang aktif
   let flipbookRuanganImages = JSON.parse(localStorage.getItem('menuvaData'))?.flipbookRuanganImages || [];
   let flipbookMenuImages = JSON.parse(localStorage.getItem('menuvaData'))?.flipbookMenuImages || [];
 
+  // Fungsi tambah item menu (food, snack, drink)
   function tambahMenu(kategori = 'food', nama = '', harga = '') {
     const containerId = {
       food: 'menuFoodContainer',
@@ -188,6 +189,7 @@
     container.appendChild(div);
   }
 
+  // Fungsi tambah input nomor WA admin
   function tambahNomorWa() {
     const container = document.getElementById('nomorWaContainer');
     const input = document.createElement('input');
@@ -197,6 +199,7 @@
     container.appendChild(input);
   }
 
+  // Fungsi untuk simpan semua data ke localStorage
   function simpanData() {
     const namaRestoran = document.getElementById('namaRestoran').value;
     const logo = document.getElementById('previewLogo').src;
@@ -238,6 +241,7 @@
     document.getElementById('btnSalinLink').style.display = 'inline-block';
   }
 
+  // Fungsi reset data localStorage dan reload halaman
   function resetData() {
     if (confirm("Yakin ingin menghapus semua data?")) {
       localStorage.removeItem('menuvaData');
@@ -245,13 +249,14 @@
     }
   }
 
+  // Event listener untuk upload logo, simpan langsung ke localStorage
   document.getElementById('logoInput').addEventListener('change', function (e) {
     const reader = new FileReader();
     reader.onload = function (event) {
       const logoUrl = event.target.result;
       document.getElementById('previewLogo').src = logoUrl;
 
-      // Simpan langsung ke localStorage
+      // Update localStorage dengan logo baru
       const saved = JSON.parse(localStorage.getItem('menuvaData')) || {};
       saved.logo = logoUrl;
       localStorage.setItem('menuvaData', JSON.stringify(saved));
@@ -259,6 +264,7 @@
     reader.readAsDataURL(e.target.files[0]);
   });
 
+  // Event listener untuk upload gambar ruangan (multiple)
   document.getElementById('flipbookRuanganUpload').addEventListener('change', function (e) {
     const files = Array.from(e.target.files);
     const previewDiv = document.getElementById('flipbookRuanganPreview');
@@ -270,11 +276,9 @@
       reader.onload = function (event) {
         const imageUrl = event.target.result;
         flipbookRuanganImages.push(imageUrl);
-        const img = document.createElement('img');
-        img.src = imageUrl;
-        previewDiv.appendChild(img);
+        renderImagePreview('ruangan', imageUrl);
 
-        // Simpan langsung ke localStorage
+        // Update localStorage
         const saved = JSON.parse(localStorage.getItem('menuvaData')) || {};
         saved.flipbookRuanganImages = flipbookRuanganImages;
         localStorage.setItem('menuvaData', JSON.stringify(saved));
@@ -283,6 +287,7 @@
     });
   });
 
+  // Event listener untuk upload gambar menu (multiple)
   document.getElementById('flipbookMenuUpload').addEventListener('change', function (e) {
     const files = Array.from(e.target.files);
     const previewDiv = document.getElementById('flipbookMenuPreview');
@@ -294,11 +299,9 @@
       reader.onload = function (event) {
         const imageUrl = event.target.result;
         flipbookMenuImages.push(imageUrl);
-        const img = document.createElement('img');
-        img.src = imageUrl;
-        previewDiv.appendChild(img);
+        renderImagePreview('menu', imageUrl);
 
-        // Simpan langsung ke localStorage
+        // Update localStorage
         const saved = JSON.parse(localStorage.getItem('menuvaData')) || {};
         saved.flipbookMenuImages = flipbookMenuImages;
         localStorage.setItem('menuvaData', JSON.stringify(saved));
@@ -307,6 +310,7 @@
     });
   });
 
+  // Fungsi backup data ke file JSON
   function backupData() {
     const data = localStorage.getItem('menuvaData');
     if (!data) return alert('Tidak ada data untuk dibackup.');
@@ -319,6 +323,7 @@
     URL.revokeObjectURL(url);
   }
 
+  // Restore data dari file JSON dan reload halaman
   document.getElementById('restoreInput').addEventListener('change', function (e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -337,6 +342,7 @@
     reader.readAsText(file);
   });
 
+  // Fungsi salin link menu ke clipboard dan buka di tab baru
   function salinLinkMenu() {
     const origin = window.location.origin;
     const linkMenu = `${origin}/menu.html`;
@@ -349,12 +355,62 @@
       .catch(() => alert('❌ Gagal menyalin link'));
   }
 
+  // Fungsi render preview gambar dengan tombol hapus
+  function renderImagePreview(tipe, url) {
+    const img = document.createElement('img');
+    img.src = url;
+    img.style.maxWidth = '100px';
+    img.style.margin = '5px';
+    img.style.border = '1px solid #ccc';
+
+    const wrapper = document.createElement('div');
+    wrapper.style.display = 'inline-block';
+    wrapper.style.position = 'relative';
+    wrapper.style.margin = '5px';
+
+    const btnHapus = document.createElement('button');
+    btnHapus.innerText = '❌';
+    btnHapus.style.position = 'absolute';
+    btnHapus.style.top = '0';
+    btnHapus.style.right = '0';
+    btnHapus.style.background = 'red';
+    btnHapus.style.color = 'white';
+    btnHapus.style.border = 'none';
+    btnHapus.style.cursor = 'pointer';
+
+    btnHapus.onclick = function () {
+      wrapper.remove();
+      if (tipe === 'ruangan') {
+        flipbookRuanganImages = flipbookRuanganImages.filter(src => src !== url);
+      } else {
+        flipbookMenuImages = flipbookMenuImages.filter(src => src !== url);
+      }
+      // Update localStorage setelah hapus gambar
+      localStorage.setItem('menuvaData', JSON.stringify({
+        ...JSON.parse(localStorage.getItem('menuvaData') || '{}'),
+        flipbookRuanganImages,
+        flipbookMenuImages
+      }));
+    };
+
+    wrapper.appendChild(img);
+    wrapper.appendChild(btnHapus);
+
+    if (tipe === 'ruangan') {
+      document.getElementById('flipbookRuanganPreview').appendChild(wrapper);
+    } else {
+      document.getElementById('flipbookMenuPreview').appendChild(wrapper);
+    }
+  }
+
+  // Load data dari localStorage saat halaman siap
   window.onload = function () {
     const saved = localStorage.getItem('menuvaData');
     if (saved) {
       const data = JSON.parse(saved);
       document.getElementById('namaRestoran').value = data.namaRestoran || '';
       if (data.logo) document.getElementById('previewLogo').src = data.logo;
+
       if (data.menu) {
         data.menu.forEach(m => tambahMenu(m.kategori || 'food', m.nama, m.harga));
       }
@@ -362,100 +418,57 @@
       if (data.nomorWaAdmin) {
         data.nomorWaAdmin.forEach(no => {
           tambahNomorWa();
-          document.querySelectorAll('.nomor-wa')[document.querySelectorAll('.nomor-wa').length - 1].value = no;
+          const nomorInputs = document.querySelectorAll('.nomor-wa');
+          nomorInputs[nomorInputs.length - 1].value = no;
         });
       }
 
       if (data.flipbookRuanganImages) {
         flipbookRuanganImages = data.flipbookRuanganImages;
-        const previewDiv = document.getElementById('flipbookRuanganPreview');
-        flipbookRuanganImages.forEach(src => {
-          const img = document.createElement('img');
-          img.src = src;
-          previewDiv.appendChild(img);
-        });
+        flipbookRuanganImages.forEach(src => renderImagePreview('ruangan', src));
       }
 
       if (data.flipbookMenuImages) {
         flipbookMenuImages = data.flipbookMenuImages;
-        const previewDiv = document.getElementById('flipbookMenuPreview');
-        flipbookMenuImages.forEach(src => {
-          const img = document.createElement('img');
-          img.src = src;
-          previewDiv.appendChild(img);
-        });
+        flipbookMenuImages.forEach(src => renderImagePreview('menu', src));
       }
     }
   };
-</script>
-<script>
+
+  // Fungsi tambah gambar via file input dan langsung preview + simpan localStorage
   function tambahGambar(tipe) {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
     input.style.display = 'none';
-    input.onchange = function(e) {
+
+    input.onchange = function (e) {
       const file = e.target.files[0];
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = function(event) {
+      reader.onload = function (event) {
         const url = event.target.result;
 
-        const img = document.createElement('img');
-        img.src = url;
-        img.style.maxWidth = '100px';
-        img.style.margin = '5px';
-        img.style.border = '1px solid #ccc';
-
-        const wrapper = document.createElement('div');
-        wrapper.style.display = 'inline-block';
-        wrapper.style.position = 'relative';
-        wrapper.style.margin = '5px';
-
-        const btnHapus = document.createElement('button');
-        btnHapus.innerText = '❌';
-        btnHapus.style.position = 'absolute';
-        btnHapus.style.top = '0';
-        btnHapus.style.right = '0';
-        btnHapus.style.background = 'red';
-        btnHapus.style.color = 'white';
-        btnHapus.style.border = 'none';
-        btnHapus.style.cursor = 'pointer';
-        btnHapus.onclick = function() {
-          wrapper.remove();
-          if (tipe === 'ruangan') {
-            flipbookRuanganImages = flipbookRuanganImages.filter(src => src !== url);
-          } else {
-            flipbookMenuImages = flipbookMenuImages.filter(src => src !== url);
-          }
-          localStorage.setItem('menuvaData', JSON.stringify({
-            ...JSON.parse(localStorage.getItem('menuvaData') || '{}'),
-            flipbookRuanganImages,
-            flipbookMenuImages
-          }));
-        };
-
-        wrapper.appendChild(img);
-        wrapper.appendChild(btnHapus);
+        // Render preview dan simpan ke array + localStorage
+        renderImagePreview(tipe, url);
 
         if (tipe === 'ruangan') {
-          document.getElementById('flipbookRuanganPreview').appendChild(wrapper);
           flipbookRuanganImages.push(url);
         } else {
-          document.getElementById('flipbookMenuPreview').appendChild(wrapper);
           flipbookMenuImages.push(url);
         }
 
-        // Auto simpan ke localStorage
         localStorage.setItem('menuvaData', JSON.stringify({
           ...JSON.parse(localStorage.getItem('menuvaData') || '{}'),
           flipbookRuanganImages,
           flipbookMenuImages
         }));
       };
+
       reader.readAsDataURL(file);
     };
+
     document.body.appendChild(input);
     input.click();
     document.body.removeChild(input);
