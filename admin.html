@@ -259,7 +259,7 @@
       // Update localStorage dengan logo baru
       const saved = JSON.parse(localStorage.getItem('menuvaData')) || {};
       saved.logo = logoUrl;
-      localStorage.setItem('menuvaData', JSON.stringify(saved));
+      updateLocalStorage({ flipbookRuanganImages });
     };
     reader.readAsDataURL(e.target.files[0]);
   });
@@ -281,7 +281,7 @@
         // Update localStorage
         const saved = JSON.parse(localStorage.getItem('menuvaData')) || {};
         saved.flipbookRuanganImages = flipbookRuanganImages;
-        localStorage.setItem('menuvaData', JSON.stringify(saved));
+        updateLocalStorage({ flipbookRuanganImages });
       };
       reader.readAsDataURL(file);
     });
@@ -304,11 +304,19 @@
         // Update localStorage
         const saved = JSON.parse(localStorage.getItem('menuvaData')) || {};
         saved.flipbookMenuImages = flipbookMenuImages;
-        localStorage.setItem('menuvaData', JSON.stringify(saved));
+        updateLocalStorage({ flipbookRuanganImages });
+
       };
       reader.readAsDataURL(file);
     });
   });
+
+  function updateLocalStorage(updates) {
+  const saved = JSON.parse(localStorage.getItem('menuvaData')) || {};
+  const merged = { ...saved, ...updates };
+  updateLocalStorage({ flipbookRuanganImages });
+}
+
 
   // Fungsi backup data ke file JSON
   function backupData() {
