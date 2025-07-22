@@ -42,6 +42,35 @@
       color: #e74c3c;
       text-align: center;
     }
+    .flipbook-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    perspective: 1000px;
+  }
+
+  .flipbook-gallery img {
+    width: 180px;
+    height: auto;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+    cursor: pointer;
+  }
+
+  .flipbook-gallery img:hover {
+    transform: rotateY(180deg) scale(1.05);
+  }
+
+  .flipbook-title {
+    text-align: center;
+    font-size: 22px;
+    font-weight: bold;
+    margin-top: 30px;
+    margin-bottom: 10px;
+  }
   </style>
 </head>
 <body>
@@ -59,23 +88,23 @@
       ${menuva.logo ? `<img src="${menuva.logo}" class="logo-resto" alt="Logo Restoran" />` : ''}
       <h1>${menuva.namaRestoran || 'Menu Restoran'}</h1>
 
-      ${menuva.galeriRuangan && menuva.galeriRuangan.length ? `
+      ${menuva.flipbookRuanganImages && menuva.flipbookRuanganImages.length ? `
         <div class="flipbook-section">
-          <div class="flipbook-title">Galeri Ruangan</div>
+          <div class="flipbook-title">📸 Galeri Ruangan</div>
           <div class="flipbook-gallery">
-            ${menuva.galeriRuangan.map(src => `<img src="${src}" />`).join('')}
+            ${menuva.flipbookRuanganImages.map(src => `<img src="${src}" alt="Ruangan" />`).join('')}
           </div>
         </div>
-      ` : '<p class="warning">Belum ada foto ruangan yang diunggah.</p>'}
+      ` : '<p class="warning">⚠️ Belum ada foto ruangan yang diunggah.</p>'}
 
-      ${menuva.flipbookMenu && menuva.flipbookMenu.length ? `
+      ${menuva.flipbookMenuImages && menuva.flipbookMenuImages.length ? `
         <div class="flipbook-section">
-          <div class="flipbook-title">Menu Makanan & Minuman</div>
+          <div class="flipbook-title">📖 Menu Makanan & Minuman</div>
           <div class="flipbook-gallery">
-            ${menuva.flipbookMenu.map(src => `<img src="${src}" />`).join('')}
+            ${menuva.flipbookMenuImages.map(src => `<img src="${src}" alt="Menu" />`).join('')}
           </div>
         </div>
-      ` : '<p class="warning">Belum ada gambar menu yang diunggah.</p>'}
+      ` : '<p class="warning">⚠️ Belum ada gambar menu yang diunggah.</p>'}
     `;
 
     content.innerHTML += `
@@ -96,6 +125,5 @@
     `;
   }
 </script>
-
 </body>
 </html>
