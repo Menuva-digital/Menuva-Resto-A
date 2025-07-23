@@ -124,20 +124,22 @@
  <div class="section">
   <h2>📸 Galeri Ruangan</h2>
   <button onclick="tambahGambar('ruangan')">+ Tambah Gambar Ruangan</button>
+  <input type="file" id="flipbookRuanganUpload" accept="image/*" multiple style="display:none;" />
   <div id="flipbookRuanganPreview"></div>
 </div>
 
 <div class="section">
   <h2>📖 Menu Restoran</h2>
   <button onclick="tambahGambar('menu')">+ Tambah Gambar Menu</button>
+  <input type="file" id="flipbookMenuUpload" accept="image/*" multiple style="display:none;" />
   <div id="flipbookMenuPreview"></div>
 </div>
 
   <div class="section">
     <button onclick="simpanData()">💾 Simpan Semua</button>
     <button onclick="window.open('menu.html')" style="margin-top: 10px;">👁️ Lihat Halaman Customer</button>
-    <button id="btnSalinLink" onclick="salinLinkMenu()" style="display:none; background-color: orange; color: white; padding: 10px; border: none; border-radius: 8px; margin-top: 10px;">
-      📋 Salin Link menu.html
+    <button id="btnSalinLink" onclick="salinLinkMenu()" style="display:none; background-color: rgb(58, 82, 219); color: white; padding: 10px; border: none; border-radius: 8px; margin-top: 10px;">
+      📋 Copy Link Page Customer.html
     </button>
     
     <!-- Backup dan Restore -->
@@ -160,328 +162,336 @@
     <button onclick="window.location.href='index.html'" class="btn-secondary" style="margin-top: 10px;">🔒 Logout</button>
     <button onclick="resetData()" class="btn-danger" style="margin-top: 10px;">🗑️ Reset Semua Data</button>
   </div>
-<script>
-  // Variabel global untuk menyimpan gambar flipbook yang sedang aktif
-  let flipbookRuanganImages = JSON.parse(localStorage.getItem('menuvaData'))?.flipbookRuanganImages || [];
-  let flipbookMenuImages = JSON.parse(localStorage.getItem('menuvaData'))?.flipbookMenuImages || [];
 
-  // Fungsi tambah item menu (food, snack, drink)
-  function tambahMenu(kategori = 'food', nama = '', harga = '') {
-    const containerId = {
-      food: 'menuFoodContainer',
-      snack: 'menuSnackContainer',
-      drink: 'menuDrinkContainer'
-    }[kategori];
-
-    const container = document.getElementById(containerId);
-    const div = document.createElement('div');
-    div.className = 'menu-item';
-    div.innerHTML = `
-      <input type="text" placeholder="Nama Menu" value="${nama}" />
-      <input type="number" placeholder="Harga" value="${harga}" />
-      <select>
-        <option value="food" ${kategori === 'food' ? 'selected' : ''}>Food</option>
-        <option value="snack" ${kategori === 'snack' ? 'selected' : ''}>Snack</option>
-        <option value="drink" ${kategori === 'drink' ? 'selected' : ''}>Drink</option>
-      </select>
-      <button class="btn-danger" onclick="this.parentElement.remove()">Hapus</button>
-    `;
-    container.appendChild(div);
-  }
-
-  // Fungsi tambah input nomor WA admin
-  function tambahNomorWa() {
-    const container = document.getElementById('nomorWaContainer');
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.className = 'nomor-wa';
-    input.placeholder = 'Contoh: 6281234567890';
-    container.appendChild(input);
-  }
-
-  // Fungsi untuk simpan semua data ke localStorage
-  function simpanData() {
-    const namaRestoran = document.getElementById('namaRestoran').value;
-    const logo = document.getElementById('previewLogo').src;
-
-    function ambilMenu(containerId) {
-      const items = document.querySelectorAll(`#${containerId} .menu-item`);
-      const list = [];
-      items.forEach(item => {
-        const nama = item.children[0].value;
-        const harga = item.children[1].value;
-        const kategori = item.children[2].value;
-        if (nama && harga) list.push({ nama, harga, kategori });
-      });
-      return list;
-    }
-
-    const nomorWaInputs = document.querySelectorAll('.nomor-wa');
-    const nomorWaAdmin = [];
-    nomorWaInputs.forEach(input => {
-      const value = input.value.trim();
-      if (value !== '') nomorWaAdmin.push(value);
-    });
-
-    const data = {
-      namaRestoran,
-      logo,
-      nomorWaAdmin,
-      flipbookRuanganImages,
-      flipbookMenuImages,
-      menu: [
-        ...ambilMenu('menuFoodContainer'),
-        ...ambilMenu('menuSnackContainer'),
-        ...ambilMenu('menuDrinkContainer')
-      ]
-    };
-
-    localStorage.setItem('menuvaData', JSON.stringify(data));
-    alert('✅ Data berhasil disimpan!');
-    document.getElementById('btnSalinLink').style.display = 'inline-block';
-  }
-
-  // Fungsi reset data localStorage dan reload halaman
-  function resetData() {
-    if (confirm("Yakin ingin menghapus semua data?")) {
-      localStorage.removeItem('menuvaData');
-      location.reload();
-    }
-  }
-
-  // Event listener untuk upload logo, simpan langsung ke localStorage
-  document.getElementById('logoInput').addEventListener('change', function (e) {
-    const reader = new FileReader();
-    reader.onload = function (event) {
-      const logoUrl = event.target.result;
-      document.getElementById('previewLogo').src = logoUrl;
-
-      // Update localStorage dengan logo baru
+  <script>
+    
+    // Variabel global
+    let flipbookRuanganImages = JSON.parse(localStorage.getItem('menuvaData'))?.flipbookRuanganImages || [];
+    let flipbookMenuImages = JSON.parse(localStorage.getItem('menuvaData'))?.flipbookMenuImages || [];
+  
+    // Fungsi simpan ke localStorage
+    function updateLocalStorage(updates) {
       const saved = JSON.parse(localStorage.getItem('menuvaData')) || {};
-      saved.logo = logoUrl;
-      updateLocalStorage({ flipbookRuanganImages });
-    };
-    reader.readAsDataURL(e.target.files[0]);
+      const merged = { ...saved, ...updates };
+      localStorage.setItem('menuvaData', JSON.stringify(merged));
+    }
+
+    function resizeIfNeeded(file, maxSizeMB = 1, maxWidth = 1024, quality = 0.7) {
+    return new Promise((resolve, reject) => {
+      if (file.size <= maxSizeMB * 1024 * 1024) {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      } else {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            const scale = Math.min(maxWidth / img.width, 1);
+            canvas.width = img.width * scale;
+            canvas.height = img.height * scale;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            const resized = canvas.toDataURL("image/jpeg", quality);
+            resolve(resized);
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+
+  // Upload logo
+  document.getElementById('logoInput').addEventListener('change', async function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const logoUrl = await resizeIfNeeded(file);
+      document.getElementById('previewLogo').src = logoUrl;
+      updateLocalStorage({ logo: logoUrl });
+    } catch (err) {
+      alert("❌ Gagal memproses gambar logo.");
+      console.error("Logo error:", err);
+    }
   });
 
-  // Event listener untuk upload gambar ruangan (multiple)
-  document.getElementById('flipbookRuanganUpload').addEventListener('change', function (e) {
+  // Upload flipbook ruangan
+  document.getElementById('flipbookRuanganUpload').addEventListener('change', async function (e) {
     const files = Array.from(e.target.files);
     const previewDiv = document.getElementById('flipbookRuanganPreview');
     previewDiv.innerHTML = '';
     flipbookRuanganImages = [];
 
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = function (event) {
-        const imageUrl = event.target.result;
+    for (const file of files) {
+      try {
+        const imageUrl = await resizeIfNeeded(file);
         flipbookRuanganImages.push(imageUrl);
         renderImagePreview('ruangan', imageUrl);
-
-        // Update localStorage
-        const saved = JSON.parse(localStorage.getItem('menuvaData')) || {};
-        saved.flipbookRuanganImages = flipbookRuanganImages;
-        updateLocalStorage({ flipbookRuanganImages });
-      };
-      reader.readAsDataURL(file);
-    });
+      } catch (err) {
+        alert("❌ Gagal memproses gambar ruangan.");
+        console.error("Ruangan error:", err);
+      }
+    }
+    updateLocalStorage({ flipbookRuanganImages });
   });
 
-  // Event listener untuk upload gambar menu (multiple)
-  document.getElementById('flipbookMenuUpload').addEventListener('change', function (e) {
+  // Upload flipbook menu
+  document.getElementById('flipbookMenuUpload').addEventListener('change', async function (e) {
     const files = Array.from(e.target.files);
     const previewDiv = document.getElementById('flipbookMenuPreview');
     previewDiv.innerHTML = '';
     flipbookMenuImages = [];
 
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = function (event) {
-        const imageUrl = event.target.result;
+    for (const file of files) {
+      try {
+        const imageUrl = await resizeIfNeeded(file);
         flipbookMenuImages.push(imageUrl);
         renderImagePreview('menu', imageUrl);
-
-        // Update localStorage
-        const saved = JSON.parse(localStorage.getItem('menuvaData')) || {};
-        saved.flipbookMenuImages = flipbookMenuImages;
-        updateLocalStorage({ flipbookRuanganImages });
-
-      };
-      reader.readAsDataURL(file);
-    });
+      } catch (err) {
+        alert("❌ Gagal memproses gambar menu.");
+        console.error("Menu error:", err);
+      }
+    }
+    updateLocalStorage({ flipbookMenuImages });
   });
+  
+    // Tambah menu
+    function tambahMenu(kategori = 'food', nama = '', harga = '') {
+      const containerId = {
+        food: 'menuFoodContainer',
+        snack: 'menuSnackContainer',
+        drink: 'menuDrinkContainer'
+      }[kategori];
+  
+      const container = document.getElementById(containerId);
+      const div = document.createElement('div');
+      div.className = 'menu-item';
+      div.innerHTML = `
+        <input type="text" placeholder="Nama Menu" value="${nama}" />
+        <input type="number" placeholder="Harga" value="${harga}" />
+        <select>
+          <option value="food" ${kategori === 'food' ? 'selected' : ''}>Food</option>
+          <option value="snack" ${kategori === 'snack' ? 'selected' : ''}>Snack</option>
+          <option value="drink" ${kategori === 'drink' ? 'selected' : ''}>Drink</option>
+        </select>
+        <button class="btn-danger" onclick="this.parentElement.remove()">Hapus</button>
+      `;
+      container.appendChild(div);
+    }
+  
+    // Tambah input nomor WA
+    function tambahNomorWa() {
+      const container = document.getElementById('nomorWaContainer');
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'nomor-wa';
+      input.placeholder = 'Contoh: 6281234567890';
+      container.appendChild(input);
+    }
+  
+    // Simpan semua data
+    function simpanData() {
+  const namaRestoran = document.getElementById('namaRestoran').value;
+  const logo = document.getElementById('previewLogo').src;
 
-  function updateLocalStorage(updates) {
-  const saved = JSON.parse(localStorage.getItem('menuvaData')) || {};
-  const merged = { ...saved, ...updates };
-  updateLocalStorage({ flipbookRuanganImages });
-}
-
-
-  // Fungsi backup data ke file JSON
-  function backupData() {
-    const data = localStorage.getItem('menuvaData');
-    if (!data) return alert('Tidak ada data untuk dibackup.');
-    const blob = new Blob([data], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "backup-menuva.json";
-    a.click();
-    URL.revokeObjectURL(url);
+  function ambilMenu(containerId) {
+    const items = document.querySelectorAll(`#${containerId} .menu-item`);
+    const list = [];
+    items.forEach(item => {
+      const nama = item.children[0].value;
+      const harga = item.children[1].value;
+      const kategori = item.children[2].value;
+      if (nama && harga) list.push({ nama, harga, kategori });
+    });
+    return list;
   }
 
-  // Restore data dari file JSON dan reload halaman
-  document.getElementById('restoreInput').addEventListener('change', function (e) {
+  const nomorWaInputs = document.querySelectorAll('.nomor-wa');
+  const nomorWaAdmin = Array.from(nomorWaInputs).map(input => input.value.trim()).filter(val => val !== '');
+
+  const data = {
+    namaRestoran,
+    logo,
+    nomorWaAdmin,
+    flipbookRuanganImages,
+    flipbookMenuImages,
+    menu: [
+      ...ambilMenu('menuFoodContainer'),
+      ...ambilMenu('menuSnackContainer'),
+      ...ambilMenu('menuDrinkContainer')
+    ]
+  };
+
+  try {
+    localStorage.setItem('menuvaData', JSON.stringify(data));
+    alert('✅ Data berhasil disimpan!');
+    document.getElementById('btnSalinLink').style.display = 'inline-block';
+  } catch (err) {
+    console.error("❌ Gagal menyimpan data ke localStorage:", err);
+    alert("❌ Gagal menyimpan data! Mungkin ukuran total gambar terlalu besar.\n\nTips:\n- Kurangi jumlah gambar\n- Gunakan gambar berukuran di bawah 300KB/Gambar\n- Cek koneksi Anda");
+  }
+}
+
+  
+    // Reset data
+    function resetData() {
+      if (confirm("Yakin ingin menghapus semua data?")) {
+        localStorage.removeItem('menuvaData');
+        location.reload();
+      }
+    }
+  
+    // Backup data
+    function backupData() {
+      const data = localStorage.getItem('menuvaData');
+      if (!data) return alert('Tidak ada data untuk dibackup.');
+      const blob = new Blob([data], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "backup-menuva.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  
+    // Restore data
+    document.getElementById('restoreInput').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+  
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        try {
+          const data = JSON.parse(event.target.result);
+          localStorage.setItem('menuvaData', JSON.stringify(data));
+          alert('✅ Data berhasil di-restore!');
+          location.reload();
+        } catch (err) {
+          alert('❌ Format file tidak valid.');
+          console.error("Gagal restore data:", err);
+        }
+      };
+      reader.readAsText(file);
+    });
+  
+    // Salin link
+    function salinLinkMenu() {
+      const origin = window.location.origin;
+      const linkMenu = `${origin}/menu.html`;
+  
+      navigator.clipboard.writeText(linkMenu)
+        .then(() => {
+          alert(`✅ Link menu berhasil disalin:\n${linkMenu}`);
+          window.open(linkMenu, '_blank');
+        })
+        .catch(() => alert('❌ Gagal menyalin link'));
+    }
+  
+    // Render preview gambar
+    function renderImagePreview(tipe, url) {
+      const img = document.createElement('img');
+      img.src = url;
+      img.style.maxWidth = '100px';
+      img.style.margin = '5px';
+      img.style.border = '1px solid #ccc';
+  
+      const wrapper = document.createElement('div');
+      wrapper.style.display = 'inline-block';
+      wrapper.style.position = 'relative';
+      wrapper.style.margin = '5px';
+  
+      const btnHapus = document.createElement('button');
+      btnHapus.innerText = '❌';
+      btnHapus.style.position = 'absolute';
+      btnHapus.style.top = '0';
+      btnHapus.style.right = '0';
+      btnHapus.style.background = 'red';
+      btnHapus.style.color = 'white';
+      btnHapus.style.border = 'none';
+      btnHapus.style.cursor = 'pointer';
+  
+      btnHapus.onclick = function () {
+        wrapper.remove();
+        if (tipe === 'ruangan') {
+          flipbookRuanganImages = flipbookRuanganImages.filter(src => src !== url);
+        } else {
+          flipbookMenuImages = flipbookMenuImages.filter(src => src !== url);
+        }
+        updateLocalStorage({ flipbookRuanganImages, flipbookMenuImages });
+      };
+  
+      wrapper.appendChild(img);
+      wrapper.appendChild(btnHapus);
+  
+      const previewContainer = tipe === 'ruangan' ? 'flipbookRuanganPreview' : 'flipbookMenuPreview';
+      document.getElementById(previewContainer).appendChild(wrapper);
+    }
+  
+    // Tambah gambar manual
+    function tambahGambar(tipe) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.style.display = 'none';
+
+  input.onchange = async function (e) {
     const file = e.target.files[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = function (event) {
-      try {
-        const data = JSON.parse(event.target.result);
-        localStorage.setItem('menuvaData', JSON.stringify(data));
-        alert('✅ Data berhasil di-restore!');
-        location.reload();
-      } catch (err) {
-        alert('❌ Format file tidak valid.');
-      }
-    };
-    reader.readAsText(file);
-  });
+    try {
+      const imageUrl = await resizeIfNeeded(file); // ⬅️ Ini harus aktif
+      renderImagePreview(tipe, imageUrl);
 
-  // Fungsi salin link menu ke clipboard dan buka di tab baru
-  function salinLinkMenu() {
-    const origin = window.location.origin;
-    const linkMenu = `${origin}/menu.html`;
-
-    navigator.clipboard.writeText(linkMenu)
-      .then(() => {
-        alert(`✅ Link menu berhasil disalin:\n${linkMenu}`);
-        window.open(linkMenu, '_blank');
-      })
-      .catch(() => alert('❌ Gagal menyalin link'));
-  }
-
-  // Fungsi render preview gambar dengan tombol hapus
-  function renderImagePreview(tipe, url) {
-    const img = document.createElement('img');
-    img.src = url;
-    img.style.maxWidth = '100px';
-    img.style.margin = '5px';
-    img.style.border = '1px solid #ccc';
-
-    const wrapper = document.createElement('div');
-    wrapper.style.display = 'inline-block';
-    wrapper.style.position = 'relative';
-    wrapper.style.margin = '5px';
-
-    const btnHapus = document.createElement('button');
-    btnHapus.innerText = '❌';
-    btnHapus.style.position = 'absolute';
-    btnHapus.style.top = '0';
-    btnHapus.style.right = '0';
-    btnHapus.style.background = 'red';
-    btnHapus.style.color = 'white';
-    btnHapus.style.border = 'none';
-    btnHapus.style.cursor = 'pointer';
-
-    btnHapus.onclick = function () {
-      wrapper.remove();
       if (tipe === 'ruangan') {
-        flipbookRuanganImages = flipbookRuanganImages.filter(src => src !== url);
+        flipbookRuanganImages.push(imageUrl);
       } else {
-        flipbookMenuImages = flipbookMenuImages.filter(src => src !== url);
+        flipbookMenuImages.push(imageUrl);
       }
-      // Update localStorage setelah hapus gambar
-      localStorage.setItem('menuvaData', JSON.stringify({
-        ...JSON.parse(localStorage.getItem('menuvaData') || '{}'),
-        flipbookRuanganImages,
-        flipbookMenuImages
-      }));
-    };
 
-    wrapper.appendChild(img);
-    wrapper.appendChild(btnHapus);
-
-    if (tipe === 'ruangan') {
-      document.getElementById('flipbookRuanganPreview').appendChild(wrapper);
-    } else {
-      document.getElementById('flipbookMenuPreview').appendChild(wrapper);
+      updateLocalStorage({ flipbookRuanganImages, flipbookMenuImages });
+    } catch (err) {
+      alert("❌ Gagal memproses gambar.");
+      console.error("Error resize:", err);
     }
-  }
+  };
 
-  // Load data dari localStorage saat halaman siap
-  window.onload = function () {
-    const saved = localStorage.getItem('menuvaData');
-    if (saved) {
-      const data = JSON.parse(saved);
-      document.getElementById('namaRestoran').value = data.namaRestoran || '';
-      if (data.logo) document.getElementById('previewLogo').src = data.logo;
+  document.body.appendChild(input);
+  input.click();
+  document.body.removeChild(input);
+}
 
-      if (data.menu) {
-        data.menu.forEach(m => tambahMenu(m.kategori || 'food', m.nama, m.harga));
-      }
-
-      if (data.nomorWaAdmin) {
-        data.nomorWaAdmin.forEach(no => {
+  
+    // Load data saat halaman dibuka
+    window.onload = function () {
+      const saved = localStorage.getItem('menuvaData');
+      if (saved) {
+        const data = JSON.parse(saved);
+        document.getElementById('namaRestoran').value = data.namaRestoran || '';
+        if (data.logo) document.getElementById('previewLogo').src = data.logo;
+  
+        (data.menu || []).forEach(m => tambahMenu(m.kategori || 'food', m.nama, m.harga));
+        (data.nomorWaAdmin || []).forEach(no => {
           tambahNomorWa();
           const nomorInputs = document.querySelectorAll('.nomor-wa');
           nomorInputs[nomorInputs.length - 1].value = no;
         });
+  
+        (data.flipbookRuanganImages || []).forEach(src => renderImagePreview('ruangan', src));
+        (data.flipbookMenuImages || []).forEach(src => renderImagePreview('menu', src));
       }
-
-      if (data.flipbookRuanganImages) {
-        flipbookRuanganImages = data.flipbookRuanganImages;
-        flipbookRuanganImages.forEach(src => renderImagePreview('ruangan', src));
-      }
-
-      if (data.flipbookMenuImages) {
-        flipbookMenuImages = data.flipbookMenuImages;
-        flipbookMenuImages.forEach(src => renderImagePreview('menu', src));
-      }
-    }
-  };
-
-  // Fungsi tambah gambar via file input dan langsung preview + simpan localStorage
-  function tambahGambar(tipe) {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.style.display = 'none';
-
-    input.onchange = function (e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function (event) {
-        const url = event.target.result;
-
-        // Render preview dan simpan ke array + localStorage
-        renderImagePreview(tipe, url);
-
-        if (tipe === 'ruangan') {
-          flipbookRuanganImages.push(url);
-        } else {
-          flipbookMenuImages.push(url);
-        }
-
-        localStorage.setItem('menuvaData', JSON.stringify({
-          ...JSON.parse(localStorage.getItem('menuvaData') || '{}'),
-          flipbookRuanganImages,
-          flipbookMenuImages
-        }));
-      };
-
-      reader.readAsDataURL(file);
     };
-
-    document.body.appendChild(input);
-    input.click();
-    document.body.removeChild(input);
-  }
-</script>
+  
+    // Log error global
+    window.addEventListener("error", function (e) {
+      console.error("❌ Terjadi error:", e.message);
+    });
+  </script>
+  
 
 </body>
 </html>
