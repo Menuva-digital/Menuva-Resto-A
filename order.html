@@ -74,6 +74,8 @@
 </head>
 <body>
   <div class="logo-container" id="logoContainer"></div>
+  <h1 id="namaRestoDisplay" style="font-size: 24px; font-weight: bold; margin-top: 10px; align-items: center;"></h1>
+
   <h1>📝 Pesan Menu</h1>
 
   <label for="kategoriFilter">Filter Kategori Menu:</label>
@@ -120,6 +122,11 @@
       if (data.logo) {
         logoContainer.innerHTML = `<img src="${data.logo}" alt="Logo Resto" />`;
       }
+      // Tampilkan nama restoran jika ada
+     if (data.namaResto) {
+     document.getElementById("namaRestoDisplay").textContent = data.namaResto;
+     }
+
 
       // Ambil semua kategori unik dan masukkan ke filter
       const kategoriUnik = [...new Set(data.menu.map(m => m.kategori).filter(k => k && k.trim() !== ""))];
