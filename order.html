@@ -109,14 +109,14 @@
     const totalItem = document.getElementById("total-item");
     const totalHarga = document.getElementById("total-harga");
     const kategoriFilter = document.getElementById("kategoriFilter");
-    const logoContainer = document.getElementById("logoContainer");
+    const logoResto = document.getElementById("logoResto");
 
     const pesanan = {};
 
     if (data && data.menu && data.menu.length) {
       // Tampilkan logo jika ada
       if (data.logo) {
-        logoContainer.innerHTML = `<img src="${data.logo}" alt="Logo Resto" />`;
+        logoResto.innerHTML = `<img src="${data.logo}" alt="Logo Resto" />`;
       }
       // Tampilkan nama restoran jika ada
      if (data.namaRestoran) {
