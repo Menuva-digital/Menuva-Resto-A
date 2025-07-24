@@ -52,7 +52,7 @@
     }
     .flipbook-gallery img {
       flex: 0 0 auto;
-      width: 250px;
+      width: 100vw;
       height: auto;
       border-radius: 8px;
       scroll-snap-align: center;
@@ -63,8 +63,6 @@
     .flipbook-gallery img:active {
       transform: scale(0.97);
     }
-
-    /* Fullscreen overlay */
     .fullscreen-overlay {
       display: none;
       position: fixed;
@@ -109,12 +107,10 @@
        <div class="nama-resto">${menuva.namaRestoran || 'Menu Restoran'}</div>
       </div>
 
-
-
         ${menuva.flipbookRuanganImages && menuva.flipbookRuanganImages.length ? `
           <div class="flipbook-section">
             <h1 class="flipbook-title">📸 Galeri Ruangan</h1>
-            <div class="flipbook-gallery">
+            <div class="flipbook-gallery" ontouchstart="touchStart(event, this)" ontouchmove="touchMove(event, this)" ontouchend="touchEnd(event, this)">
               ${menuva.flipbookRuanganImages.map(src => `<img src="${src}" alt="Ruangan" onclick="openFullscreen('${src}')" />`).join('')}
             </div>
           </div>
@@ -123,7 +119,7 @@
         ${menuva.flipbookMenuImages && menuva.flipbookMenuImages.length ? `
           <div class="flipbook-section">
             <h1 class="flipbook-title">📖 Menu Makanan & Minuman</h1>
-            <div class="flipbook-gallery">
+            <div class="flipbook-gallery" ontouchstart="touchStart(event, this)" ontouchmove="touchMove(event, this)" ontouchend="touchEnd(event, this)">
               ${menuva.flipbookMenuImages.map(src => `<img src="${src}" alt="Menu" onclick="openFullscreen('${src}')" />`).join('')}
             </div>
           </div>
@@ -151,6 +147,24 @@
       const img = document.getElementById("fullscreenImage");
       img.src = src;
       overlay.style.display = "flex";
+    }
+
+    let touchStartX = 0;
+    let scrollStartX = 0;
+
+    function touchStart(e, container) {
+      touchStartX = e.touches[0].clientX;
+      scrollStartX = container.scrollLeft;
+    }
+
+    function touchMove(e, container) {
+      const touchX = e.touches[0].clientX;
+      const deltaX = touchStartX - touchX;
+      container.scrollLeft = scrollStartX + deltaX;
+    }
+
+    function touchEnd(e, container) {
+      // Optional: add snap/scroll correction if needed
     }
   </script>
 </body>
