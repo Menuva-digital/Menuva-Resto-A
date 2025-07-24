@@ -52,7 +52,7 @@
     }
     .flipbook-gallery img {
       flex: 0 0 auto;
-      width: 100vw;
+      width: 80vw;
       height: auto;
       border-radius: 8px;
       scroll-snap-align: center;
@@ -63,25 +63,19 @@
     .flipbook-gallery img:active {
       transform: scale(0.97);
     }
-    .fullscreen-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0,0,0,0.9);
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-    .fullscreen-overlay img {
-      max-width: 90vw;
-      max-height: 90vh;
-      border-radius: 10px;
-    }
+    
     .fullscreen-overlay:active {
       display: none !important;
     }
+    .fullscreen-overlay img {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: 10px;
+  transition: transform 0.3s ease;
+  cursor: zoom-in;
+  touch-action: pan-x pan-y;
+}
+
   </style>
 </head>
 <body>
@@ -142,13 +136,33 @@
       `;
     }
 
-    function openFullscreen(src) {
-      const overlay = document.getElementById("fullscreenOverlay");
-      const img = document.getElementById("fullscreenImage");
-      img.src = src;
-      overlay.style.display = "flex";
-    }
+    let isZoomed = false;
 
+function openFullscreen(src) {
+  const overlay = document.getElementById("fullscreenOverlay");
+  const img = document.getElementById("fullscreenImage");
+
+  img.src = src;
+  overlay.style.display = "flex";
+  isZoomed = false;
+
+  // Reset transform
+  img.style.transform = "scale(1)";
+  img.style.cursor = "zoom-in";
+
+  img.onclick = function (e) {
+    e.stopPropagation(); // Jangan tutup overlay saat klik gambar
+    if (!isZoomed) {
+      img.style.transform = "scale(2)";
+      img.style.cursor = "zoom-out";
+      isZoomed = true;
+    } else {
+      img.style.transform = "scale(1)";
+      img.style.cursor = "zoom-in";
+      isZoomed = false;
+    }
+  };
+}
     let touchStartX = 0;
     let scrollStartX = 0;
 
