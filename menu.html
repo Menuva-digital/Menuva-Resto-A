@@ -38,16 +38,27 @@
       color: #e74c3c;
       text-align: center;
     }
-    .flipbook-gallery img {
-  opacity: 0;
-  transform: translateY(30px) scale(0.95);
-  transition: all 0.6s ease-out;
+    .flipbook-gallery {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  gap: 10px;
+  padding: 10px;
+  -webkit-overflow-scrolling: touch;
+  scroll-padding: 0 10px;
 }
 
-.flipbook-gallery img.visible {
-  opacity: 1;
-  transform: translateY(0) scale(1);
+.flipbook-gallery img {
+  width: 100%;
+  max-width: 100vw; /* Pastikan 1 gambar = 1 layar di HP */
+  height: auto;
+  object-fit: contain;
+  scroll-snap-align: center;
+  flex-shrink: 0;
+  transition: transform 0.3s ease; /* untuk zoom */
 }
+
     .flipbook-gallery img:active {
       transform: scale(0.97);
     }
@@ -71,6 +82,18 @@
   .flipbook-gallery img {
     cursor: zoom-in;
   }
+  .flipbook-gallery img {
+  filter: blur(5px);
+  opacity: 0;
+  transform: translateX(30px) scale(0.95);
+  transition: all 0.7s ease;
+}
+
+.flipbook-gallery img.visible {
+  filter: blur(0);
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
 
   </style>
 </head>
@@ -196,7 +219,7 @@ function openFullscreen(src) {
           left: targetIndex * childWidth,
           behavior: 'smooth'
         });
-      }, 100); // Delay responsif, jangan terlalu cepat
+      }, 120); // Delay responsif, jangan terlalu cepat
     });
   }
 
@@ -216,23 +239,23 @@ function openFullscreen(src) {
     });
   </script>
   <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("visible");
-        }
+    // Efek cinematic: blur to clear + fade + glide
+    document.addEventListener("DOMContentLoaded", () => {
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        });
+      }, {
+        threshold: 0.6 // 60% gambar harus terlihat dulu
       });
-    }, {
-      threshold: 0.5
+  
+      document.querySelectorAll(".flipbook-gallery img").forEach(img => {
+        observer.observe(img);
+      });
     });
-
-    document.querySelectorAll(".flipbook-gallery img").forEach(img => {
-      observer.observe(img);
-    });
-  });
-</script>
-
+  </script>
   
 </body>
 </html>
