@@ -62,14 +62,18 @@
       cursor: pointer;
       border-radius: 6px;
     }
-   .logo-resto {
-      display: block;
-      max-height: 80px;
-      margin: 0 auto 10px;
+    .logo-container {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .logo-container img {
+      max-width: 100px;
+      max-height: 100px;
+    }
   </style>
 </head>
 <body>
-  <div class="logo-resto" id="logoResto"></div>
+  <div class="logo-container" id="logoContainer"></div>
   <h1 id="namaRestoranDisplay" style="font-size: 24px; font-weight: bold; margin-top: 10px; align-items: center;"></h1>
 
   <h1>📝 Pesan Menu</h1>
@@ -109,14 +113,14 @@
     const totalItem = document.getElementById("total-item");
     const totalHarga = document.getElementById("total-harga");
     const kategoriFilter = document.getElementById("kategoriFilter");
-    const logoResto = document.getElementById("logoResto");
+    const logoContainer = document.getElementById("logoContainer");
 
     const pesanan = {};
 
     if (data && data.menu && data.menu.length) {
       // Tampilkan logo jika ada
       if (data.logo) {
-        logoResto.innerHTML = `<img src="${data.logo}" alt="Logo Resto" />`;
+        logoContainer.innerHTML = `<img src="${data.logo}" alt="Logo Resto" />`;
       }
       // Tampilkan nama restoran jika ada
      if (data.namaRestoran) {
