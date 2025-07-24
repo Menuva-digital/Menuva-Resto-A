@@ -74,12 +74,37 @@
   cursor: zoom-in;
   touch-action: pan-x pan-y;
 }
+.flipbook-gallery img.zoomed {
+    transform: scale(2); /* atau 1.8 biar nggak terlalu besar */
+    cursor: zoom-out;
+  }
+
+  .flipbook-gallery img {
+    cursor: zoom-in;
+  }
+  .flipbook-gallery img {
+  filter: blur(5px);
+  opacity: 0;
+  transform: translateX(30px) scale(0.95);
+  transition: all 0.7s ease;
+}
+
+.flipbook-gallery img.visible {
+  filter: blur(0);
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+
   </style>
 </head>
 <body>
   <h1 id="namaRestoDisplay" style="font-size: 24px; font-weight: bold; margin-top: 10px; align-items: center;"></h1>
 
   <div id="content"></div>
+
+  <div class="fullscreen-overlay" id="fullscreenOverlay" onclick="this.style.display='none'">
+    <img src="" alt="Full View" id="fullscreenImage" />
+  </div>
 
   <script>
     const data = localStorage.getItem("menuvaData");
@@ -204,5 +229,33 @@ function openFullscreen(src) {
     setupSnapGallery('#galleryMenu'); // kalau ada galeri menu juga
   });
   </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.flipbook-gallery img').forEach(img => {
+        img.addEventListener('click', () => {
+          img.classList.toggle('zoomed');
+        });
+      });
+    });
+  </script>
+  <script>
+    // Efek cinematic: blur to clear + fade + glide
+    document.addEventListener("DOMContentLoaded", () => {
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+          }
+        });
+      }, {
+        threshold: 0.6 // 60% gambar harus terlihat dulu
+      });
+  
+      document.querySelectorAll(".flipbook-gallery img").forEach(img => {
+        observer.observe(img);
+      });
+    });
+  </script>
+  
 </body>
 </html>
