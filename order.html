@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Order Makanan - Menuva</title>
   <style>
     body {
@@ -74,7 +74,7 @@
 </head>
 <body>
   <div class="logo-container" id="logoContainer"></div>
-  <h1 id="namaRestoDisplay" style="font-size: 24px; font-weight: bold; margin-top: 10px; align-items: center;"></h1>
+  <h1 id="namaRestoranDisplay" style="font-size: 24px; font-weight: bold; margin-top: 10px; align-items: center;"></h1>
 
   <h1>📝 Pesan Menu</h1>
 
@@ -123,8 +123,8 @@
         logoContainer.innerHTML = `<img src="${data.logo}" alt="Logo Resto" />`;
       }
       // Tampilkan nama restoran jika ada
-     if (data.namaResto) {
-     document.getElementById("namaRestoDisplay").textContent = data.namaResto;
+     if (data.namaRestoran) {
+     document.getElementById("namaRestoranDisplay").textContent = data.namaRestoran;
      }
 
 
