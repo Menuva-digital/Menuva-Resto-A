@@ -296,7 +296,7 @@
   
     // Simpan semua data
     function simpanData() {
-  const namaResto = document.getElementById('namaRestoran').value;
+  const namaRestoran = document.getElementById('namaRestoran').value;
   const logo = document.getElementById('previewLogo').src;
 
   function ambilMenu(containerId) {
@@ -315,7 +315,7 @@
   const nomorWaAdmin = Array.from(nomorWaInputs).map(input => input.value.trim()).filter(val => val !== '');
 
   const data = {
-    namaResto,
+    namaRestoran,
     logo,
     nomorWaAdmin,
     flipbookRuanganImages,
