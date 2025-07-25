@@ -347,41 +347,36 @@
     }
   
     // Backup data
-    function backupData() {
-  try {
-    const data = localStorage.getItem("menuvaData");
-    if (!data) {
-      alert("⚠️ Tidak ada data yang bisa di-backup.");
-      return;
-    }
-
-    const blob = new Blob([data], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-
-    console.log("📦 Blob URL:", url);
-    console.log("📏 Blob size:", blob.size, "bytes");
-    console.log("🖱️ Simulasi klik tombol download...");
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "menuva-backup.json";
-
-    // Ini penting agar di HP tetap terdeteksi interaksi user
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-
-    setTimeout(() => {
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      console.log("✅ Link download selesai dan URL dibersihkan.");
-    }, 100);
-
-    alert("✅ Backup dimulai. Jika tidak muncul download, cek izin browser.");
-  } catch (err) {
-    console.error("❌ Gagal backup:", err);
-    alert("Terjadi kesalahan saat backup data.");
+    function backupDataKe0x0() {
+  const data = localStorage.getItem("menuvaData");
+  if (!data) {
+    alert("⚠️ Tidak ada data untuk dibackup.");
+    return;
   }
+
+  const blob = new Blob([data], { type: "application/json" });
+  const formData = new FormData();
+  formData.append("file", blob, "menuva-backup.json");
+
+  // Tampilkan loading/info
+  alert("⏳ Mengupload file ke 0x0.st...");
+
+  fetch("https://0x0.st", {
+    method: "POST",
+    body: formData
+  })
+  .then(response => response.text())
+  .then(downloadUrl => {
+    console.log("✅ File berhasil diupload:", downloadUrl);
+    alert("✅ Backup sukses!\nLink file: " + downloadUrl);
+    
+    // Optional: buka otomatis
+    window.open(downloadUrl, "_blank");
+  })
+  .catch(error => {
+    console.error("❌ Gagal mengupload:", error);
+    alert("❌ Gagal mengupload file. Coba lagi nanti.");
+  });
 }
     // Salin link
     function salinLinkMenu() {
