@@ -351,22 +351,38 @@
   try {
     const data = localStorage.getItem("menuvaData");
     if (!data) {
-      alert("⚠️ Tidak ada data untuk di-backup.");
+      alert("⚠️ Tidak ada data yang bisa di-backup.");
       return;
     }
 
-    const url = "data:application/json;charset=utf-8," + encodeURIComponent(data);
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    console.log("📦 Blob URL:", url);
+    console.log("📏 Blob size:", blob.size, "bytes");
+    console.log("🖱️ Simulasi klik tombol download...");
+
     const a = document.createElement("a");
     a.href = url;
     a.download = "menuva-backup.json";
 
+    // Ini penting agar di HP tetap terdeteksi interaksi user
+    a.style.display = 'none';
+    document.body.appendChild(a);
     a.click();
+
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      console.log("✅ Link download selesai dan URL dibersihkan.");
+    }, 100);
+
+    alert("✅ Backup dimulai. Jika tidak muncul download, cek izin browser.");
   } catch (err) {
     console.error("❌ Gagal backup:", err);
     alert("Terjadi kesalahan saat backup data.");
   }
 }
-
     // Salin link
     function salinLinkMenu() {
       const origin = window.location.origin;
