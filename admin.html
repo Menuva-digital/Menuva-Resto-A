@@ -349,39 +349,18 @@
     // Backup data
     function backupData() {
   try {
-    console.log("📲 Tombol backup diklik");
-    
     const data = localStorage.getItem("menuvaData");
     if (!data) {
-      alert("⚠️ Tidak ada data yang bisa di-backup.");
+      alert("⚠️ Tidak ada data untuk di-backup.");
       return;
     }
 
-    const blob = new Blob([data], { type: "application/octet-stream" });
-    const url = URL.createObjectURL(blob);
-
-    console.log("📦 Blob URL:", url);
-    console.log("📏 Blob size:", blob.size, "bytes");
-
+    const url = "data:application/json;charset=utf-8," + encodeURIComponent(data);
     const a = document.createElement("a");
     a.href = url;
     a.download = "menuva-backup.json";
 
-    document.body.appendChild(a);
-    a.style.display = 'none';
-
-    try {
-      a.click();
-      console.log("✅ Simulasi klik tombol berhasil.");
-    } catch (clickErr) {
-      console.error("❌ Gagal klik tombol download:", clickErr);
-    }
-
-    setTimeout(() => {
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }, 100);
-
+    a.click();
   } catch (err) {
     console.error("❌ Gagal backup:", err);
     alert("Terjadi kesalahan saat backup data.");
