@@ -145,7 +145,7 @@
     <!-- Backup dan Restore -->
 <div class="section">
   <h2>🔁 Backup & Restore Data</h2>
-  <button onclick="backupData()" class="btn-orange">⬇️ Backup Data</button>
+  <button onclick="backupData()">⬇️ Backup Data</button>
   <input type="file" id="restoreInput" accept=".json" />
   
   <div style="background: #fef9e7; padding: 10px; border-left: 5px solid #f1c40f; margin-top: 10px; font-size: 14px;">
@@ -348,36 +348,38 @@
   
     // Backup data
     function backupData() {
-      const data = localStorage.getItem('menuvaData');
-      if (!data) return alert('Tidak ada data untuk dibackup.');
-      const blob = new Blob([data], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "backup-menuva.json";
-      a.click();
-      URL.revokeObjectURL(url);
+  try {
+    const data = localStorage.getItem("menuvaData");
+    if (!data) {
+      alert("⚠️ Tidak ada data yang bisa di-backup.");
+      return;
     }
-  
-    // Restore data
-    document.getElementById('restoreInput').addEventListener('change', function (e) {
-      const file = e.target.files[0];
-      if (!file) return;
-  
-      const reader = new FileReader();
-      reader.onload = function (event) {
-        try {
-          const data = JSON.parse(event.target.result);
-          localStorage.setItem('menuvaData', JSON.stringify(data));
-          alert('✅ Data berhasil di-restore!');
-          location.reload();
-        } catch (err) {
-          alert('❌ Format file tidak valid.');
-          console.error("Gagal restore data:", err);
-        }
-      };
-      reader.readAsText(file);
-    });
+
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "menuva-backup.json";
+
+    // Trik agar mobile browser mau proses
+    document.body.appendChild(a);
+    a.style.display = 'none';
+    a.click();
+
+    // Bersihkan setelah download
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 100);
+
+    console.log("✅ Backup berhasil dimulai.");
+  } catch (err) {
+    console.error("❌ Gagal backup:", err);
+    alert("Terjadi kesalahan saat backup data.");
+  }
+}
+
   
     // Salin link
     function salinLinkMenu() {
