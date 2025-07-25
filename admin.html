@@ -355,34 +355,35 @@
       return;
     }
 
-    const blob = new Blob([data], { type: "application/json" });
+    // Ganti tipe blob jadi lebih universal biar HP gak rewel
+    const blob = new Blob([data], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
 
+    // Log tambahan buat debugging di HP
     console.log("📦 Blob URL:", url);
     console.log("📏 Blob size:", blob.size, "bytes");
     console.log("🖱️ Simulasi klik tombol download...");
 
     const a = document.createElement("a");
     a.href = url;
-    a.download = "menuva-backup.json";
+    a.download = "menuva-backup.json.txt"; // Bisa juga .txt aja
 
-    // Ini penting agar di HP tetap terdeteksi interaksi user
-    a.style.display = 'none';
     document.body.appendChild(a);
+    a.style.display = 'none';
     a.click();
 
     setTimeout(() => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      console.log("✅ Link download selesai dan URL dibersihkan.");
     }, 100);
 
-    alert("✅ Backup dimulai. Jika tidak muncul download, cek izin browser.");
+    console.log("✅ Backup berhasil dimulai.");
   } catch (err) {
     console.error("❌ Gagal backup:", err);
     alert("Terjadi kesalahan saat backup data.");
   }
 }
+
     // Salin link
     function salinLinkMenu() {
       const origin = window.location.origin;
