@@ -471,58 +471,57 @@
       console.error("❌ Terjadi error:", e.message);
     });
   </script>
-  <script>
-    async function backupData() {
-      const rawData = localStorage.getItem("menuvaData");
-      if (!rawData) {
-        alert("Tidak ada data untuk di-backup!");
-        return;
-      }
-  
-      const data = JSON.parse(rawData);
-      const filename = `backup-menuva-${Date.now()}.json`;
-      const statusDiv = document.getElementById("backupDownloadLink");
-      statusDiv.innerHTML = "🔄 Mengunggah data...";
-  
-      try {
-        const res = await fetch("https://97d2ac9c-b183-41c2-b968-d26457f514fc-00-3ur8opvgnc0r1.pike.replit.dev/upload", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            filename: filename,
-            data: data,
-          }),
-        });
-  
-        const result = await res.json();
-  
-        if (result.success) {
-          statusDiv.innerHTML = `
-            ✅ Backup berhasil!<br>
-            <a href="${result.url}" target="_blank" style="
-              display:inline-block;
-              margin-top:8px;
-              padding:10px 16px;
-              background:#28a745;
-              color:white;
-              text-decoration:none;
-              border-radius:8px;
-            ">
-              ⬇️ Download Backup (.json)
-            </a>
-          `;
-        } else {
-          statusDiv.innerHTML = "❌ Gagal upload. Silakan coba lagi.";
-        }
-  
-      } catch (err) {
-        console.error(err);
-        statusDiv.innerHTML = "❌ Terjadi error saat upload. Periksa koneksi.";
-      }
+ <!-- Tambahkan SDK Firebase CDN sebelum script ini -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
+
+<script>
+  // Konfigurasi Firebase (ganti pakai punyamu)
+  const firebaseConfig = {
+    apiKey: "AIzaSyDuURG6E113eFGAdTYoepFtvBoyD_SOyZo",
+    authDomain: "menuva-30aa9.firebaseapp.com",
+    projectId: "menuva-30aa9",
+    storageBucket: "menuva-30aa9.firebasestorage.app",
+    messagingSenderId: "125797027135",
+    appId: "1:125797027135:web:9f4b71979f893e8805978a"
+  };
+
+  // Inisialisasi Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  // Fungsi backup ke Firebase Firestore
+  async function backupData() {
+    const rawData = localStorage.getItem("menuvaData");
+    const statusDiv = document.getElementById("backupDownloadLink");
+
+    if (!rawData) {
+      alert("❗ Tidak ada data untuk di-backup!");
+      return;
     }
-  </script>
+
+    const data = JSON.parse(rawData);
+    const timestamp = new Date().toISOString();
+    statusDiv.innerHTML = "🔄 Mengunggah data ke Firebase...";
+
+    try {
+      const docRef = await db.collection("backups").add({
+        data: data,
+        time: timestamp,
+        filename: `backup-menuva-${Date.now()}.json`
+      });
+
+      statusDiv.innerHTML = `
+        ✅ Backup berhasil ke Firebase!<br>
+        ID Backup: <code>${docRef.id}</code>
+      `;
+    } catch (err) {
+      console.error("Gagal backup ke Firebase:", err);
+      statusDiv.innerHTML = "❌ Gagal backup ke Firebase. Coba lagi nanti.";
+    }
+  }
+</script>
+
   
 </body>
 </html>
