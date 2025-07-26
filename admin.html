@@ -146,13 +146,9 @@
 
     <div class="section">
       <h2>🔁 Backup & Restore Data</h2>
-    
-      <!-- Tombol Backup -->
-      <button onclick="backupData()">📦 Backup Data</button>
-    
-      <!-- Hasil Link Download -->
-      <div id="backupDownloadLink" style="margin-top: 10px;"></div>
-    
+      <button onclick="backupDataToLocal()">📥 Backup Data</button>
+      <div id="backupDownloadLink" style="margin-top:10px;"></div>
+      
       <!-- Input Restore -->
       <label for="restoreInput" style="margin-top: 20px; display: block;">
         📂 Pilih File JSON untuk Restore:
@@ -471,57 +467,40 @@
       console.error("❌ Terjadi error:", e.message);
     });
   </script>
- <!-- Tambahkan SDK Firebase CDN sebelum script ini -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
-<script>
-  // Konfigurasi Firebase lo
-  const firebaseConfig = {
-    apiKey: "AIzaSyDuURG6E113eFGAdTYoepFtvBoyD_SOyZo",
-    authDomain: "menuva-30aa9.firebaseapp.com",
-    projectId: "menuva-30aa9",
-    storageBucket: "menuva-30aa9.firebasestorage.app",
-    messagingSenderId: "125797027135",
-    appId: "1:125797027135:web:9f4b71979f893e8805978a"
-  };
-
-  // Inisialisasi Firebase (pakai compat SDK)
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-
-  // Fungsi backup ke Firebase Firestore
-  async function backupData() {
+  <script>
+  function backupDataToLocal() {
     const rawData = localStorage.getItem("menuvaData");
     const statusDiv = document.getElementById("backupDownloadLink");
 
     if (!rawData) {
-      alert("❗ Tidak ada data untuk di-backup!");
+      alert("Tidak ada data untuk di-backup!");
       return;
     }
 
-    const data = JSON.parse(rawData);
-    const timestamp = new Date().toISOString();
-    statusDiv.innerHTML = "🔄 Mengunggah data ke Firebase...";
-
     try {
-      const docRef = await db.collection("backups").add({
-        data: data,
-        time: timestamp,
-        filename: `backup-menuva-${Date.now()}.json`
-      });
+      // Optional: minify supaya file lebih kecil
+      const minified = JSON.stringify(JSON.parse(rawData));
 
-      statusDiv.innerHTML = `
-        ✅ Backup berhasil ke Firebase!<br>
-        ID Backup: <code>${docRef.id}</code>
-      `;
-    } catch (err) {
-      console.error("Gagal backup ke Firebase:", err);
-      statusDiv.innerHTML = "❌ Gagal backup ke Firebase. Coba lagi nanti.";
+      const filename = `menuva-backup-${Date.now()}.json`;
+      const blob = new Blob([minified], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      statusDiv.innerHTML = `✅ Backup berhasil! File ${filename} siap di-download.`;
+    } catch (error) {
+      console.error("❌ Gagal backup lokal:", error);
+      statusDiv.innerHTML = "❌ Gagal membuat file backup. Coba lagi.";
     }
   }
 </script>
 
   
+
 </body>
 </html>
