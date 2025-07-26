@@ -467,40 +467,43 @@
       console.error("❌ Terjadi error:", e.message);
     });
   </script>
+
   <script>
-  function backupDataToLocal() {
-    const rawData = localStorage.getItem("menuvaData");
-    const statusDiv = document.getElementById("backupDownloadLink");
+function backupData() {
+  const data = localStorage.getItem("menuvaData");
+  const statusDiv = document.getElementById("backupDownloadLink");
 
-    if (!rawData) {
-      alert("Tidak ada data untuk di-backup!");
-      return;
-    }
-
-    try {
-      // Optional: minify supaya file lebih kecil
-      const minified = JSON.stringify(JSON.parse(rawData));
-
-      const filename = `menuva-backup-${Date.now()}.json`;
-      const blob = new Blob([minified], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-
-      statusDiv.innerHTML = `✅ Backup berhasil! File ${filename} siap di-download.`;
-    } catch (error) {
-      console.error("❌ Gagal backup lokal:", error);
-      statusDiv.innerHTML = "❌ Gagal membuat file backup. Coba lagi.";
-    }
+  if (!data) {
+    alert("Tidak ada data untuk di-backup!");
+    return;
   }
+
+  try {
+    const filename = `menuva-backup-${Date.now()}.json`;
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    // Buat elemen link download
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click(); // ✅ Otomatis download
+    document.body.removeChild(link);
+
+    // Tampilkan tombol manual kalau gagal auto-download
+    statusDiv.innerHTML = `
+      ✅ Backup berhasil! File <strong>${filename}</strong> siap di-download.<br>
+      <a href="${url}" download="${filename}" style="margin-top:10px;display:inline-block;padding:10px 16px;background:#007bff;color:white;text-decoration:none;border-radius:6px;">
+        📥 Klik di sini jika download tidak dimulai otomatis
+      </a>
+    `;
+  } catch (error) {
+    console.error("❌ Gagal backup:", error);
+    statusDiv.innerHTML = "❌ Gagal melakukan backup. Coba lagi.";
+  }
+}
 </script>
-
-  
-
 </body>
 </html>
