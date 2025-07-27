@@ -34,25 +34,27 @@
     }
 
     input {
-      width: 105%;
-      padding: 10px;
-      margin-top: 10px;
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
+  width: 100%;
+  padding: 12px; /* disamakan dengan button */
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px; /* disamakan juga */
+  box-sizing: border-box; /* biar padding ga nambah lebar total */
+}
 
-    button {
-      width: 100%;
-      padding: 12px;
-      background-color: #2e8b57;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
+button {
+  width: 100%;
+  padding: 12px;
+  background-color: #2e8b57;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
     .error {
       color: red;
       margin-top: 5px;
