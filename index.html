@@ -30,31 +30,29 @@
       max-width: 400px;
     }
     input, button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 10px;
-  margin-bottom: 20px;
-  border-radius: 6px;
-  font-size: 16px;
-  box-sizing: border-box;
-}
-
-input {
-  border: 1px solid #ccc;
-}
-
-button {
-  background-color: #2e8b57;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 6px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    input {
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #2e8b57;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
     .error {
       color: red;
-      margin-top: -15px;
-      margin-bottom: 15px;
       font-size: 14px;
       text-align: center;
+      margin: 10px 0;
+      white-space: pre-line;
     }
     .link {
       text-align: center;
@@ -69,20 +67,18 @@ button {
       margin-bottom: 20px;
     }
     .password-wrapper {
-  position: relative;
-  width: 100%;
-}
-
-.toggle-eye {
-  position: absolute;
-  right: 10px;
-  top: 42%;
-  transform: translateY(-50%);
-  cursor: pointer;
-  font-size: 18px;
-  user-select: none;
-}
-
+      position: relative;
+      width: 100%;
+    }
+    .toggle-eye {
+      position: absolute;
+      right: 10px;
+      top: 42%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      font-size: 18px;
+      user-select: none;
+    }
   </style>
 </head>
 <body>
@@ -102,16 +98,20 @@ button {
         <input type="password" id="password" placeholder="Password" required />
         <span id="togglePassword" class="toggle-eye">👁️</span>
       </div>
-      
+
       <p id="errorMsg" class="error"></p>
+      
       <button type="submit">Login</button>
+
       <div class="link">
         Belum punya akun? <a href="register.html">Daftar di sini</a>
       </div>
-      
-       <div class="link">
-      <a href="#" onclick="showSavedAccount()">🔑 Lupa akun?</a>
+
+      <div class="link">
+        <a href="#" onclick="showSavedAccount()">🔑 Lupa akun?</a>
       </div>
+
+      <!-- Ditaruh di bawah link agar tidak bertabrakan -->
       <p id="savedAccountInfo" class="error"></p>
     </form>
   </div>
@@ -126,11 +126,9 @@ button {
       const emailInput = document.getElementById('email').value.trim().toLowerCase();
       const passwordInput = document.getElementById('password').value;
 
-      // Ambil daftar user dari localStorage
       const storedUsers = localStorage.getItem('menuvaUsers');
       const users = storedUsers ? JSON.parse(storedUsers) : [];
 
-      // Cek apakah ada user yang cocok
       const matchedUser = users.find(user => user.email === emailInput && user.password === passwordInput);
 
       if (matchedUser) {
@@ -141,36 +139,43 @@ button {
         errorMsg.textContent = 'Email atau password salah, coba lagi bro!';
       }
     });
-  </script>
-  <script>
+
     // Toggle password visibility
     const passwordInput = document.getElementById('password');
     const togglePassword = document.getElementById('togglePassword');
-  
+
     togglePassword.addEventListener('click', () => {
       const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
       passwordInput.setAttribute('type', type);
-      
-      // Ganti ikon sesuai state
       togglePassword.textContent = type === 'password' ? '👁️' : '🙈';
     });
-  </script>
-  <script>
-  function showSavedAccount() {
-    const storedUsers = localStorage.getItem('menuvaUsers');
-    const users = storedUsers ? JSON.parse(storedUsers) : [];
 
-    if (users.length > 0) {
-      const lastUser = users[users.length - 1]; // tampilkan akun terakhir yang didaftarkan
-      const email = lastUser.email || 'Tidak tersedia';
-      const password = lastUser.password || 'Tidak tersedia';
-      document.getElementById('savedAccountInfo').textContent =
-        `✅ Akun ditemukan di perangkat ini:\n📧 Email: ${email}\n🔒 Password: ${password}`;
-    } else {
-      document.getElementById('savedAccountInfo').textContent =
-        '⚠️ Belum ada akun terdaftar di perangkat ini.';
+    function showSavedAccount() {
+      const storedUsers = localStorage.getItem('menuvaUsers');
+      const users = storedUsers ? JSON.parse(storedUsers) : [];
+
+      const info = document.getElementById('savedAccountInfo');
+      if (users.length > 0) {
+        const lastUser = users[users.length - 1];
+        const email = lastUser.email || 'Tidak tersedia';
+        const password = lastUser.password || 'Tidak tersedia';
+        info.textContent =
+          `✅ Akun ditemukan di perangkat ini:\n📧 Email: ${email}\n🔒 Password: ${password}`;
+      } else {
+        info.textContent = '⚠️ Belum ada akun terdaftar di perangkat ini.';
+      }
     }
+
+    // Prefill otomatis email dan password terakhir
+window.addEventListener('DOMContentLoaded', () => {
+  const storedUsers = localStorage.getItem('menuvaUsers');
+  const users = storedUsers ? JSON.parse(storedUsers) : [];
+  if (users.length > 0) {
+    const lastUser = users[users.length - 1];
+    document.getElementById('email').value = lastUser.email || '';
+    document.getElementById('password').value = lastUser.password || '';
   }
-</script>
+});
+  </script>
 </body>
 </html>
