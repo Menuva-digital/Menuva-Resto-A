@@ -102,6 +102,11 @@ button {
         <input type="password" id="password" placeholder="Password" required />
         <span id="togglePassword" class="toggle-eye">👁️</span>
       </div>
+      
+      <div class="link">
+      <a href="#" onclick="showSavedAccount()">🔑 Lupa akun?</a>
+      </div>
+      <p id="savedAccountInfo" class="error"></p>
 
       <p id="errorMsg" class="error"></p>
       <button type="submit">Login</button>
@@ -150,6 +155,22 @@ button {
       togglePassword.textContent = type === 'password' ? '👁️' : '🙈';
     });
   </script>
-  
+  <script>
+  function showSavedAccount() {
+    const storedUsers = localStorage.getItem('menuvaUsers');
+    const users = storedUsers ? JSON.parse(storedUsers) : [];
+
+    if (users.length > 0) {
+      const lastUser = users[users.length - 1]; // tampilkan akun terakhir yang didaftarkan
+      const email = lastUser.email || 'Tidak tersedia';
+      const password = lastUser.password || 'Tidak tersedia';
+      document.getElementById('savedAccountInfo').textContent =
+        `✅ Akun ditemukan di perangkat ini:\n📧 Email: ${email}\n🔒 Password: ${password}`;
+    } else {
+      document.getElementById('savedAccountInfo').textContent =
+        '⚠️ Belum ada akun terdaftar di perangkat ini.';
+    }
+  }
+</script>
 </body>
 </html>
