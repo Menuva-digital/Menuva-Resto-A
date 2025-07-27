@@ -304,51 +304,65 @@
       input.placeholder = 'Contoh: 6281234567890';
       container.appendChild(input);
     }
-  
-    // Simpan semua data
-    function simpanData() {
-  const namaRestoran = document.getElementById('namaRestoran').value;
-  const logo = document.getElementById('previewLogo').src;
+  //Simpan Data
+  function simpanData() {
+    const namaRestoran = document.getElementById('namaRestoran').value.trim();
+    const logo = document.getElementById('previewLogo').src;
 
-  function ambilMenu(containerId) {
-    const items = document.querySelectorAll(`#${containerId} .menu-item`);
-    const list = [];
-    items.forEach(item => {
-      const nama = item.children[0].value;
-      const harga = item.children[1].value;
-      const kategori = item.children[2].value;
-      if (nama && harga) list.push({ nama, harga, kategori });
-    });
-    return list;
+    function ambilMenu(containerId) {
+      const items = document.querySelectorAll(`#${containerId} .menu-item`);
+      const list = [];
+      items.forEach(item => {
+        const nama = item.children[0].value;
+        const harga = item.children[1].value;
+        const kategori = item.children[2].value;
+        if (nama && harga) list.push({ nama, harga, kategori });
+      });
+      return list;
+    }
+
+    const nomorWaInputs = document.querySelectorAll('.nomor-wa');
+    const nomorWaAdmin = Array.from(nomorWaInputs).map(input => input.value.trim()).filter(val => val !== '');
+
+    const data = {
+      namaRestoran,
+      logo,
+      nomorWaAdmin,
+      flipbookRuanganImages,
+      flipbookMenuImages,
+      menu: [
+        ...ambilMenu('menuFoodContainer'),
+        ...ambilMenu('menuSnackContainer'),
+        ...ambilMenu('menuDrinkContainer')
+      ]
+    };
+
+    try {
+      localStorage.setItem('menuvaData', JSON.stringify(data));
+      alert('✅ Data berhasil disimpan!');
+
+      // === AUTO SHOW DAN GENERATE LINK ===
+      const customerId = namaRestoran.toLowerCase().replace(/\s+/g, '-'); // Buat ID dari nama resto
+      const linkMenu = `${location.origin}${location.pathname.replace('admin.html', '')}menu.html?customer=${customerId}`;
+
+      document.getElementById('btnSalinLink').style.display = 'inline-block';
+
+      // Simpan link ke tombol
+      document.getElementById('btnSalinLink').onclick = function () {
+        navigator.clipboard.writeText(linkMenu).then(() => {
+          alert("✅ Link berhasil disalin ke clipboard:\n" + linkMenu);
+        }).catch(err => {
+          console.error("❌ Gagal menyalin:", err);
+          alert("❌ Gagal menyalin link. Coba salin manual:\n" + linkMenu);
+        });
+      };
+
+    } catch (err) {
+      console.error("❌ Gagal menyimpan data ke localStorage:", err);
+      alert("❌ Gagal menyimpan data! Mungkin ukuran total gambar terlalu besar.\n\nTips:\n- Kurangi jumlah gambar\n- Gunakan gambar berukuran di bawah 300KB/Gambar\n- Cek koneksi Anda");
+    }
   }
 
-  const nomorWaInputs = document.querySelectorAll('.nomor-wa');
-  const nomorWaAdmin = Array.from(nomorWaInputs).map(input => input.value.trim()).filter(val => val !== '');
-
-  const data = {
-    namaRestoran,
-    logo,
-    nomorWaAdmin,
-    flipbookRuanganImages,
-    flipbookMenuImages,
-    menu: [
-      ...ambilMenu('menuFoodContainer'),
-      ...ambilMenu('menuSnackContainer'),
-      ...ambilMenu('menuDrinkContainer')
-    ]
-  };
-
-  try {
-    localStorage.setItem('menuvaData', JSON.stringify(data));
-    alert('✅ Data berhasil disimpan!');
-    document.getElementById('btnSalinLink').style.display = 'inline-block';
-  } catch (err) {
-    console.error("❌ Gagal menyimpan data ke localStorage:", err);
-    alert("❌ Gagal menyimpan data! Mungkin ukuran total gambar terlalu besar.\n\nTips:\n- Kurangi jumlah gambar\n- Gunakan gambar berukuran di bawah 300KB/Gambar\n- Cek koneksi Anda");
-  }
-}
-
-  
     // Reset data
     function resetData() {
       if (confirm("Yakin ingin menghapus semua data?")) {
@@ -506,6 +520,27 @@ function backupData() {
   }
 }
 </script>
+<script>
+function restoreDataFromFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      const json = JSON.parse(e.target.result);
+      localStorage.setItem('menuvaData', JSON.stringify(json));
+      alert("✅ Data berhasil direstore dari file!\nHalaman akan dimuat ulang...");
+      location.reload(); // 🔁 reload untuk langsung munculkan data
+    } catch (err) {
+      alert("❌ Gagal membaca file JSON. Pastikan file valid.");
+      console.error("Restore error:", err);
+    }
+  };
+  reader.readAsText(file);
+}
+</script>
+
   
 </body>
 </html>
