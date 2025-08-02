@@ -26,72 +26,73 @@
 <div id="errorLog" style="color:red; margin-top:20px;"></div>
 
 <script>
-  const dbName = "menuvaDB";
-  const storeName = "menuvaData";
+ const dbName = "MenuvaDB";  // sama persis case-nya
+const storeName = "menuvaData";
 
-  function loadDataFromDB() {
-    const request = indexedDB.open(dbName, 1);
+function loadDataFromDB() {
+  const request = indexedDB.open(dbName, 1);
 
-    request.onerror = function () {
-      document.getElementById('errorLog').textContent = "❌ Gagal membuka database IndexedDB.";
-    };
+  request.onerror = function () {
+    document.getElementById('errorLog').textContent = "❌ Gagal membuka database IndexedDB.";
+  };
 
-    request.onsuccess = function (event) {
-      const db = event.target.result;
+  request.onsuccess = function (event) {
+    const db = event.target.result;
 
-      try {
-        const transaction = db.transaction([storeName], "readonly");
-        const objectStore = transaction.objectStore(storeName);
-        const getRequest = objectStore.get("data");
+    try {
+      const transaction = db.transaction([storeName], "readonly");
+      const objectStore = transaction.objectStore(storeName);
+      const getRequest = objectStore.get(1);  // key harus 1, bukan "data"
 
-        getRequest.onsuccess = function () {
-          const data = getRequest.result;
-          if (!data) {
-            document.getElementById('errorLog').textContent = "❌ Data belum tersedia. Silakan isi dari halaman admin.html";
-            return;
-          }
+      getRequest.onsuccess = function () {
+        const data = getRequest.result;
+        if (!data) {
+          document.getElementById('errorLog').textContent = "❌ Data belum tersedia. Silakan isi dari halaman admin.html";
+          return;
+        }
 
-          document.getElementById("namaRestoran").textContent = data.namaRestoran || "Restoran";
+        document.getElementById("namaRestoran").textContent = data.namaRestoran || "Restoran";
 
-          const promoContainer = document.getElementById("promoContainer");
-          promoContainer.innerHTML = "";
+        const promoContainer = document.getElementById("promoContainer");
+        promoContainer.innerHTML = "";
 
-          if (data.promoMenu && data.promoMenu.length > 0) {
-            data.promoMenu.forEach(promo => {
-              const item = document.createElement("div");
-              item.className = "promo-item";
-              item.innerHTML = `
-                <img src="${promo.gambar}" alt="Promo">
-                <h3>${promo.namaPromo}</h3>
-                <p>${promo.namaMenu}</p>
-                <p><b>Rp ${promo.harga}</b></p>
-                <button onclick="alert('Detail promo: ${promo.namaPromo}')">OPEN</button>
-              `;
-              promoContainer.appendChild(item);
-            });
-          } else {
-            promoContainer.innerHTML = "<p>Tidak ada promo saat ini.</p>";
-          }
-        };
+        if (data.menuPromo && data.menuPromo.length > 0) {  // properti sama seperti admin
+          data.menuPromo.forEach(promo => {
+            const item = document.createElement("div");
+            item.className = "promo-item";
+            item.innerHTML = `
+              <img src="${promo.image || ''}" alt="Promo">
+              <h3>${promo.namaPromo}</h3>
+              <p>${promo.namaMenu}</p>
+              <p><b>Rp ${promo.harga}</b></p>
+              <button onclick="alert('Detail promo: ${promo.namaPromo}')">OPEN</button>
+            `;
+            promoContainer.appendChild(item);
+          });
+        } else {
+          promoContainer.innerHTML = "<p>Tidak ada promo saat ini.</p>";
+        }
+      };
 
-        getRequest.onerror = function () {
-          document.getElementById('errorLog').textContent = "❌ Gagal membaca data dari object store.";
-        };
-      } catch (err) {
-        document.getElementById('errorLog').textContent = "❌ Error: " + err.message;
-      }
-    };
+      getRequest.onerror = function () {
+        document.getElementById('errorLog').textContent = "❌ Gagal membaca data dari object store.";
+      };
+    } catch (err) {
+      document.getElementById('errorLog').textContent = "❌ Error: " + err.message;
+    }
+  };
 
-    request.onupgradeneeded = function (event) {
-      const db = event.target.result;
-      if (!db.objectStoreNames.contains(storeName)) {
-        db.createObjectStore(storeName, { keyPath: "id" });
-      }
-    };
-  }
+  request.onupgradeneeded = function (event) {
+    const db = event.target.result;
+    if (!db.objectStoreNames.contains(storeName)) {
+      db.createObjectStore(storeName, { keyPath: "id" });
+    }
+  };
+}
 
-  window.onload = loadDataFromDB;
+window.onload = loadDataFromDB;
 </script>
 
 </body>
 </html>
+
