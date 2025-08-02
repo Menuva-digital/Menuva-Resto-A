@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Menu Restoran - Menuva</title>
   <style>
- body {
+    body {
       font-family: Arial, sans-serif;
       padding: 20px;
       background: #fdfdfd;
-      margin: 0;
+      margin: 0 0 70px 0; /* kasih space bawah utk fixed bar */
     }
     h1 {
       text-align: center;
@@ -128,184 +128,181 @@
       cursor: zoom-out;
       touch-action: pan-x pan-y;
     }
-   .section-title {
-  text-align: center;
-  font-weight: bold;
-  font-size: 50px;
-  margin: 30px 0 20px;
-  position: relative;
-  display: inline-block;
-  left: 50%;
-  transform: translateX(-50%);
-  border-bottom: 2px solid #ccc;
-  padding-bottom: 5px;
-}
-
-    /* ...styles tetap seperti yang kamu punya... */
+    .section-title {
+      text-align: center;
+      font-weight: bold;
+      font-size: 50px;
+      margin: 30px 0 20px;
+      position: relative;
+      display: inline-block;
+      left: 50%;
+      transform: translateX(-50%);
+      border-bottom: 2px solid #ccc;
+      padding-bottom: 5px;
+    }
     .countdown {
       font-size: 14px;
       margin-bottom: 10px;
       color: #ff5733;
       font-weight: bold;
     }
+
+    /* Fixed button bar bawah layar */
+    .fixed-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: #fff;
+      border-top: 1px solid #ddd;
+      box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      padding: 10px 20px;
+      z-index: 10000;
+    }
+    .fixed-bar button {
+      flex: 1;
+      padding: 14px 0;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      color: white;
+    }
+    .btn-order {
+      background-color: #007bff;
+    }
+    .btn-order:hover {
+      background-color: #0056b3;
+    }
+    .btn-room {
+      background-color: #28a745;
+    }
+    .btn-room:hover {
+      background-color: #1e7e34;
+    }
+
+    @media (max-width: 480px) {
+      .fixed-bar {
+        flex-direction: column;
+        padding: 10px;
+      }
+      .fixed-bar button {
+        width: 100%;
+        margin-bottom: 8px;
+      }
+      .fixed-bar button:last-child {
+        margin-bottom: 0;
+      }
+    }
   </style>
 </head>
 <body>
 
 <!-- Logo dan Nama Restoran -->
-  <img id="logoResto" class="logo-resto" src="" alt="Logo Restoran" />
-  <h1 id="namaRestoDisplay"></h1>
+<img id="logoResto" class="logo-resto" src="" alt="Logo Restoran" />
+<h1 id="namaRestoDisplay"></h1>
 
-  <!-- Promo Section -->
-  <section class="flipbook-section" id="promoSection">
-    <div class="section-title">🎉 Promo Special</div>
-    <div id="promoContainer" class="promo-grid"></div>
-    <div id="promoWarning" class="warning"></div>
-  </section>
+<!-- Promo Section -->
+<section class="flipbook-section" id="promoSection">
+  <div class="section-title">🎉 Promo Special</div>
+  <div id="promoContainer" class="promo-grid"></div>
+  <div id="promoWarning" class="warning"></div>
+</section>
 
-  <!-- Flipbook Ruangan -->
-  <section class="flipbook-section" id="flipbookRuanganSection">
-    <div class="section-title">📸 Room Galery</div>
-    <div id="flipbookRuanganGallery" class="flipbook-gallery"></div>
-    <div id="ruanganWarning" class="warning"></div>
-  </section>
+<!-- Flipbook Ruangan -->
+<section class="flipbook-section" id="flipbookRuanganSection">
+  <div class="section-title">📸 Room Galery</div>
+  <div id="flipbookRuanganGallery" class="flipbook-gallery"></div>
+  <div id="ruanganWarning" class="warning"></div>
+</section>
 
-  <!-- Flipbook Menu -->
-  <section class="flipbook-section" id="flipbookMenuSection">
-    <div class="section-title">📖 Menu Galery</div>
-    <div id="flipbookMenuGallery" class="flipbook-gallery"></div>
-    <div id="menuWarning" class="warning"></div>
-  </section>
+<!-- Flipbook Menu -->
+<section class="flipbook-section" id="flipbookMenuSection">
+  <div class="section-title">📖 Menu Galery</div>
+  <div id="flipbookMenuGallery" class="flipbook-gallery"></div>
+  <div id="menuWarning" class="warning"></div>
+</section>
 
-  <!-- Fullscreen Overlay -->
-  <div class="fullscreen-overlay" id="fullscreenOverlay" onclick="closeFullscreen()">
-    <img id="fullscreenImage" alt="Fullscreen Image" />
-  </div>
+<!-- Fullscreen Overlay -->
+<div class="fullscreen-overlay" id="fullscreenOverlay" onclick="closeFullscreen()">
+  <img id="fullscreenImage" alt="Fullscreen Image" />
+</div>
 
+<!-- Fixed Button Bar -->
+<div class="fixed-bar">
+  <button class="btn-order" onclick="window.location.href='order.html'">🛒 Order Now</button>
+  <button class="btn-room" onclick="window.location.href='room.html'">🏢 Room/Meeting Room Package</button>
+</div>
 
 <script>
-  // ...fungsi loadDataFromDB tetap sama...
-const DB_NAME = "MenuvaDB";
-    const STORE_NAME = "menuvaData";
+  const DB_NAME = "MenuvaDB";
+  const STORE_NAME = "menuvaData";
 
-    // Buka IndexedDB dan load data
-    function loadDataFromDB() {
-      return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, 1);
+  function loadDataFromDB() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, 1);
 
-        request.onerror = () => reject("❌ Gagal membuka database IndexedDB.");
+      request.onerror = () => reject("❌ Gagal membuka database IndexedDB.");
 
-        request.onsuccess = (event) => {
-          const db = event.target.result;
-          try {
-            const tx = db.transaction(STORE_NAME, "readonly");
-            const store = tx.objectStore(STORE_NAME);
-            const getReq = store.get(1);
-            getReq.onsuccess = () => resolve(getReq.result || {});
-            getReq.onerror = () => reject("❌ Gagal membaca data dari object store.");
-          } catch (e) {
-            reject("❌ Error: " + e.message);
-          }
-        };
-
-        request.onupgradeneeded = (event) => {
-          const db = event.target.result;
-          if (!db.objectStoreNames.contains(STORE_NAME)) {
-            db.createObjectStore(STORE_NAME, { keyPath: "id" });
-          }
-        };
-      });
-    }
-
-    // Render promo
-    function renderPromo(promoMenu) {
-      const container = document.getElementById("promoContainer");
-      const warning = document.getElementById("promoWarning");
-      container.innerHTML = "";
-      warning.textContent = "";
-
-      if (!promoMenu || promoMenu.length === 0) {
-        warning.textContent = "Tidak ada promo saat ini.";
-        return;
-      }
-
-      promoMenu.forEach(promo => {
-        const div = document.createElement("div");
-        div.className = "promo-item";
-        div.innerHTML = `
-          <img src="${promo.image || ''}" alt="Promo" />
-          <h3>${promo.namaPromo || '-'}</h3>
-          <p>${promo.namaMenu || '-'}</p>
-          <p><b>Rp ${promo.harga || '-'}</b></p>
-          <button onclick="alert('Detail promo: ${promo.namaPromo || '-'}')">OPEN</button>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    // Render gallery gambar flipbook
-    function renderFlipbookGallery(containerId, images, warningId) {
-      const container = document.getElementById(containerId);
-      const warning = document.getElementById(warningId);
-      container.innerHTML = "";
-      warning.textContent = "";
-
-      if (!images || images.length === 0) {
-        warning.textContent = "Belum ada gambar.";
-        return;
-      }
-
-      images.forEach(src => {
-        const img = document.createElement("img");
-        img.src = src;
-        img.alt = "Flipbook Image";
-        img.onclick = () => openFullscreen(src);
-        container.appendChild(img);
-      });
-    }
-
-    // Open fullscreen overlay
-    function openFullscreen(src) {
-      const overlay = document.getElementById("fullscreenOverlay");
-      const img = document.getElementById("fullscreenImage");
-      img.src = src;
-      overlay.style.display = "flex";
-    }
-
-    // Close fullscreen overlay
-    function closeFullscreen() {
-      document.getElementById("fullscreenOverlay").style.display = "none";
-      document.getElementById("fullscreenImage").src = "";
-    }
-
-    // Main: load data dan render
-    window.onload = async () => {
-      try {
-        const data = await loadDataFromDB();
-
-        // Tampilkan logo dan nama resto
-        const logoElem = document.getElementById("logoResto");
-        if (data.logo) {
-          logoElem.src = data.logo;
-          logoElem.style.display = "block";
-        } else {
-          logoElem.style.display = "none";
+      request.onsuccess = (event) => {
+        const db = event.target.result;
+        try {
+          const tx = db.transaction(STORE_NAME, "readonly");
+          const store = tx.objectStore(STORE_NAME);
+          const getReq = store.get(1);
+          getReq.onsuccess = () => resolve(getReq.result || {});
+          getReq.onerror = () => reject("❌ Gagal membaca data dari object store.");
+        } catch (e) {
+          reject("❌ Error: " + e.message);
         }
-        document.getElementById("namaRestoDisplay").textContent = data.namaRestoran || "Menu Restoran";
+      };
 
-        // Render promo
-        renderPromo(data.menuPromo);
+      request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME, { keyPath: "id" });
+        }
+      };
+    });
+  }
 
-        // Render flipbook gambar ruangan dan menu
-        renderFlipbookGallery("flipbookRuanganGallery", data.flipbookRuanganImages, "ruanganWarning");
-        renderFlipbookGallery("flipbookMenuGallery", data.flipbookMenuImages, "menuWarning");
-      } catch (err) {
-        console.error(err);
-        alert("Gagal load data menu.");
-      }
-    };
+  function renderFlipbookGallery(containerId, images, warningId) {
+    const container = document.getElementById(containerId);
+    const warning = document.getElementById(warningId);
+    container.innerHTML = "";
+    warning.textContent = "";
 
-  // Render promo + countdown
+    if (!images || images.length === 0) {
+      warning.textContent = "Belum ada gambar.";
+      return;
+    }
+
+    images.forEach(src => {
+      const img = document.createElement("img");
+      img.src = src;
+      img.alt = "Flipbook Image";
+      img.onclick = () => openFullscreen(src);
+      container.appendChild(img);
+    });
+  }
+
+  function openFullscreen(src) {
+    const overlay = document.getElementById("fullscreenOverlay");
+    const img = document.getElementById("fullscreenImage");
+    img.src = src;
+    overlay.style.display = "flex";
+  }
+
+  function closeFullscreen() {
+    document.getElementById("fullscreenOverlay").style.display = "none";
+    document.getElementById("fullscreenImage").src = "";
+  }
+
   function renderPromo(promoMenu) {
     const container = document.getElementById("promoContainer");
     const warning = document.getElementById("promoWarning");
@@ -333,7 +330,6 @@ const DB_NAME = "MenuvaDB";
       `;
       container.appendChild(div);
 
-      // Countdown per promo jika tersedia
       if (promo.countdown) {
         const countdownEl = document.getElementById(countdownId);
         const endTime = new Date(promo.countdown).getTime();
@@ -365,7 +361,27 @@ const DB_NAME = "MenuvaDB";
     });
   }
 
-  // ...fungsi lain tetap sama, termasuk renderFlipbookGallery dan open/close fullscreen...
+  window.onload = async () => {
+    try {
+      const data = await loadDataFromDB();
+
+      const logoElem = document.getElementById("logoResto");
+      if (data.logo) {
+        logoElem.src = data.logo;
+        logoElem.style.display = "block";
+      } else {
+        logoElem.style.display = "none";
+      }
+      document.getElementById("namaRestoDisplay").textContent = data.namaRestoran || "Menu Restoran";
+
+      renderPromo(data.menuPromo);
+      renderFlipbookGallery("flipbookRuanganGallery", data.flipbookRuanganImages, "ruanganWarning");
+      renderFlipbookGallery("flipbookMenuGallery", data.flipbookMenuImages, "menuWarning");
+    } catch (err) {
+      console.error(err);
+      alert("Gagal load data menu.");
+    }
+  };
 </script>
 
 </body>
