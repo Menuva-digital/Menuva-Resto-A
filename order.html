@@ -78,6 +78,8 @@
 
   <h1>📝 Pesan Menu</h1>
 
+  <div id="promo-list" class="promo-container"></div>
+
   <label for="kategoriFilter">Filter Kategori Menu:</label>
   <select id="kategoriFilter" onchange="tampilkanMenu()">
     <option value="Semua">Semua Kategori</option>
@@ -222,10 +224,74 @@ if (data.restoPhone) {
   telp.style.fontSize = "14px";
   identitasContainer.appendChild(telp);
 }
+  // Tampilkan promo jika ada
+if (data.promo && data.promo.length) {
+  tampilkanPromo(data.promo);
+}
 
   logoContainer.innerHTML = ""; // Kosongkan dulu
   logoContainer.appendChild(identitasContainer);
 }
+
+  function tampilkanPromo(promoList) {
+  const promoContainer = document.getElementById("promo-list");
+  promoContainer.innerHTML = ""; // Kosongkan dulu
+
+  const judul = document.createElement("h3");
+  judul.textContent = "🔥 Promo Menarik";
+  judul.style.textAlign = "center";
+  promoContainer.appendChild(judul);
+
+  promoList.forEach((promo, index) => {
+    const card = document.createElement("div");
+    card.className = "promo-card";
+    card.style.border = "1px solid #ccc";
+    card.style.borderRadius = "8px";
+    card.style.margin = "10px 0";
+    card.style.padding = "10px";
+    card.style.display = "flex";
+    card.style.alignItems = "center";
+
+    // Gambar
+    const img = document.createElement("img");
+    img.src = promo.gambar;
+    img.alt = promo.namaPromo;
+    img.style.width = "80px";
+    img.style.height = "80px";
+    img.style.objectFit = "cover";
+    img.style.marginRight = "10px";
+
+    // Isi promo
+    const isi = document.createElement("div");
+    isi.style.flex = "1";
+
+    const nama = document.createElement("h4");
+    nama.textContent = promo.namaPromo;
+    nama.style.margin = "0 0 5px 0";
+
+    const harga = document.createElement("p");
+    harga.textContent = "Rp " + promo.hargaPromo.toLocaleString();
+    harga.style.margin = "0 0 5px 0";
+
+    const qtyInput = document.createElement("input");
+    qtyInput.type = "number";
+    qtyInput.min = "0";
+    qtyInput.value = "0";
+    qtyInput.dataset.nama = promo.namaPromo;
+    qtyInput.dataset.harga = promo.hargaPromo;
+    qtyInput.classList.add("qty-promo");
+    qtyInput.style.width = "60px";
+
+    isi.appendChild(nama);
+    isi.appendChild(harga);
+    isi.appendChild(qtyInput);
+
+    card.appendChild(img);
+    card.appendChild(isi);
+    promoContainer.appendChild(card);
+  });
+}
+
 
 
 function tampilkanMenu() {
@@ -339,6 +405,7 @@ function kirimPesanan() {
   </script>
 </body>
 </html>
+
 
 
 
