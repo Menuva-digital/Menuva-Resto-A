@@ -215,6 +215,10 @@
 <!-- Logo dan Nama Restoran -->
 <img id="logoResto" class="logo-resto" src="" alt="Logo Restoran" />
 <h1 id="namaRestoDisplay"></h1>
+  <div id="infoResto" style="margin-top: 10px;">
+  <p id="alamatResto" style="margin: 4px 0; font-size: 14px;">📍 Alamat: </p>
+  <p id="teleponResto" style="margin: 4px 0; font-size: 14px;">📞 Telepon: </p>
+</div>
 
 <!-- Promo Section -->
 <section class="flipbook-section" id="promoSection">
@@ -279,6 +283,13 @@
       };
     });
   }
+
+  loadDataFromDB().then(data => {
+  document.getElementById("alamatResto").innerText = `📍 Alamat: ${data.restoAddress || '-'}`;
+  document.getElementById("teleponResto").innerText = `📞 Telepon: ${data.restoPhone || '-'}`;
+}).catch(err => {
+  console.error("Gagal load info resto:", err);
+});
 
   function renderFlipbookGallery(containerId, images, warningId) {
     const container = document.getElementById(containerId);
@@ -413,6 +424,7 @@ function startCountdown(tanggalAkhir, elementId) {
 
 </body>
 </html>
+
 
 
 
