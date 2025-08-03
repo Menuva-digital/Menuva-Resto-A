@@ -252,6 +252,7 @@ if (data.menuPromo && data.menuPromo.length) {
 
   promoList.forEach((promo, index) => {
     console.log("PROMO ITEM:", promo);
+    console.log("🖼️ Gambar promo:", promo.gambar); // ✅ Tambahan log
 
     const card = document.createElement("div");
     card.className = "promo-card";
@@ -429,6 +430,7 @@ function kirimPesanan() {
   </script>
 </body>
 </html>
+
 
 
 
