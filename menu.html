@@ -208,6 +208,27 @@
         margin-bottom: 0;
       }
     }
+     #infoResto {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 20px auto;
+    padding: 10px 20px;
+    max-width: 500px;
+    text-align: center;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    font-size: 15px;
+    color: #333;
+  }
+
+  #infoResto p {
+    margin: 5px 0;
+    line-height: 1.5;
+  }
   </style>
 </head>
 <body>
@@ -215,9 +236,10 @@
 <!-- Logo dan Nama Restoran -->
 <img id="logoResto" class="logo-resto" src="" alt="Logo Restoran" />
 <h1 id="namaRestoDisplay"></h1>
-  <div id="infoResto" style="margin-top: 10px;">
-  <p id="alamatResto" style="margin: 4px 0; font-size: 14px;">📍 Alamat: </p>
-  <p id="teleponResto" style="margin: 4px 0; font-size: 14px;">📞 Telepon: </p>
+ <div id="infoResto">
+  <p id="alamatResto">📍 Alamat: </p>
+  <p id="teleponResto">📞 Telepon: </p>
+</div>
 </div>
 
 <!-- Promo Section -->
@@ -424,6 +446,7 @@ function startCountdown(tanggalAkhir, elementId) {
 
 </body>
 </html>
+
 
 
 
