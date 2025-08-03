@@ -206,22 +206,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // Alamat Restoran
-  if (data.alamatRestoran) {
-    const alamat = document.createElement("p");
-    alamat.textContent = data.alamatRestoran;
-    alamat.style.margin = "3px 0";
-    alamat.style.fontSize = "14px";
-    identitasContainer.appendChild(alamat);
-  }
+if (data.alamat) {  // ← sesuaikan dari "alamatRestoran" menjadi "alamat"
+  const alamat = document.createElement("p");
+  alamat.textContent = data.alamat;
+  alamat.style.margin = "3px 0";
+  alamat.style.fontSize = "14px";
+  identitasContainer.appendChild(alamat);
+}
 
-  // Nomor Telepon
-  if (data.nomorTelepon) {
-    const telp = document.createElement("p");
-    telp.textContent = "Telp: " + data.nomorTelepon;
-    telp.style.margin = "3px 0";
-    telp.style.fontSize = "14px";
-    identitasContainer.appendChild(telp);
-  }
+// Nomor Telepon
+if (data.noTelepon) { // ← sesuaikan dari "nomorTelepon" jadi "noTelepon"
+  const telp = document.createElement("p");
+  telp.textContent = "Telp: " + data.noTelepon;
+  telp.style.margin = "3px 0";
+  telp.style.fontSize = "14px";
+  identitasContainer.appendChild(telp);
+}
 
   logoContainer.innerHTML = ""; // Kosongkan dulu
   logoContainer.appendChild(identitasContainer);
@@ -339,6 +339,7 @@ function kirimPesanan() {
   </script>
 </body>
 </html>
+
 
 
 
