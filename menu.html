@@ -176,22 +176,7 @@
     margin: 5px 0;
     line-height: 1.5;
   }
-    .fixed-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background: #fff;
-  border-top: 1px solid #ddd;
-  box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
-  display: flex;
-  flex-wrap: wrap; /* Ini penting biar tombol bisa pindah baris kalau kepanjangan */
-  justify-content: center;
-  gap: 10px;
-  padding: 10px 15px;
-  z-index: 10000;
-}
-
+    
 .fixed-bar {
   position: fixed;
   bottom: 0;
@@ -266,8 +251,8 @@
 
 <!-- Fixed Button Bar -->
 <div class="fixed-bar">
-  <button class="btn-order">🛒 Order Now</button>
-  <button class="btn-room">🏢 Room / Meeting Room Package</button>
+  <button class="order-btn">🛒 Order Now</button>
+  <button class="room-btn"> Room/Meeting Room Package</button>
 </div>
 
 <script>
@@ -442,6 +427,7 @@ function startCountdown(tanggalAkhir, elementId) {
 
 </body>
 </html>
+
 
 
 
