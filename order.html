@@ -234,8 +234,15 @@ if (data.promo && data.promo.length) {
 }
 
   function tampilkanPromo(promoList) {
+  console.log("MENJALANKAN tampilkanPromo()", promoList); // Tambahan log
+  
   const promoContainer = document.getElementById("promo-list");
-  promoContainer.innerHTML = ""; // Kosongkan dulu
+  if (!promoContainer) {
+    console.warn("Elemen promo-list tidak ditemukan di HTML!");
+    return;
+  }
+
+  promoContainer.innerHTML = "";
 
   const judul = document.createElement("h3");
   judul.textContent = "🔥 Promo Menarik";
@@ -243,6 +250,8 @@ if (data.promo && data.promo.length) {
   promoContainer.appendChild(judul);
 
   promoList.forEach((promo, index) => {
+    console.log("PROMO ITEM:", promo); // Tambahan log per promo item
+
     const card = document.createElement("div");
     card.className = "promo-card";
     card.style.border = "1px solid #ccc";
@@ -252,7 +261,6 @@ if (data.promo && data.promo.length) {
     card.style.display = "flex";
     card.style.alignItems = "center";
 
-    // Gambar
     const img = document.createElement("img");
     img.src = promo.gambar;
     img.alt = promo.namaPromo;
@@ -261,7 +269,6 @@ if (data.promo && data.promo.length) {
     img.style.objectFit = "cover";
     img.style.marginRight = "10px";
 
-    // Isi promo
     const isi = document.createElement("div");
     isi.style.flex = "1";
 
@@ -291,7 +298,6 @@ if (data.promo && data.promo.length) {
     promoContainer.appendChild(card);
   });
 }
-
 
 
 function tampilkanMenu() {
@@ -405,6 +411,7 @@ function kirimPesanan() {
   </script>
 </body>
 </html>
+
 
 
 
