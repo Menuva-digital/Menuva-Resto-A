@@ -192,34 +192,31 @@
   z-index: 10000;
 }
 
-.fixed-bar button {
-  flex: 1 1 auto;
-  padding: 6px 12px;         /* lebih ramping */
-  font-size: 13px;           /* lebih kecil */
-  font-weight: 600;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  color: white;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.fixed-bar {
+  position: fixed;
+  bottom: 0;
+  width: 95%;
+  background-color: white;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 999;
 }
-   @media (max-width: 600px) {
-  .fixed-bar {
-    flex-direction: column;
-    gap: 8px;               /* jarak antara tombol atas dan bawah */
-    padding: 10px;
-  }
 
-  .fixed-bar button {
-    width: 90%;            /* full width tiap tombol */
-    padding: 8px 12px;      /* lebih ramping */
-    font-size: 14px;        /* font lebih kecil */
-  }
-   }
-    /* Hijau untuk tombol Order Now */
+.fixed-bar button {
+  flex: 1;
+  margin: 0 5px;
+  padding: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Hijau untuk tombol Order Now */
 .fixed-bar button.order-btn {
   background-color: #28a745;
 }
@@ -445,6 +442,7 @@ function startCountdown(tanggalAkhir, elementId) {
 
 </body>
 </html>
+
 
 
 
