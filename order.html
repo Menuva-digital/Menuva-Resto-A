@@ -70,6 +70,56 @@
       max-width: 100px;
       max-height: 100px;
     }
+    /* Container promo */
+#promo-list {
+  display: flex;
+  flex-wrap: wrap;      /* agar promo bisa pindah baris */
+  justify-content: center;
+  gap: 15px;            /* jarak antar promo */
+  padding: 10px;
+}
+
+/* Tiap kartu promo */
+.promo-card {
+  display: flex;
+  flex-direction: row;  /* gambar di kiri, teks di kanan */
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  width: 100%;          /* default full lebar */
+  max-width: 480px;     /* max lebar supaya gak terlalu lebar di desktop */
+  box-sizing: border-box;
+}
+
+/* Gambar promo */
+.promo-card img {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  margin-right: 15px;
+  flex-shrink: 0;
+}
+
+/* Isi teks promo */
+.promo-card div {
+  flex: 1;
+}
+
+/* Responsive: di layar kecil (portrait) ubah layout jadi kolom */
+@media (max-width: 480px) {
+  .promo-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .promo-card img {
+    margin-right: 0;
+    margin-bottom: 10px;
+    width: 100%;
+    height: auto;
+  }
+}
+
   </style>
 </head>
 <body>
@@ -268,7 +318,7 @@ if (data.menuPromo && data.menuPromo.length) {
     img.alt = promo.namaPromo;
     img.style.width = "80px";
     img.style.height = "80px";
-    img.style.objectFit = "cover";
+    img.style.objectFit = "contain";
     img.style.marginRight = "10px";
 
     const isi = document.createElement("div");
@@ -430,6 +480,7 @@ function kirimPesanan() {
   </script>
 </body>
 </html>
+
 
 
 
