@@ -176,22 +176,6 @@ function getMainData() {
   }
 });
 
-      // Ambil semua kategori unik dan masukkan ke filter
-      const kategoriUnik = [...new Set(data.menu.map(m => m.kategori).filter(k => k && k.trim() !== ""))];
-      kategoriUnik.forEach(k => {
-        const opt = document.createElement("option");
-        opt.value = k;
-        opt.textContent = k;
-        kategoriFilter.appendChild(opt);
-      });
-    kategoriFilter.addEventListener("change", tampilkanMenu);
-    
-      tampilkanMenu();
-    } else {
-      menuList.innerHTML = "<p>⚠️ Tidak ada menu tersedia</p>";
-    }
-    
-
     function tampilkanMenu() {
   const kategoriDipilih = kategoriFilter.value;
   menuList.innerHTML = "";
@@ -301,5 +285,6 @@ function ubahJumlah(index, delta) {
   </script>
 </body>
 </html>
+
 
 
