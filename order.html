@@ -108,25 +108,73 @@
   </div>
 
   <script>
-    const data = JSON.parse(localStorage.getItem("menuvaData"));
+    let data = null;
+    const pesanan = {};
+
+    function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("menuvaDB", 1);
+    request.onerror = () => reject("❌ Gagal membuka database");
+    request.onsuccess = (event) => resolve(event.target.result);
+  });
+}
+
+function getMainData() {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const db = await openDB();
+      const tx = db.transaction("menuvaData", "readonly");
+      const store = tx.objectStore("menuvaData");
+      const getRequest = store.get("mainData");
+
+      getRequest.onsuccess = () => resolve(getRequest.result);
+      getRequest.onerror = () => reject("❌ Gagal membaca data dari store");
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
+   document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    data = await getMainData();
+
     const menuList = document.getElementById("menu-list");
     const totalItem = document.getElementById("total-item");
     const totalHarga = document.getElementById("total-harga");
     const kategoriFilter = document.getElementById("kategoriFilter");
     const logoContainer = document.getElementById("logoContainer");
 
-    const pesanan = {};
-
     if (data && data.menu && data.menu.length) {
       // Tampilkan logo jika ada
       if (data.logo) {
         logoContainer.innerHTML = `<img src="${data.logo}" alt="Logo Resto" />`;
       }
-      // Tampilkan nama restoran jika ada
-     if (data.namaRestoran) {
-     document.getElementById("namaRestoranDisplay").textContent = data.namaRestoran;
-     }
 
+      // Tampilkan nama restoran
+      if (data.namaRestoran) {
+        document.getElementById("namaRestoranDisplay").textContent = data.namaRestoran;
+      }
+
+      // Isi filter kategori
+      const kategoriUnik = [...new Set(data.menu.map(m => m.kategori).filter(k => k && k.trim() !== ""))];
+      kategoriUnik.forEach(k => {
+        const opt = document.createElement("option");
+        opt.value = k;
+        opt.textContent = k;
+        kategoriFilter.appendChild(opt);
+      });
+
+      // Tampilkan menu pertama kali
+      tampilkanMenu();
+    } else {
+      menuList.innerHTML = "<p>⚠️ Tidak ada menu tersedia</p>";
+    }
+
+  } catch (err) {
+    console.error("❌ Gagal ambil data dari IndexedDB:", err);
+    document.getElementById("menu-list").innerHTML = "<p>⚠️ Gagal membaca data</p>";
+  }
+});
 
       // Ambil semua kategori unik dan masukkan ke filter
       const kategoriUnik = [...new Set(data.menu.map(m => m.kategori).filter(k => k && k.trim() !== ""))];
@@ -236,3 +284,4 @@
   </script>
 </body>
 </html>
+
