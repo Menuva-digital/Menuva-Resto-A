@@ -108,14 +108,20 @@
   </div>
 
   <script>
-    let data = null;
-    const pesanan = {};
+  let data = null;
+const pesanan = {};
 
-    function openDB() {
+function openDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("menuvaDB", 1);
+    const request = indexedDB.open("MenuvaDB", 1);
     request.onerror = () => reject("❌ Gagal membuka database");
     request.onsuccess = (event) => resolve(event.target.result);
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains("menuvaData")) {
+        db.createObjectStore("menuvaData", { keyPath: "id" });
+      }
+    };
   });
 }
 
@@ -125,17 +131,20 @@ function getMainData() {
       const db = await openDB();
       const tx = db.transaction("menuvaData", "readonly");
       const store = tx.objectStore("menuvaData");
-      const getRequest = store.get("menuva");
+      const getRequest = store.get(1);
 
-
-      getRequest.onsuccess = () => resolve(getRequest.result);
+      getRequest.onsuccess = () => {
+        if (getRequest.result) resolve(getRequest.result);
+        else reject("⚠️ Data tidak ditemukan");
+      };
       getRequest.onerror = () => reject("❌ Gagal membaca data dari store");
     } catch (e) {
       reject(e);
     }
   });
 }
-   document.addEventListener("DOMContentLoaded", async () => {
+
+document.addEventListener("DOMContentLoaded", async () => {
   try {
     data = await getMainData();
 
@@ -176,8 +185,10 @@ function getMainData() {
     document.getElementById("menu-list").innerHTML = "<p>⚠️ Gagal membaca data</p>";
   }
 });
- 
-    function tampilkanMenu() {
+
+function tampilkanMenu() {
+  const kategoriFilter = document.getElementById("kategoriFilter");
+  const menuList = document.getElementById("menu-list");
   const kategoriDipilih = kategoriFilter.value;
   menuList.innerHTML = "";
 
@@ -195,7 +206,7 @@ function getMainData() {
     return;
   }
 
-  menuFiltered.forEach((item, indexInFiltered) => {
+  menuFiltered.forEach(item => {
     const indexInAll = data.menu.indexOf(item);
 
     if (pesanan[indexInAll] === undefined) pesanan[indexInAll] = 0;
@@ -205,7 +216,7 @@ function getMainData() {
     itemEl.innerHTML = `
       <div>
         <div class="menu-name">${item.nama}</div>
-        <div>Rp${item.harga}</div>
+        <div>Rp${item.harga.toLocaleString()}</div>
       </div>
       <div class="qty-controls">
         <button onclick="ubahJumlah(${indexInAll}, -1)">➖</button>
@@ -218,7 +229,7 @@ function getMainData() {
 
   updateRingkasan();
 }
-    
+
 function ubahJumlah(index, delta) {
   if (!data.menu[index]) return;
   pesanan[index] = Math.max(0, (pesanan[index] || 0) + delta);
@@ -226,66 +237,67 @@ function ubahJumlah(index, delta) {
   updateRingkasan();
 }
 
-    function updateRingkasan() {
-      let totalQty = 0;
-      let totalHargaValue = 0;
+function updateRingkasan() {
+  let totalQty = 0;
+  let totalHargaValue = 0;
 
-      Object.entries(pesanan).forEach(([i, jumlah]) => {
-        totalQty += jumlah;
-        totalHargaValue += jumlah * parseInt(data.menu[i].harga || 0);
-      });
+  Object.entries(pesanan).forEach(([i, jumlah]) => {
+    totalQty += jumlah;
+    totalHargaValue += jumlah * parseInt(data.menu[i].harga || 0);
+  });
 
-      totalItem.innerText = totalQty;
-      totalHarga.innerText = totalHargaValue.toLocaleString();
-    }
+  document.getElementById("total-item").innerText = totalQty;
+  document.getElementById("total-harga").innerText = totalHargaValue.toLocaleString();
+}
 
-    function kirimPesanan() {
-      const nama = document.getElementById("nama").value.trim();
-      const alamat = document.getElementById("alamat").value.trim();
-      const waktuAntar = document.getElementById("waktuAntar").value;
-      const catatan = document.getElementById("catatan").value.trim();
-      const ruangan = document.getElementById("ruangan").value.trim();
-      const now = new Date();
-      const waktuOrder = now.toLocaleString("id-ID");
+function kirimPesanan() {
+  const nama = document.getElementById("nama").value.trim();
+  const alamat = document.getElementById("alamat").value.trim();
+  const waktuAntar = document.getElementById("waktuAntar").value;
+  const catatan = document.getElementById("catatan").value.trim();
+  const ruangan = document.getElementById("ruangan").value.trim();
+  const now = new Date();
+  const waktuOrder = now.toLocaleString("id-ID");
 
-      let listPesanan = Object.entries(pesanan)
-        .filter(([_, jumlah]) => jumlah > 0)
-        .map(([i, jumlah]) => `${data.menu[i].nama} x${jumlah} (Rp${jumlah * parseInt(data.menu[i].harga)})`)
-        .join("\n");
+  let listPesanan = Object.entries(pesanan)
+    .filter(([_, jumlah]) => jumlah > 0)
+    .map(([i, jumlah]) => `${data.menu[i].nama} x${jumlah} (Rp${(jumlah * parseInt(data.menu[i].harga)).toLocaleString()})`)
+    .join("\n");
 
-      if (!listPesanan) {
-        alert("Belum ada item yang dipilih.");
-        return;
-      }
+  if (!listPesanan) {
+    alert("Belum ada item yang dipilih.");
+    return;
+  }
 
-      let totalHargaAll = Object.entries(pesanan).reduce((sum, [i, jml]) => sum + (jml * parseInt(data.menu[i].harga || 0)), 0);
+  let totalHargaAll = Object.entries(pesanan).reduce((sum, [i, jml]) => sum + (jml * parseInt(data.menu[i].harga || 0)), 0);
 
-      let pesanWA = `🧾 Pesanan Baru dari ${nama || "Customer"}\n\n` +
-        `📅 Tanggal Order: ${waktuOrder}\n` +
-        (waktuAntar ? `🕒 Waktu Antar: ${new Date(waktuAntar).toLocaleString("id-ID")}\n` : "") +
-        (ruangan ? `🏨 Ruangan: ${ruangan}\n` : "") +
-        `\n📍 Alamat:\n${alamat}\n` +
-        `\n🛒 Pesanan:\n${listPesanan}\n\n` +
-        `💰 Total: Rp${totalHargaAll.toLocaleString()}\n` +
-        (catatan ? `\n📌 Catatan:\n${catatan}` : "");
+  let pesanWA = `🧾 Pesanan Baru dari ${nama || "Customer"}\n\n` +
+    `📅 Tanggal Order: ${waktuOrder}\n` +
+    (waktuAntar ? `🕒 Waktu Antar: ${new Date(waktuAntar).toLocaleString("id-ID")}\n` : "") +
+    (ruangan ? `🏨 Ruangan: ${ruangan}\n` : "") +
+    `\n📍 Alamat:\n${alamat}\n` +
+    `\n🛒 Pesanan:\n${listPesanan}\n\n` +
+    `💰 Total: Rp${totalHargaAll.toLocaleString()}\n` +
+    (catatan ? `\n📌 Catatan:\n${catatan}` : "");
 
-        const nomorAdminList = data.nomorWaAdmin || [];
+  const nomorAdminList = data.nomorWaAdmin || [];
 
-        if (nomorAdminList.length === 0) {
-        alert("⚠️ Tidak ada nomor admin yang tersedia.");
-        return;
-        }
+  if (nomorAdminList.length === 0) {
+    alert("⚠️ Tidak ada nomor admin yang tersedia.");
+    return;
+  }
 
-        // Kirim ke semua nomor admin
-        nomorAdminList.forEach(nomor => {
-        const waLink = `https://wa.me/${nomor}?text=${encodeURIComponent(pesanWA)}`;
-        window.open(waLink, "_blank");
-       });
+  // Kirim ke semua nomor admin
+  nomorAdminList.forEach(nomor => {
+    const waLink = `https://wa.me/${nomor}?text=${encodeURIComponent(pesanWA)}`;
+    window.open(waLink, "_blank");
+  });
+}
 
-    }
   </script>
 </body>
 </html>
+
 
 
 
