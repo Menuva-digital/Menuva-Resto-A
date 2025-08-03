@@ -155,15 +155,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const logoContainer = document.getElementById("logoContainer");
 
     if (data && data.menu && data.menu.length) {
-      // Tampilkan logo jika ada
-      if (data.logo) {
-        logoContainer.innerHTML = `<img src="${data.logo}" alt="Logo Resto" />`;
-      }
+     tampilkanIdentitasRestoran(data);
 
-      // Tampilkan nama restoran
-      if (data.namaRestoran) {
-        document.getElementById("namaRestoranDisplay").textContent = data.namaRestoran;
-      }
 
       // Isi filter kategori
       const kategoriUnik = [...new Set(data.menu.map(m => m.kategori).filter(k => k && k.trim() !== ""))];
@@ -185,6 +178,55 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("menu-list").innerHTML = "<p>⚠️ Gagal membaca data</p>";
   }
 });
+    function tampilkanIdentitasRestoran(data) {
+  const logoContainer = document.getElementById("logoContainer");
+  const namaDisplay = document.getElementById("namaRestoranDisplay");
+
+  const identitasContainer = document.createElement("div");
+  identitasContainer.id = "identitasContainer";
+  identitasContainer.style.textAlign = "center";
+  identitasContainer.style.marginBottom = "20px";
+
+  // Logo
+  if (data.logo) {
+    const img = document.createElement("img");
+    img.src = data.logo;
+    img.alt = "Logo Resto";
+    img.style.maxWidth = "120px";
+    img.style.marginBottom = "10px";
+    identitasContainer.appendChild(img);
+  }
+
+  // Nama Restoran
+  if (data.namaRestoran) {
+    const nama = document.createElement("h2");
+    nama.textContent = data.namaRestoran;
+    nama.style.margin = "5px 0";
+    identitasContainer.appendChild(nama);
+  }
+
+  // Alamat Restoran
+  if (data.alamatRestoran) {
+    const alamat = document.createElement("p");
+    alamat.textContent = data.alamatRestoran;
+    alamat.style.margin = "3px 0";
+    alamat.style.fontSize = "14px";
+    identitasContainer.appendChild(alamat);
+  }
+
+  // Nomor Telepon
+  if (data.nomorTelepon) {
+    const telp = document.createElement("p");
+    telp.textContent = "Telp: " + data.nomorTelepon;
+    telp.style.margin = "3px 0";
+    telp.style.fontSize = "14px";
+    identitasContainer.appendChild(telp);
+  }
+
+  logoContainer.innerHTML = ""; // Kosongkan dulu
+  logoContainer.appendChild(identitasContainer);
+}
+
 
 function tampilkanMenu() {
   const kategoriFilter = document.getElementById("kategoriFilter");
@@ -297,6 +339,7 @@ function kirimPesanan() {
   </script>
 </body>
 </html>
+
 
 
 
