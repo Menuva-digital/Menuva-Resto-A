@@ -205,19 +205,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     identitasContainer.appendChild(nama);
   }
 
-  // Alamat Restoran
-if (data.alamat) {  // ← sesuaikan dari "alamatRestoran" menjadi "alamat"
+ // Alamat Restoran
+if (data.restoAddress) {
   const alamat = document.createElement("p");
-  alamat.textContent = data.alamat;
+  alamat.textContent = data.restoAddress;
   alamat.style.margin = "3px 0";
   alamat.style.fontSize = "14px";
   identitasContainer.appendChild(alamat);
 }
 
 // Nomor Telepon
-if (data.noTelepon) { // ← sesuaikan dari "nomorTelepon" jadi "noTelepon"
+if (data.restoPhone) {
   const telp = document.createElement("p");
-  telp.textContent = "Telp: " + data.noTelepon;
+  telp.textContent = "Telp: " + data.restoPhone;
   telp.style.margin = "3px 0";
   telp.style.fontSize = "14px";
   identitasContainer.appendChild(telp);
@@ -339,6 +339,7 @@ function kirimPesanan() {
   </script>
 </body>
 </html>
+
 
 
 
