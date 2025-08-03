@@ -277,18 +277,21 @@ if (data.menuPromo && data.menuPromo.length) {
     nama.textContent = promo.namaPromo;
     nama.style.margin = "0 0 5px 0";
 
-    const harga = document.createElement("p");
-    harga.textContent = "Rp " + promo.hargaPromo.toLocaleString();
-    harga.style.margin = "0 0 5px 0";
+    const hargaValue = parseInt(promo.hargaPromo || promo.harga || 0);
+console.log("📦 hargaPromo:", promo.hargaPromo, "harga:", promo.harga, "→ hargaValue:", hargaValue);
 
-    const qtyInput = document.createElement("input");
-    qtyInput.type = "number";
-    qtyInput.min = "0";
-    qtyInput.value = "0";
-    qtyInput.dataset.nama = promo.namaPromo;
-    qtyInput.dataset.harga = promo.hargaPromo;
-    qtyInput.classList.add("qty-promo");
-    qtyInput.style.width = "60px";
+const harga = document.createElement("p");
+harga.textContent = "Rp " + hargaValue.toLocaleString();
+harga.style.margin = "0 0 5px 0";
+
+const qtyInput = document.createElement("input");
+qtyInput.type = "number";
+qtyInput.min = "0";
+qtyInput.value = "0";
+qtyInput.dataset.nama = promo.namaPromo;
+qtyInput.dataset.harga = hargaValue;
+qtyInput.classList.add("qty-promo");
+qtyInput.style.width = "60px";
 
     isi.appendChild(nama);
     isi.appendChild(harga);
@@ -412,6 +415,7 @@ function kirimPesanan() {
   </script>
 </body>
 </html>
+
 
 
 
