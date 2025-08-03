@@ -157,9 +157,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const logoContainer = document.getElementById("logoContainer");
 
     if (data && data.menu && data.menu.length) {
-     tampilkanIdentitasRestoran(data);
-
-
+     
       // Isi filter kategori
       const kategoriUnik = [...new Set(data.menu.map(m => m.kategori).filter(k => k && k.trim() !== ""))];
       kategoriUnik.forEach(k => {
@@ -174,11 +172,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     } else {
       menuList.innerHTML = "<p>⚠️ Tidak ada menu tersedia</p>";
     }
+    tampilkanIdentitasRestoran(data);
 
   } catch (err) {
     console.error("❌ Gagal ambil data dari IndexedDB:", err);
     document.getElementById("menu-list").innerHTML = "<p>⚠️ Gagal membaca data</p>";
   }
+  
 });
     function tampilkanIdentitasRestoran(data) {
   const logoContainer = document.getElementById("logoContainer");
@@ -411,6 +411,7 @@ function kirimPesanan() {
   </script>
 </body>
 </html>
+
 
 
 
