@@ -206,17 +206,19 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-    @media (max-width: 480px) {
+   @media (max-width: 600px) {
   .fixed-bar {
-    padding: 6px 8px;         /* padding container lebih ramping */
+    flex-direction: column;
+    gap: 8px;               /* jarak antara tombol atas dan bawah */
+    padding: 10px;
   }
 
   .fixed-bar button {
-    font-size: 12px;
-    padding: 6px 10px;
-    border-radius: 6px;
+    width: 100%;            /* full width tiap tombol */
+    padding: 8px 12px;      /* lebih ramping */
+    font-size: 14px;        /* font lebih kecil */
   }
-}
+   }
   </style>
 </head>
 <body>
@@ -434,6 +436,7 @@ function startCountdown(tanggalAkhir, elementId) {
 
 </body>
 </html>
+
 
 
 
