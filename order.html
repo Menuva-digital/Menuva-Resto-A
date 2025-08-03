@@ -125,7 +125,8 @@ function getMainData() {
       const db = await openDB();
       const tx = db.transaction("menuvaData", "readonly");
       const store = tx.objectStore("menuvaData");
-      const getRequest = store.get("mainData");
+      const getRequest = store.get("menuva");
+
 
       getRequest.onsuccess = () => resolve(getRequest.result);
       getRequest.onerror = () => reject("❌ Gagal membaca data dari store");
@@ -175,6 +176,19 @@ function getMainData() {
     document.getElementById("menu-list").innerHTML = "<p>⚠️ Gagal membaca data</p>";
   }
 });
+    document.addEventListener("DOMContentLoaded", async () => {
+  const dbRequest = indexedDB.open("MenuvaDB", 1);
+
+  dbRequest.onsuccess = async function (event) {
+    const db = event.target.result;
+    const transaction = db.transaction(["menuvaData"], "readonly");
+    const store = transaction.objectStore("menuvaData");
+    const getRequest = store.get("menuva");
+
+    getRequest.onsuccess = function () {
+      const data = getRequest.result;
+      console.log("✅ Data dari IndexedDB:", data); // 👉 Tambahkan ini
+
 
     function tampilkanMenu() {
   const kategoriDipilih = kategoriFilter.value;
@@ -285,6 +299,7 @@ function ubahJumlah(index, delta) {
   </script>
 </body>
 </html>
+
 
 
 
