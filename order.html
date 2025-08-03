@@ -235,8 +235,8 @@ if (data.menuPromo && data.menuPromo.length) {
 }
 
   function tampilkanPromo(promoList) {
-  console.log("MENJALANKAN tampilkanPromo()", promoList); // Tambahan log
-  
+  console.log("MENJALANKAN tampilkanPromo()", promoList);
+
   const promoContainer = document.getElementById("promo-list");
   if (!promoContainer) {
     console.warn("Elemen promo-list tidak ditemukan di HTML!");
@@ -251,7 +251,7 @@ if (data.menuPromo && data.menuPromo.length) {
   promoContainer.appendChild(judul);
 
   promoList.forEach((promo, index) => {
-    console.log("PROMO ITEM:", promo); // Tambahan log per promo item
+    console.log("PROMO ITEM:", promo);
 
     const card = document.createElement("div");
     card.className = "promo-card";
@@ -277,23 +277,37 @@ if (data.menuPromo && data.menuPromo.length) {
     nama.textContent = promo.namaPromo;
     nama.style.margin = "0 0 5px 0";
 
+    const namaMenu = document.createElement("p");
+    namaMenu.textContent = "🍽 " + (promo.namaMenu || "-");
+    namaMenu.style.margin = "0 0 5px 0";
+    namaMenu.style.fontStyle = "italic";
+    namaMenu.style.fontSize = "14px";
+
+    const deskripsi = document.createElement("p");
+    deskripsi.textContent = promo.deskripsi || "-";
+    deskripsi.style.margin = "0 0 10px 0";
+    deskripsi.style.fontSize = "13px";
+    deskripsi.style.color = "#555";
+
     const hargaValue = parseInt(promo.hargaPromo || promo.harga || 0);
-console.log("📦 hargaPromo:", promo.hargaPromo, "harga:", promo.harga, "→ hargaValue:", hargaValue);
+    console.log("📦 hargaPromo:", promo.hargaPromo, "harga:", promo.harga, "→ hargaValue:", hargaValue);
 
-const harga = document.createElement("p");
-harga.textContent = "Rp " + hargaValue.toLocaleString();
-harga.style.margin = "0 0 5px 0";
+    const harga = document.createElement("p");
+    harga.textContent = "Rp " + hargaValue.toLocaleString();
+    harga.style.margin = "0 0 5px 0";
 
-const qtyInput = document.createElement("input");
-qtyInput.type = "number";
-qtyInput.min = "0";
-qtyInput.value = "0";
-qtyInput.dataset.nama = promo.namaPromo;
-qtyInput.dataset.harga = hargaValue;
-qtyInput.classList.add("qty-promo");
-qtyInput.style.width = "60px";
+    const qtyInput = document.createElement("input");
+    qtyInput.type = "number";
+    qtyInput.min = "0";
+    qtyInput.value = "0";
+    qtyInput.dataset.nama = promo.namaPromo;
+    qtyInput.dataset.harga = hargaValue;
+    qtyInput.classList.add("qty-promo");
+    qtyInput.style.width = "60px";
 
     isi.appendChild(nama);
+    isi.appendChild(namaMenu);     // ✅ Tambahan
+    isi.appendChild(deskripsi);    // ✅ Tambahan
     isi.appendChild(harga);
     isi.appendChild(qtyInput);
 
@@ -415,6 +429,7 @@ function kirimPesanan() {
   </script>
 </body>
 </html>
+
 
 
 
