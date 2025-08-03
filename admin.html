@@ -81,6 +81,32 @@
   color: white;
   border: none;
 }
+    .btn-hapus-gambar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: #ffecec;
+  color: #ff3333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: background 0.2s, transform 0.1s ease;
+}
+
+.btn-hapus-gambar:hover {
+  background: #ffcdcd;
+  transform: scale(1.05);
+}
+
+.btn-hapus-gambar svg {
+  width: 14px;
+  height: 14px;
+}
+
 
   </style>
 </head>
@@ -413,43 +439,50 @@
   
     // Render preview gambar flipbook
     function renderImagePreview(tipe, url) {
-      const img = document.createElement("img");
-      img.src = url;
-      img.style.maxWidth = "100px";
-      img.style.margin = "5px";
-      img.style.borderRadius = "5px";
-      img.style.boxShadow = "0 1px 4px rgba(0,0,0,0.1)";
-  
-      const wrapper = document.createElement("div");
-      wrapper.style.display = "inline-block";
-      wrapper.style.position = "relative";
-      wrapper.style.margin = "5px";
-  
-      const btnHapus = document.createElement("button");
-      btnHapus.innerText = "❌";
-      btnHapus.style.position = "absolute";
-      btnHapus.style.top = "0";
-      btnHapus.style.right = "0";
-      btnHapus.style.background = "red";
-      btnHapus.style.color = "white";
-      btnHapus.style.border = "none";
-      btnHapus.style.cursor = "pointer";
-  
-      btnHapus.onclick = function () {
-        wrapper.remove();
-        if (tipe === "ruangan") {
-          flipbookRuanganImages = flipbookRuanganImages.filter((src) => src !== url);
-        } else {
-          flipbookMenuImages = flipbookMenuImages.filter((src) => src !== url);
-        }
-      };
-  
-      wrapper.appendChild(img);
-      wrapper.appendChild(btnHapus);
-  
-      const previewContainer = tipe === "ruangan" ? "flipbookRuanganPreview" : "flipbookMenuPreview";
-      document.getElementById(previewContainer).appendChild(wrapper);
+  const img = document.createElement("img");
+  img.src = url;
+  img.style.maxWidth = "100px";
+  img.style.margin = "5px";
+  img.style.borderRadius = "5px";
+  img.style.boxShadow = "0 1px 4px rgba(0,0,0,0.1)";
+
+  const wrapper = document.createElement("div");
+  wrapper.style.display = "inline-block";
+  wrapper.style.position = "relative";
+  wrapper.style.margin = "5px";
+
+  const btnHapus = document.createElement("button");
+  btnHapus.className = "btn-hapus-gambar";
+  btnHapus.setAttribute("aria-label", "Hapus Gambar");
+
+  btnHapus.innerHTML = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  `;
+
+  btnHapus.style.position = "absolute";
+  btnHapus.style.top = "4px";
+  btnHapus.style.right = "4px";
+
+  btnHapus.onclick = function () {
+    wrapper.remove();
+    if (tipe === "ruangan") {
+      flipbookRuanganImages = flipbookRuanganImages.filter((src) => src !== url);
+    } else {
+      flipbookMenuImages = flipbookMenuImages.filter((src) => src !== url);
     }
+  };
+
+  wrapper.appendChild(img);
+  wrapper.appendChild(btnHapus);
+
+  const previewContainer = tipe === "ruangan" ? "flipbookRuanganPreview" : "flipbookMenuPreview";
+  document.getElementById(previewContainer).appendChild(wrapper);
+}
+
   
     // Tambah gambar flipbook
     function tambahGambar(tipe) {
@@ -620,5 +653,6 @@
   
 </body>
 </html>
+
 
 
