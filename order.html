@@ -184,45 +184,62 @@ function getMainData() {
         opt.textContent = k;
         kategoriFilter.appendChild(opt);
       });
-
+    kategoriFilter.addEventListener("change", tampilkanMenu);
+    
       tampilkanMenu();
     } else {
       menuList.innerHTML = "<p>⚠️ Tidak ada menu tersedia</p>";
     }
+    
 
     function tampilkanMenu() {
-      const kategoriDipilih = kategoriFilter.value;
-      menuList.innerHTML = "";
+  const kategoriDipilih = kategoriFilter.value;
+  menuList.innerHTML = "";
 
-      data.menu.forEach((item, index) => {
-        if (kategoriDipilih !== "Semua" && item.kategori !== kategoriDipilih) return;
+  if (!data || !data.menu || !Array.isArray(data.menu)) {
+    menuList.innerHTML = "<p>⚠️ Menu tidak ditemukan.</p>";
+    return;
+  }
 
-        if (pesanan[index] === undefined) pesanan[index] = 0;
+  const menuFiltered = data.menu.filter(item => {
+    return kategoriDipilih === "Semua" || item.kategori === kategoriDipilih;
+  });
 
-        const itemEl = document.createElement("div");
-        itemEl.className = "menu-item";
-        itemEl.innerHTML = `
-          <div>
-            <div class="menu-name">${item.nama}</div>
-            <div>Rp${item.harga}</div>
-          </div>
-          <div class="qty-controls">
-            <button onclick="ubahJumlah(${index}, -1)">➖</button>
-            <span id="qty-${index}">${pesanan[index]}</span>
-            <button onclick="ubahJumlah(${index}, 1)">➕</button>
-          </div>
-        `;
-        menuList.appendChild(itemEl);
-      });
+  if (menuFiltered.length === 0) {
+    menuList.innerHTML = "<p>⚠️ Tidak ada menu dalam kategori ini.</p>";
+    return;
+  }
 
-      updateRingkasan();
-    }
+  menuFiltered.forEach((item, indexInFiltered) => {
+    const indexInAll = data.menu.indexOf(item);
 
-    function ubahJumlah(index, delta) {
-      pesanan[index] = Math.max(0, (pesanan[index] || 0) + delta);
-      document.getElementById(`qty-${index}`).innerText = pesanan[index];
-      updateRingkasan();
-    }
+    if (pesanan[indexInAll] === undefined) pesanan[indexInAll] = 0;
+
+    const itemEl = document.createElement("div");
+    itemEl.className = "menu-item";
+    itemEl.innerHTML = `
+      <div>
+        <div class="menu-name">${item.nama}</div>
+        <div>Rp${item.harga}</div>
+      </div>
+      <div class="qty-controls">
+        <button onclick="ubahJumlah(${indexInAll}, -1)">➖</button>
+        <span id="qty-${indexInAll}">${pesanan[indexInAll]}</span>
+        <button onclick="ubahJumlah(${indexInAll}, 1)">➕</button>
+      </div>
+    `;
+    menuList.appendChild(itemEl);
+  });
+
+  updateRingkasan();
+}
+    
+function ubahJumlah(index, delta) {
+  if (!data.menu[index]) return;
+  pesanan[index] = Math.max(0, (pesanan[index] || 0) + delta);
+  document.getElementById(`qty-${index}`).innerText = pesanan[index];
+  updateRingkasan();
+}
 
     function updateRingkasan() {
       let totalQty = 0;
@@ -284,4 +301,5 @@ function getMainData() {
   </script>
 </body>
 </html>
+
 
