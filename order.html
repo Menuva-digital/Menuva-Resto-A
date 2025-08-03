@@ -156,6 +156,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const kategoriFilter = document.getElementById("kategoriFilter");
     const logoContainer = document.getElementById("logoContainer");
 
+    console.log("🔥 Promo data yang diterima:", data.menuPromo)
+
     if (data && data.menu && data.menu.length) {
      
       // Isi filter kategori
@@ -225,10 +227,9 @@ if (data.restoPhone) {
   identitasContainer.appendChild(telp);
 }
   // Tampilkan promo jika ada
-if (data.promo && data.promo.length) {
-  tampilkanPromo(data.promo);
+if (data.menuPromo && data.menuPromo.length) {
+  tampilkanPromo(data.menuPromo);
 }
-
   logoContainer.innerHTML = ""; // Kosongkan dulu
   logoContainer.appendChild(identitasContainer);
 }
@@ -411,6 +412,7 @@ function kirimPesanan() {
   </script>
 </body>
 </html>
+
 
 
 
