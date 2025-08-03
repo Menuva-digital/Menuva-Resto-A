@@ -121,6 +121,10 @@
     <input type="file" id="logoInput" accept="image/*" />
     <img id="previewLogo" src="" alt="Logo Restoran" style="max-height: 80px; margin-top: 10px;" />
     <input type="text" id="namaRestoran" placeholder="Nama Restoran" />
+    <label for="restoAddress">Alamat Restoran</label>
+    <input id="restoAddress" type="text" placeholder="Jl. Sudirman No. 10, Jakarta" />
+    <label for="restoPhone">No. Telepon</label>
+    <input id="restoPhone" type="text" placeholder="08xx-xxxx-xxxx" />
   </div>
 
   <div class="section">
@@ -519,6 +523,8 @@
     async function simpanData() {
       try {
         const namaRestoran = document.getElementById("namaRestoran").value;
+        const restoAddress = document.getElementById("restoAddress").value.trim();
+        const restoPhone = document.getElementById("restoPhone").value.trim();
         const logo = document.getElementById("previewLogo").src || "";
         const nomorWaInputs = document.querySelectorAll(".nomor-wa");
         const nomorWaAdmin = Array.from(nomorWaInputs).map((input) => input.value);
@@ -531,6 +537,8 @@
   
         const data = {
           namaRestoran,
+          restoAddress,
+          restoPhone,
           logo,
           nomorWaAdmin,
           menuPromo,
@@ -554,6 +562,8 @@
         const data = await loadDataFromDB();
   
         document.getElementById("namaRestoran").value = data.namaRestoran || "";
+        document.getElementById("restoAddress").value = data.restoAddress || "";
+        document.getElementById("restoPhone").value = data.restoPhone || "";
         if (data.logo) document.getElementById("previewLogo").src = data.logo;
   
         if (Array.isArray(data.nomorWaAdmin)) {
@@ -653,6 +663,7 @@
   
 </body>
 </html>
+
 
 
 
