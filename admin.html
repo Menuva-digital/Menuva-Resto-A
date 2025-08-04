@@ -171,6 +171,34 @@
   <div id="flipbookMenuPreview"></div>
 </div>
 
+  <h2>Input Room & Package</h2>
+<form id="formRoom" onsubmit="simpanRoom(event)">
+  <label>Nama:</label><br>
+  <input type="text" id="roomNama" required><br><br>
+
+  <label>Kategori:</label><br>
+  <select id="roomKategori" required>
+    <option value="Hotel Room">Hotel Room</option>
+    <option value="Meeting Room">Meeting Room</option>
+    <option value="Package">Package</option>
+  </select><br><br>
+
+  <label>Deskripsi:</label><br>
+  <textarea id="roomDeskripsi" rows="3" required></textarea><br><br>
+
+  <label>Harga (dalam angka):</label><br>
+  <input type="number" id="roomHarga" required><br><br>
+
+  <label>Gambar (URL atau base64):</label><br>
+  <input type="text" id="roomImage"><br><br>
+
+  <button type="submit">💾 Simpan Room/Package</button>
+</form>
+
+<hr>
+<div id="listRoom"></div>
+
+
   <div class="section">
     <button onclick="simpanData()">💾 Simpan Semua</button>
     <button onclick="window.open('menu.html')" style="margin-top: 10px;">👁️ Lihat Halaman Customer</button>
@@ -217,24 +245,30 @@
   
     // Inisialisasi IndexedDB
     function initDB() {
-      return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
-  
-        request.onerror = () => reject(request.error);
-  
-        request.onupgradeneeded = (event) => {
-          db = event.target.result;
-          if (!db.objectStoreNames.contains(STORE_NAME)) {
-            db.createObjectStore(STORE_NAME, { keyPath: "id" });
-          }
-        };
-  
-        request.onsuccess = (event) => {
-          db = event.target.result;
-          resolve();
-        };
-      });
-    }
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+    request.onerror = () => reject(request.error);
+
+    request.onupgradeneeded = (event) => {
+      db = event.target.result;
+
+      if (!db.objectStoreNames.contains("menuvaData")) {
+        db.createObjectStore("menuvaData", { keyPath: "id" });
+      }
+
+      if (!db.objectStoreNames.contains("roomData")) {
+        db.createObjectStore("roomData", { keyPath: "id", autoIncrement: true });
+      }
+    };
+
+    request.onsuccess = (event) => {
+      db = event.target.result;
+      resolve();
+    };
+  });
+}
+
   
     // Simpan data ke IndexedDB
     function saveDataToDB(data) {
@@ -371,6 +405,52 @@
       `;
       container.appendChild(div);
     }
+
+    function simpanRoom(e) {
+  e.preventDefault();
+
+  const data = {
+    nama: document.getElementById("roomNama").value,
+    kategori: document.getElementById("roomKategori").value,
+    deskripsi: document.getElementById("roomDeskripsi").value,
+    harga: parseInt(document.getElementById("roomHarga").value),
+    image: document.getElementById("roomImage").value
+  };
+
+  const tx = db.transaction("roomData", "readwrite");
+  const store = tx.objectStore("roomData");
+  store.add(data);
+
+  tx.oncomplete = () => {
+    alert("✅ Data Room/Package tersimpan!");
+    document.getElementById("formRoom").reset();
+    tampilkanListRoom();
+  };
+}
+
+function tampilkanListRoom() {
+  const tx = db.transaction("roomData", "readonly");
+  const store = tx.objectStore("roomData");
+  const req = store.getAll();
+
+  req.onsuccess = () => {
+    const list = req.result;
+    const container = document.getElementById("listRoom");
+    if (!container) return;
+    container.innerHTML = "<h3>Data Tersimpan:</h3>";
+    list.forEach(item => {
+      container.innerHTML += `
+        <div style="border:1px solid #ccc;padding:10px;margin-bottom:10px;">
+          <b>${item.nama}</b> (${item.kategori})<br>
+          Rp${item.harga.toLocaleString()}<br>
+          <small>${item.deskripsi}</small><br>
+          ${item.image ? `<img src="${item.image}" style="max-height:80px;">` : ""}
+        </div>
+      `;
+    });
+  };
+}
+
   
     // Tambah nomor WA admin
     function tambahNomorWa() {
@@ -555,46 +635,46 @@
       }
     }
   
-    // Load data saat halaman dibuka
-    async function loadData() {
-      try {
-        await initDB();
-        const data = await loadDataFromDB();
-  
-        document.getElementById("namaRestoran").value = data.namaRestoran || "";
-        document.getElementById("restoAddress").value = data.restoAddress || "";
-        document.getElementById("restoPhone").value = data.restoPhone || "";
-        if (data.logo) document.getElementById("previewLogo").src = data.logo;
-  
-        if (Array.isArray(data.nomorWaAdmin)) {
-          const container = document.getElementById("nomorWaContainer");
-          container.innerHTML = "";
-          data.nomorWaAdmin.forEach(() => tambahNomorWa());
-          const nomorInputs = document.querySelectorAll(".nomor-wa");
-          data.nomorWaAdmin.forEach((no, i) => {
-            if (nomorInputs[i]) nomorInputs[i].value = no;
-          });
-        }
-  
-        if (Array.isArray(data.menuPromo)) {
-          menuPromo = data.menuPromo;
-          renderPromoUI();
-        }
-  
-        if (Array.isArray(data.menu)) {
-          data.menu.forEach((m) => tambahMenu(m.kategori || "food", m.nama, m.harga));
-        }
-  
-        flipbookRuanganImages = data.flipbookRuanganImages || [];
-        flipbookRuanganImages.forEach((src) => renderImagePreview("ruangan", src));
-  
-        flipbookMenuImages = data.flipbookMenuImages || [];
-        flipbookMenuImages.forEach((src) => renderImagePreview("menu", src));
-      } catch (err) {
-        console.error("❌ Gagal load data IndexedDB:", err);
-      }
+  // Load data saat halaman dibuka
+async function loadData() {
+  try {
+    await initDB();
+    const data = await loadDataFromDB();
+
+    document.getElementById("namaRestoran").value = data.namaRestoran || "";
+    document.getElementById("restoAddress").value = data.restoAddress || "";
+    document.getElementById("restoPhone").value = data.restoPhone || "";
+    if (data.logo) document.getElementById("previewLogo").src = data.logo;
+
+    if (Array.isArray(data.nomorWaAdmin)) {
+      const container = document.getElementById("nomorWaContainer");
+      container.innerHTML = "";
+      data.nomorWaAdmin.forEach(() => tambahNomorWa());
+      const nomorInputs = document.querySelectorAll(".nomor-wa");
+      data.nomorWaAdmin.forEach((no, i) => {
+        if (nomorInputs[i]) nomorInputs[i].value = no;
+      });
     }
-  
+
+    if (Array.isArray(data.menuPromo)) {
+      menuPromo = data.menuPromo;
+      renderPromoUI();
+    }
+
+    if (Array.isArray(data.menu)) {
+      data.menu.forEach((m) => tambahMenu(m.kategori || "food", m.nama, m.harga));
+    }
+
+    flipbookRuanganImages = data.flipbookRuanganImages || [];
+    flipbookRuanganImages.forEach((src) => renderImagePreview("ruangan", src));
+
+    flipbookMenuImages = data.flipbookMenuImages || [];
+    flipbookMenuImages.forEach((src) => renderImagePreview("menu", src));
+  } catch (err) {
+    console.error("❌ Gagal load data IndexedDB:", err);
+  }
+}
+
     // Reset semua data
     async function resetData() {
       if (!confirm("Yakin ingin menghapus semua data?")) return;
@@ -658,11 +738,16 @@
       reader.readAsText(file);
     }
   
-    window.addEventListener("DOMContentLoaded", loadData);
+  window.addEventListener("DOMContentLoaded", async () => {
+  await initDB();
+  await loadData();
+  tampilkanListRoom(); // ini kunci
+});
   </script>
   
 </body>
 </html>
+
 
 
 
