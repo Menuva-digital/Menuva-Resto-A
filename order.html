@@ -5,141 +5,253 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Order Makanan - Menuva</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
-    h1, h2 { text-align: center; }
-    .menu-item, .promo-item {
-      border: 1px solid #ccc; border-radius: 10px; padding: 10px; margin: 10px 0;
-      display: flex; align-items: center; background: #fff;
+    body {
+      font-family: Arial, sans-serif;
+      background: #fefefe;
+      padding: 20px;
     }
-    .menu-item img, .promo-item img { width: 100px; height: 100px; object-fit: cover; border-radius: 8px; margin-right: 10px; }
-    .info { flex-grow: 1; }
-    .qty-control { display: flex; align-items: center; gap: 10px; }
-    .qty-control button { width: 30px; height: 30px; font-size: 18px; }
-    .total-section { margin-top: 20px; font-size: 18px; text-align: center; }
-    .order-btn { margin-top: 20px; padding: 10px; font-size: 18px; background: #25d366; color: #fff; border: none; border-radius: 5px; cursor: pointer; width: 100%; }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .menu-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #ccc;
+      padding: 10px 0;
+    }
+    .menu-name {
+      font-weight: bold;
+    }
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .qty-controls button {
+      padding: 5px 10px;
+      font-size: 16px;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    label {
+      font-weight: bold;
+    }
+    .summary {
+      margin-top: 30px;
+    }
+    .summary p {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+    .submit-btn {
+      margin-top: 20px;
+      padding: 12px 20px;
+      font-size: 16px;
+      background: orange;
+      border: none;
+      color: white;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+    .logo-container {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .logo-container img {
+      max-width: 300px;
+      max-height: 300px;
+    }
   </style>
 </head>
 <body>
+  <div class="logo-container" id="logoContainer"></div>
+  <h1 id="namaRestoranDisplay"></h1>
 
-  <h1>Order Menu</h1>
-  <div id="promo-list"><h2>Promo</h2></div>
-  <div id="menu-list"><h2>Menu</h2></div>
+  <h1>📝 Pesan Menu</h1>
 
-  <div class="total-section">
-    Total: <span id="total-price">Rp 0</span>
+  <label for="kategoriFilter">Filter Kategori Menu:</label>
+  <select id="kategoriFilter" onchange="tampilkanMenu()">
+    <option value="Semua">Semua Kategori</option>
+  </select>
+
+  <div id="menu-list"></div>
+
+  <div class="summary">
+    <p>Total Item: <span id="total-item">0</span></p>
+    <p>Total Harga: Rp<span id="total-harga">0</span></p>
+
+    <label for="nama">Nama Pemesan</label>
+    <input type="text" id="nama" placeholder="Contoh: Budi">
+
+    <label for="alamat">Alamat Pengantaran</label>
+    <textarea id="alamat" placeholder="Contoh: Jl. Kenanga No. 123"></textarea>
+
+    <label for="waktuAntar">Waktu Pengantaran (opsional)</label>
+    <input type="datetime-local" id="waktuAntar" />
+
+    <label for="catatan">Catatan Tambahan</label>
+    <textarea id="catatan" placeholder="Contoh: Daging jangan terlalu matang"></textarea>
+
+    <label for="ruangan">Catatan Pemakaian Ruangan</label>
+    <input type="text" id="ruangan" placeholder="Contoh: Superior Room">
+
+    <button class="submit-btn" onclick="kirimPesanan()">Kirim Pesanan</button>
   </div>
-  <button class="order-btn" onclick="kirimPesanan()">Kirim Pesanan via WhatsApp</button>
 
   <script>
-    let db, keranjang = {};
+    let data = null;
+    const pesanan = {};
+    const menuList = document.getElementById("menu-list");
+    const totalItem = document.getElementById("total-item");
+    const totalHarga = document.getElementById("total-harga");
+    const kategoriFilter = document.getElementById("kategoriFilter");
+    const logoContainer = document.getElementById("logoContainer");
 
     function bukaDB() {
-      return new Promise((resolve, reject) => {
-        const request = indexedDB.open("menuvaDB", 1);
-        request.onerror = () => reject("Gagal membuka database");
-        request.onsuccess = () => {
-          db = request.result;
-          resolve(db);
-        };
-      });
-    }
+      const dbReq = indexedDB.open("menuvaDB", 1);
 
-    function ambilDataRestoran() {
-      return new Promise((resolve, reject) => {
+      dbReq.onsuccess = function (event) {
+        const db = event.target.result;
         const tx = db.transaction("menuvaData", "readonly");
         const store = tx.objectStore("menuvaData");
-        const getData = store.get("menuva");
+        const getReq = store.get("dataMenuva");
 
-        getData.onsuccess = () => {
-          if (getData.result) resolve(getData.result);
-          else reject("Data tidak ditemukan");
+        getReq.onsuccess = function (e) {
+          data = e.target.result;
+          if (!data || !data.menu || data.menu.length === 0) {
+            menuList.innerHTML = "<p>⚠️ Tidak ada menu tersedia</p>";
+            return;
+          }
+
+          if (data.logo) {
+            logoContainer.innerHTML = `<img src="${data.logo}" alt="Logo Resto" />`;
+          }
+
+          if (data.namaRestoran) {
+            document.getElementById("namaRestoranDisplay").textContent = `${data.namaRestoran} - ${data.alamat || ""} (${data.nomorTlp || ""})`;
+          }
+
+          const kategoriUnik = [...new Set(data.menu.map(m => m.kategori).filter(k => k && k.trim() !== ""))];
+          kategoriUnik.forEach(k => {
+            const opt = document.createElement("option");
+            opt.value = k;
+            opt.textContent = k;
+            kategoriFilter.appendChild(opt);
+          });
+
+          tampilkanMenu();
         };
-        getData.onerror = () => reject("Gagal mengambil data");
-      });
+
+        getReq.onerror = function () {
+          menuList.innerHTML = "<p>❌ Gagal memuat data dari database.</p>";
+        };
+      };
+
+      dbReq.onerror = function () {
+        menuList.innerHTML = "<p>❌ Tidak bisa membuka database.</p>";
+      };
     }
 
-    function renderItem(data, container, isPromo = false) {
-      data.forEach((item, index) => {
-        const div = document.createElement("div");
-        div.className = isPromo ? "promo-item" : "menu-item";
+    function tampilkanMenu() {
+      const kategoriDipilih = kategoriFilter.value;
+      menuList.innerHTML = "";
 
-        const qtyKey = `${isPromo ? "promo" : "menu"}-${index}`;
-        keranjang[qtyKey] = 0;
+      data.menu.forEach((item, index) => {
+        if (kategoriDipilih !== "Semua" && item.kategori !== kategoriDipilih) return;
+        if (pesanan[index] === undefined) pesanan[index] = 0;
 
-        div.innerHTML = `
-          <img src="${item.gambar || ""}" alt="gambar">
-          <div class="info">
-            <strong>${item.nama}</strong><br/>
-            <small>${item.deskripsi || ""}</small><br/>
-            <strong>Rp ${item.harga}</strong>
+        const itemEl = document.createElement("div");
+        itemEl.className = "menu-item";
+        itemEl.innerHTML = `
+          <div>
+            <div class="menu-name">${item.nama}</div>
+            <div>Rp${item.harga}</div>
           </div>
-          <div class="qty-control">
-            <button onclick="ubahQty('${qtyKey}', -1)">−</button>
-            <span id="qty-${qtyKey}">0</span>
-            <button onclick="ubahQty('${qtyKey}', 1)">+</button>
+          <div class="qty-controls">
+            <button onclick="ubahJumlah(${index}, -1)">➖</button>
+            <span id="qty-${index}">${pesanan[index]}</span>
+            <button onclick="ubahJumlah(${index}, 1)">➕</button>
           </div>
         `;
-
-        container.appendChild(div);
+        menuList.appendChild(itemEl);
       });
+
+      updateRingkasan();
     }
 
-    function ubahQty(key, delta) {
-      keranjang[key] = Math.max(0, (keranjang[key] || 0) + delta);
-      document.getElementById(`qty-${key}`).textContent = keranjang[key];
-      hitungTotal();
+    function ubahJumlah(index, delta) {
+      pesanan[index] = Math.max(0, (pesanan[index] || 0) + delta);
+      document.getElementById(`qty-${index}`).innerText = pesanan[index];
+      updateRingkasan();
     }
 
-    function hitungTotal() {
-      let total = 0;
-      Object.keys(keranjang).forEach(key => {
-        const [tipe, index] = key.split("-");
-        const item = dataGlobal[tipe][index];
-        total += keranjang[key] * Number(item.harga || 0);
+    function updateRingkasan() {
+      let totalQty = 0;
+      let totalHargaValue = 0;
+
+      Object.entries(pesanan).forEach(([i, jumlah]) => {
+        totalQty += jumlah;
+        totalHargaValue += jumlah * parseInt(data.menu[i].harga || 0);
       });
-      document.getElementById("total-price").textContent = "Rp " + total.toLocaleString();
+
+      totalItem.innerText = totalQty;
+      totalHarga.innerText = totalHargaValue.toLocaleString();
     }
 
     function kirimPesanan() {
-      const lines = [];
-      Object.keys(keranjang).forEach(key => {
-        if (keranjang[key] > 0) {
-          const [tipe, index] = key.split("-");
-          const item = dataGlobal[tipe][index];
-          lines.push(`- ${item.nama} x ${keranjang[key]}`);
-        }
+      const nama = document.getElementById("nama").value.trim();
+      const alamat = document.getElementById("alamat").value.trim();
+      const waktuAntar = document.getElementById("waktuAntar").value;
+      const catatan = document.getElementById("catatan").value.trim();
+      const ruangan = document.getElementById("ruangan").value.trim();
+      const now = new Date();
+      const waktuOrder = now.toLocaleString("id-ID");
+
+      let listPesanan = Object.entries(pesanan)
+        .filter(([_, jumlah]) => jumlah > 0)
+        .map(([i, jumlah]) => `${data.menu[i].nama} x${jumlah} (Rp${jumlah * parseInt(data.menu[i].harga)})`)
+        .join("\n");
+
+      if (!listPesanan) {
+        alert("Belum ada item yang dipilih.");
+        return;
+      }
+
+      let totalHargaAll = Object.entries(pesanan).reduce((sum, [i, jml]) => sum + (jml * parseInt(data.menu[i].harga || 0)), 0);
+
+      let pesanWA = `🧾 Pesanan Baru dari ${nama || "Customer"}\n\n` +
+        `📅 Tanggal Order: ${waktuOrder}\n` +
+        (waktuAntar ? `🕒 Waktu Antar: ${new Date(waktuAntar).toLocaleString("id-ID")}\n` : "") +
+        (ruangan ? `🏨 Ruangan: ${ruangan}\n` : "") +
+        `\n📍 Alamat:\n${alamat}\n` +
+        `\n🛒 Pesanan:\n${listPesanan}\n\n` +
+        `💰 Total: Rp${totalHargaAll.toLocaleString()}\n` +
+        (catatan ? `\n📌 Catatan:\n${catatan}` : "");
+
+      const nomorAdminList = data.nomorWaAdmin || [];
+
+      if (nomorAdminList.length === 0) {
+        alert("⚠️ Tidak ada nomor admin yang tersedia.");
+        return;
+      }
+
+      nomorAdminList.forEach(nomor => {
+        const waLink = `https://wa.me/${nomor}?text=${encodeURIComponent(pesanWA)}`;
+        window.open(waLink, "_blank");
       });
-
-      if (lines.length === 0) return alert("Keranjang masih kosong!");
-
-      const text = `Halo Admin, saya ingin memesan:\n${lines.join("\n")}`;
-      const wa = dataGlobal.noWA?.[0] || "628123456789";
-      const link = `https://wa.me/${wa}?text=${encodeURIComponent(text)}`;
-      window.open(link, "_blank");
     }
 
-    let dataGlobal = {};
-
-    bukaDB()
-      .then(() => ambilDataRestoran())
-      .then(data => {
-        dataGlobal = data;
-
-        const promoList = document.getElementById("promo-list");
-        const menuList = document.getElementById("menu-list");
-
-        if (data.promo && data.promo.length) {
-          renderItem(data.promo, promoList, true);
-        }
-
-        if (data.menu && data.menu.length) {
-          renderItem(data.menu, menuList, false);
-        }
-
-      })
-      .catch(err => {
-        document.body.innerHTML = "<h2 style='color:red;text-align:center;'>Gagal memuat data: " + err + "</h2>";
-      });
+    // Mulai proses
+    bukaDB();
   </script>
 </body>
 </html>
