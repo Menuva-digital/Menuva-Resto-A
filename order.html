@@ -143,38 +143,45 @@ h1 {
   justify-content: center;
   align-items: center;
 }
-    .bottom-buttons {
+  body {
+  padding-bottom: 120px; /* supaya konten tidak tertutup tombol */
+}
+
+/* Tombol tetap di bawah layar, tapi sekarang vertikal dan ramping */
+.bottom-buttons {
   position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
   display: flex;
-  justify-content: space-around;
+  flex-direction: column;
+  align-items: center;
   background: #fff;
-  padding: 10px;
+  padding: 10px 0;
   box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
   z-index: 999;
+  gap: 8px;
 }
 
 .bottom-buttons button {
-  flex: 1;
-  margin: 0 5px;
-  padding: 12px;
-  font-size: 16px;
+  width: 90%;
+  max-width: 320px;
+  padding: 10px;
+  font-size: 14px;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
-}
-
-.btn-back {
-  background-color: #ccc;
-  color: #333;
 }
 
 .btn-wa {
   background-color: green;
   color: white;
+}
+
+.btn-back {
+  background-color: #ccc;
+  color: #333;
 }
 
   </style>
@@ -458,13 +465,16 @@ function kirimPesanan() {
 }
 
 </script>
+  
 <div class="bottom-buttons">
-  <button onclick="window.location.href='menu.html'" class="btn-back">⬅️ Kembali ke Menu</button>
-  <button onclick="kirimPesanan()" class="btn-wa">📤 Kirim via WhatsApp</button>
+  <button onclick="kirimPesanan()" class="btn-wa">📤 Send Order List</button>
+  <button onclick="window.location.href='menu.html'" class="btn-back">⬅️ Back To Menu</button>
 </div>
+
 
 </body>
 </html>
+
 
 
 
