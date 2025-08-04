@@ -305,9 +305,9 @@ if (data.restoPhone) {
   telp.style.fontSize = "14px";
   identitasContainer.appendChild(telp);
 }
-  // Tampilkan promo jika ada
-if (data.menuPromo && data.menuPromo.length) {
-  tampilkanPromo(data.menuPromo);
+ // Tampilkan promo jika ada
+if (data.promo && data.promo.length) {
+  tampilkanPromo(data.promo);
 }
   logoContainer.innerHTML = ""; // Kosongkan dulu
   logoContainer.appendChild(identitasContainer);
@@ -556,6 +556,7 @@ function kirimPesanan() {
   </script>
 </body>
 </html>
+
 
 
 
