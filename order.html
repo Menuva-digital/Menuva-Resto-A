@@ -313,131 +313,84 @@ if (data.menuPromo && data.menuPromo.length) {
   logoContainer.appendChild(identitasContainer);
 }
 
-  function tampilkanPromo(promoList) {
-  console.log("MENJALANKAN tampilkanPromo()", promoList);
+ function tampilkanPromo(promoList) {
+    console.log("MENJALANKAN tampilkanPromo()", promoList);
+    const promoContainer = document.getElementById("promo-list");
+    promoContainer.innerHTML = "";
 
-  const promoContainer = document.getElementById("promo-list");
-  if (!promoContainer) {
-    console.warn("Elemen promo-list tidak ditemukan di HTML!");
-    return;
+    if (!Array.isArray(promoList) || promoList.length === 0) {
+      promoContainer.innerHTML = "<p>Tidak ada promo tersedia.</p>";
+      return;
+    }
+
+    promoList.forEach((promo, index) => {
+      const promoCard = document.createElement("div");
+      promoCard.classList.add("promo-card");
+
+      promoCard.innerHTML = `
+        <img src="${promo.gambar}" alt="Promo Gambar" />
+        <h3>${promo.namaPromo}</h3>
+        <p>${promo.deskripsi}</p>
+        <p>Harga Promo: <strong>Rp${Number(promo.harga).toLocaleString()}</strong></p>
+        <button onclick="tambahPromoKeKeranjang(${index})">Tambah ke Keranjang Promo</button>
+      `;
+
+      promoContainer.appendChild(promoCard);
+    });
   }
 
-  promoContainer.innerHTML = "";
+  function tambahPromoKeKeranjang(index) {
+    const dbReq = indexedDB.open("menuvaDB", 1);
 
-  const judul = document.createElement("h3");
-  judul.textContent = "🔥 Promo Menarik";
-  judul.style.textAlign = "center";
-  promoContainer.appendChild(judul);
+    dbReq.onsuccess = function (event) {
+      const db = event.target.result;
+      const tx = db.transaction("menuvaData", "readonly");
+      const store = tx.objectStore("menuvaData");
+      const getRequest = store.get("dataMenuva");
 
-  promoList.forEach((promo, index) => {
-  const card = document.createElement("div");
-  card.className = "promo-card";
-  card.style.border = "1px solid #ccc";
-  card.style.borderRadius = "12px";
-  card.style.margin = "15px 0";
-  card.style.padding = "10px";
-  card.style.background = "#fff";
-  card.style.boxShadow = "0 2px 8px rgba(0,0,0,0.05)";
-  card.style.display = "flex";
-  card.style.flexDirection = "column";
-  card.style.alignItems = "center";
+      getRequest.onsuccess = function (e) {
+        const data = e.target.result;
+        const selectedPromo = data?.promo?.[index];
 
-  const img = document.createElement("img");
-  img.src = promo.image;
-  img.alt = promo.namaPromo;
-  img.style.width = "100%";
-  img.style.maxWidth = "300px";
-  img.style.borderRadius = "8px";
-  img.style.objectFit = "cover";
-  img.style.marginBottom = "10px";
+        if (selectedPromo) {
+          const keranjang = JSON.parse(localStorage.getItem("promoCart")) || [];
+          keranjang.push(selectedPromo);
+          localStorage.setItem("promoCart", JSON.stringify(keranjang));
+          alert("✅ Promo ditambahkan ke keranjang!");
+        } else {
+          alert("❌ Gagal menambahkan promo ke keranjang.");
+        }
+      };
+    };
+  }
 
-  const nama = document.createElement("h4");
-  nama.textContent = promo.namaPromo;
-  nama.style.margin = "5px 0 5px 0";
-  nama.style.textAlign = "center";
+  // Ambil data promo dari IndexedDB dan tampilkan
+  function ambilDataPromo() {
+    const dbReq = indexedDB.open("menuvaDB", 1);
 
-  const namaMenu = document.createElement("p");
-  namaMenu.textContent = "🍽 " + (promo.namaMenu || "-");
-  namaMenu.style.margin = "0";
-  namaMenu.style.fontStyle = "italic";
-  namaMenu.style.fontSize = "14px";
-  namaMenu.style.textAlign = "center";
+    dbReq.onsuccess = function (event) {
+      const db = event.target.result;
+      const tx = db.transaction("menuvaData", "readonly");
+      const store = tx.objectStore("menuvaData");
+      const getRequest = store.get("dataMenuva");
 
-  const deskripsi = document.createElement("p");
-  deskripsi.textContent = promo.deskripsi || "-";
-  deskripsi.style.margin = "5px 0";
-  deskripsi.style.fontSize = "13px";
-  deskripsi.style.color = "#555";
-  deskripsi.style.textAlign = "center";
+      getRequest.onsuccess = function (e) {
+        const data = e.target.result;
+        if (data && Array.isArray(data.promo)) {
+          tampilkanPromo(data.promo);
+        } else {
+          console.warn("🚫 Tidak ada data promo ditemukan.");
+        }
+      };
+    };
 
-  const hargaValue = parseInt(promo.hargaPromo || promo.harga || 0);
-  const harga = document.createElement("p");
-  harga.textContent = "Rp " + hargaValue.toLocaleString();
-  harga.style.fontWeight = "bold";
-  harga.style.margin = "5px 0";
-  harga.style.textAlign = "center";
+    dbReq.onerror = function () {
+      console.error("❌ IndexedDB gagal dibuka");
+    };
+  }
 
-  // 🔁 Buat tombol - qty +
-  const qtyWrapper = document.createElement("div");
-  qtyWrapper.className = "qty-wrapper";
-  qtyWrapper.style.display = "flex";
-  qtyWrapper.style.alignItems = "center";
-  qtyWrapper.style.justifyContent = "center";
-  qtyWrapper.style.gap = "10px";
-  qtyWrapper.style.marginTop = "8px";
-
-  const btnMinus = document.createElement("button");
-  btnMinus.textContent = "−";
-  btnMinus.style.padding = "4px 12px";
-  btnMinus.style.fontSize = "18px";
-  btnMinus.style.borderRadius = "5px";
-  btnMinus.style.border = "1px solid #888";
-
-  const qtyDisplay = document.createElement("span");
-  qtyDisplay.textContent = "0";
-  qtyDisplay.dataset.nama = promo.namaPromo;
-  qtyDisplay.dataset.harga = hargaValue;
-  qtyDisplay.classList.add("qty-promo");
-  qtyDisplay.style.fontSize = "16px";
-  qtyDisplay.style.minWidth = "20px";
-  qtyDisplay.style.textAlign = "center";
-
-  const btnPlus = document.createElement("button");
-  btnPlus.textContent = "+";
-  btnPlus.style.padding = "4px 12px";
-  btnPlus.style.fontSize = "18px";
-  btnPlus.style.borderRadius = "5px";
-  btnPlus.style.border = "1px solid #888";
-
-  // 🔁 Event listener tombol
-  btnMinus.addEventListener("click", () => {
-    let currentQty = parseInt(qtyDisplay.textContent);
-    if (currentQty > 0) {
-      qtyDisplay.textContent = currentQty - 1;
-      updatePromoCart(promo.namaPromo, hargaValue, currentQty - 1);
-    }
-  });
-
-  btnPlus.addEventListener("click", () => {
-    let currentQty = parseInt(qtyDisplay.textContent);
-    qtyDisplay.textContent = currentQty + 1;
-    updatePromoCart(promo.namaPromo, hargaValue, currentQty + 1);
-  });
-
-  qtyWrapper.appendChild(btnMinus);
-  qtyWrapper.appendChild(qtyDisplay);
-  qtyWrapper.appendChild(btnPlus);
-
-  // 🧱 Susun isi card
-  card.appendChild(img);
-  card.appendChild(nama);
-  card.appendChild(namaMenu);
-  card.appendChild(deskripsi);
-  card.appendChild(harga);
-  card.appendChild(qtyWrapper);
-
-  promoContainer.appendChild(card);
-});
+  // Panggil saat halaman dibuka
+  ambilDataPromo();
 
 function updatePromoCart(namaPromo, harga, qty) {
   let cart = JSON.parse(localStorage.getItem("promoCart") || "[]");
@@ -568,6 +521,7 @@ function kirimPesanan() {
   </script>
 </body>
 </html>
+
 
 
 
