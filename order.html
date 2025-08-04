@@ -35,27 +35,18 @@
   </style>
 </head>
 <body>
-  <h1>Order Menu</h1>
-  <div class="info">
-    <img id="logo" src="" alt="Logo" height="80" /><br>
-    <strong id="namaRestoran">Nama Restoran</strong><br>
-    <span id="alamatRestoran">Alamat Restoran</span><br>
-    <span id="noWaRestoran">No. WhatsApp</span>
-  </div>
-  
-  <img id="logoRestoran" alt="Logo Restoran" style="max-height:80px;" />
- <h2 id="namaRestoran"></h2>
- <p id="alamatRestoran"></p>
- <p id="teleponRestoran"></p>
+<div id="logoContainer"></div>
+<h2 id="namaRestoranDisplay"></h2>
+<p id="alamatRestoranDisplay"></p>
+<p id="teleponRestoranDisplay"></p>
 
-  <div id="menuList"></div>
+<label for="kategoriFilter">Filter Menu:</label>
+<select id="kategoriFilter" onchange="tampilkanMenu()">
+  <option value="Semua">Semua</option>
+</select>
 
-  <div class="order-summary">
-    <h2>Ringkasan Pesanan</h2>
-    <ul id="orderList"></ul>
-    <p>Total: <span id="totalHarga">Rp 0</span></p>
-    <button onclick="kirimPesananWA()">Kirim Pesanan via WA</button>
-  </div>
+<div id="menu-list"></div>
+
 <script>
 let db;
 const DB_NAME = "MenuvaDB";
@@ -275,6 +266,7 @@ function kirimPesanan() {
 
 </body>
 </html>
+
 
 
 
