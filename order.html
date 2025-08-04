@@ -115,18 +115,34 @@ h1 {
   font-weight: bold;
 }
 
+.promo-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 30px;
+}
 .promo-item {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background: #fffef5;
+  padding: 15px;
+  width: 250px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   text-align: center;
-  margin-bottom: 20px;
 }
 .promo-item img {
+  max-width: 150px;
+  max-height: 150px;
   display: block;
   margin: 0 auto 10px;
-  max-width: 100px;
-  max-height: 100px;
 }
-
-
+.promo-item .qty-controls {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
   </style>
 </head>
 <body>
@@ -252,17 +268,35 @@ function tampilkanPromo() {
   const promoContainer = document.getElementById("promoContainer");
   promoContainer.innerHTML = `<h2 class="section-title">🔥 Promo Spesial</h2>`;
 
-  data.menuPromo.forEach((promo) => {
+  const wrapper = document.createElement("div");
+  wrapper.className = "promo-container";
+
+  data.menuPromo.forEach((promo, index) => {
+    const promoIndex = `promo-${index}`;
+    if (pesanan[promoIndex] === undefined) pesanan[promoIndex] = 0;
+
     const div = document.createElement("div");
     div.className = "promo-item";
     div.innerHTML = `
       ${promo.image ? `<img src="${promo.image}" alt="Promo">` : ""}
       <div><b>${promo.namaPromo}</b> - ${promo.namaMenu}</div>
       <div>${promo.deskripsi}</div>
-      <div>Rp${promo.harga?.toLocaleString() || "0"} | Berlaku s.d ${promo.tanggalAkhir}</div>
+      <div>Rp${promo.harga?.toLocaleString() || "0"} | s.d ${promo.tanggalAkhir}</div>
+      <div class="qty-controls">
+        <button onclick="ubahJumlahPromo('${promoIndex}', -1)">➖</button>
+        <span id="qty-${promoIndex}">${pesanan[promoIndex]}</span>
+        <button onclick="ubahJumlahPromo('${promoIndex}', 1)">➕</button>
+      </div>
     `;
-    promoContainer.appendChild(div);
+    wrapper.appendChild(div);
   });
+
+  promoContainer.appendChild(wrapper);
+}
+function ubahJumlahPromo(index, delta) {
+  pesanan[index] = Math.max(0, (pesanan[index] || 0) + delta);
+  document.getElementById(`qty-${index}`).innerText = pesanan[index];
+  updateRingkasan();
 }
 
 
@@ -307,13 +341,24 @@ function updateRingkasan() {
   let totalHargaValue = 0;
 
   Object.entries(pesanan).forEach(([i, jumlah]) => {
-    totalQty += jumlah;
-    totalHargaValue += jumlah * parseInt(data.menu[i].harga || 0);
+    if (jumlah <= 0) return;
+
+    if (i.startsWith("promo-")) {
+      const index = parseInt(i.split("-")[1]);
+      const item = data.menuPromo[index];
+      totalQty += jumlah;
+      totalHargaValue += jumlah * parseInt(item.harga || 0);
+    } else {
+      const item = data.menu[i];
+      totalQty += jumlah;
+      totalHargaValue += jumlah * parseInt(item.harga || 0);
+    }
   });
 
   document.getElementById("total-item").innerText = totalQty;
   document.getElementById("total-harga").innerText = totalHargaValue.toLocaleString();
 }
+
 
 function kirimPesanan() {
   const nama = document.getElementById("nama").value.trim();
@@ -325,9 +370,18 @@ function kirimPesanan() {
   const waktuOrder = now.toLocaleString("id-ID");
 
   let listPesanan = Object.entries(pesanan)
-    .filter(([_, jumlah]) => jumlah > 0)
-    .map(([i, jumlah]) => `${data.menu[i].nama} x${jumlah} (Rp${jumlah * parseInt(data.menu[i].harga)})`)
-    .join("\n");
+  .filter(([_, jumlah]) => jumlah > 0)
+  .map(([i, jumlah]) => {
+    if (i.startsWith("promo-")) {
+      const idx = parseInt(i.split("-")[1]);
+      const item = data.menuPromo[idx];
+      return `${item.namaPromo} x${jumlah} (Rp${jumlah * parseInt(item.harga)})`;
+    } else {
+      const item = data.menu[i];
+      return `${item.nama} x${jumlah} (Rp${jumlah * parseInt(item.harga)})`;
+    }
+  })
+  .join("\n");
 
   if (!listPesanan) {
     alert("Belum ada item yang dipilih.");
@@ -361,6 +415,7 @@ function kirimPesanan() {
 
 </body>
 </html>
+
 
 
 
