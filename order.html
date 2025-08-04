@@ -10,248 +10,160 @@
       background: #fefefe;
       padding: 20px;
     }
-    h1 {
+    h1, h2 {
+      text-align: center;
+    }
+    .info {
       text-align: center;
       margin-bottom: 20px;
     }
     .menu-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #ccc;
-      padding: 10px 0;
-    }
-    .menu-name {
-      font-weight: bold;
-    }
-    .qty-controls {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      border: 1px solid #ccc;
+      margin: 10px;
+      padding: 10px;
+      border-radius: 10px;
     }
     .qty-controls button {
-      padding: 5px 10px;
-      font-size: 16px;
+      margin: 0 5px;
     }
-    input, textarea, select {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 16px;
-    }
-    label {
-      font-weight: bold;
-    }
-    .summary {
+    .order-summary {
       margin-top: 30px;
-    }
-    .summary p {
-      font-size: 18px;
-      margin: 10px 0;
-    }
-    .submit-btn {
-      margin-top: 20px;
-      padding: 12px 20px;
-      font-size: 16px;
-      background: orange;
-      border: none;
-      color: white;
-      cursor: pointer;
-      border-radius: 6px;
-    }
-    .logo-container {
-      text-align: center;
-      margin-bottom: 10px;
-    }
-    .logo-container img {
-      max-width: 300px;
-      max-height: 300px;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
     }
   </style>
 </head>
 <body>
-  <div class="logo-container" id="logoContainer"></div>
-  <h1 id="namaRestoranDisplay"></h1>
+  <h1>Order Menu</h1>
+  <div class="info">
+    <img id="logo" src="" alt="Logo" height="80" /><br>
+    <strong id="namaRestoran">Nama Restoran</strong><br>
+    <span id="alamatRestoran">Alamat Restoran</span><br>
+    <span id="noWaRestoran">No. WhatsApp</span>
+  </div>
 
-  <h1>📝 Pesan Menu</h1>
+  <div id="menuList"></div>
 
-  <label for="kategoriFilter">Filter Kategori Menu:</label>
-  <select id="kategoriFilter" onchange="tampilkanMenu()">
-    <option value="Semua">Semua Kategori</option>
-  </select>
-
-  <div id="menu-list"></div>
-
-  <div class="summary">
-    <p>Total Item: <span id="total-item">0</span></p>
-    <p>Total Harga: Rp<span id="total-harga">0</span></p>
-
-    <label for="nama">Nama Pemesan</label>
-    <input type="text" id="nama" placeholder="Contoh: Budi">
-
-    <label for="alamat">Alamat Pengantaran</label>
-    <textarea id="alamat" placeholder="Contoh: Jl. Kenanga No. 123"></textarea>
-
-    <label for="waktuAntar">Waktu Pengantaran (opsional)</label>
-    <input type="datetime-local" id="waktuAntar" />
-
-    <label for="catatan">Catatan Tambahan</label>
-    <textarea id="catatan" placeholder="Contoh: Daging jangan terlalu matang"></textarea>
-
-    <label for="ruangan">Catatan Pemakaian Ruangan</label>
-    <input type="text" id="ruangan" placeholder="Contoh: Superior Room">
-
-    <button class="submit-btn" onclick="kirimPesanan()">Kirim Pesanan</button>
+  <div class="order-summary">
+    <h2>Ringkasan Pesanan</h2>
+    <ul id="orderList"></ul>
+    <p>Total: <span id="totalHarga">Rp 0</span></p>
+    <button onclick="kirimPesananWA()">Kirim Pesanan via WA</button>
   </div>
 
   <script>
-    let data = null;
-    const pesanan = {};
-    const menuList = document.getElementById("menu-list");
-    const totalItem = document.getElementById("total-item");
-    const totalHarga = document.getElementById("total-harga");
-    const kategoriFilter = document.getElementById("kategoriFilter");
-    const logoContainer = document.getElementById("logoContainer");
+    let db;
 
     function bukaDB() {
-      const dbReq = indexedDB.open("menuvaDB", 1);
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open("menuvaDB", 1);
 
-      dbReq.onsuccess = function (event) {
-        const db = event.target.result;
-        const tx = db.transaction("menuvaData", "readonly");
-        const store = tx.objectStore("menuvaData");
-        const getReq = store.get("dataMenuva");
-
-        getReq.onsuccess = function (e) {
-          data = e.target.result;
-          if (!data || !data.menu || data.menu.length === 0) {
-            menuList.innerHTML = "<p>⚠️ Tidak ada menu tersedia</p>";
-            return;
-          }
-
-          if (data.logo) {
-            logoContainer.innerHTML = `<img src="${data.logo}" alt="Logo Resto" />`;
-          }
-
-          if (data.namaRestoran) {
-            document.getElementById("namaRestoranDisplay").textContent = `${data.namaRestoran} - ${data.alamat || ""} (${data.nomorTlp || ""})`;
-          }
-
-          const kategoriUnik = [...new Set(data.menu.map(m => m.kategori).filter(k => k && k.trim() !== ""))];
-          kategoriUnik.forEach(k => {
-            const opt = document.createElement("option");
-            opt.value = k;
-            opt.textContent = k;
-            kategoriFilter.appendChild(opt);
-          });
-
-          tampilkanMenu();
+        request.onsuccess = (event) => {
+          db = event.target.result;
+          resolve(db);
         };
 
-        getReq.onerror = function () {
-          menuList.innerHTML = "<p>❌ Gagal memuat data dari database.</p>";
+        request.onerror = (event) => {
+          reject("Gagal membuka database");
         };
-      };
-
-      dbReq.onerror = function () {
-        menuList.innerHTML = "<p>❌ Tidak bisa membuka database.</p>";
-      };
+      });
     }
 
-    function tampilkanMenu() {
-      const kategoriDipilih = kategoriFilter.value;
+    function ambilData() {
+      return new Promise((resolve, reject) => {
+        const transaksi = db.transaction(["menuvaData"], "readonly");
+        const store = transaksi.objectStore("menuvaData");
+        const request = store.get("menuva");
+
+        request.onsuccess = (event) => {
+          const data = event.target.result;
+          if (data) resolve(data);
+          else reject("Data tidak ditemukan");
+        };
+
+        request.onerror = () => reject("Gagal mengambil data");
+      });
+    }
+
+    function renderMenu(menuArray) {
+      const menuList = document.getElementById("menuList");
       menuList.innerHTML = "";
-
-      data.menu.forEach((item, index) => {
-        if (kategoriDipilih !== "Semua" && item.kategori !== kategoriDipilih) return;
-        if (pesanan[index] === undefined) pesanan[index] = 0;
-
-        const itemEl = document.createElement("div");
-        itemEl.className = "menu-item";
-        itemEl.innerHTML = `
-          <div>
-            <div class="menu-name">${item.nama}</div>
-            <div>Rp${item.harga}</div>
-          </div>
+      menuArray.forEach((menu, index) => {
+        const item = document.createElement("div");
+        item.className = "menu-item";
+        item.innerHTML = `
+          <strong>${menu.nama}</strong><br>
+          <em>${menu.kategori}</em><br>
+          <span>Rp ${menu.harga}</span><br>
           <div class="qty-controls">
-            <button onclick="ubahJumlah(${index}, -1)">➖</button>
-            <span id="qty-${index}">${pesanan[index]}</span>
-            <button onclick="ubahJumlah(${index}, 1)">➕</button>
+            <button onclick="ubahQty(${index}, -1)">-</button>
+            <input type="number" id="qty-${index}" value="0" min="0" readonly style="width: 30px; text-align: center;" />
+            <button onclick="ubahQty(${index}, 1)">+</button>
           </div>
         `;
-        menuList.appendChild(itemEl);
+        menuList.appendChild(item);
       });
-
-      updateRingkasan();
     }
 
-    function ubahJumlah(index, delta) {
-      pesanan[index] = Math.max(0, (pesanan[index] || 0) + delta);
-      document.getElementById(`qty-${index}`).innerText = pesanan[index];
+    let pesanan = [];
+
+    function ubahQty(index, delta) {
+      const input = document.getElementById(`qty-${index}`);
+      let val = parseInt(input.value) + delta;
+      if (val < 0) val = 0;
+      input.value = val;
+      pesanan[index] = val;
       updateRingkasan();
     }
 
     function updateRingkasan() {
-      let totalQty = 0;
-      let totalHargaValue = 0;
-
-      Object.entries(pesanan).forEach(([i, jumlah]) => {
-        totalQty += jumlah;
-        totalHargaValue += jumlah * parseInt(data.menu[i].harga || 0);
+      const list = document.getElementById("orderList");
+      list.innerHTML = "";
+      let total = 0;
+      pesanan.forEach((qty, i) => {
+        if (qty > 0) {
+          const nama = window.menuData[i].nama;
+          const harga = window.menuData[i].harga;
+          const li = document.createElement("li");
+          li.textContent = `${nama} x ${qty} = Rp ${harga * qty}`;
+          list.appendChild(li);
+          total += harga * qty;
+        }
       });
-
-      totalItem.innerText = totalQty;
-      totalHarga.innerText = totalHargaValue.toLocaleString();
+      document.getElementById("totalHarga").textContent = `Rp ${total}`;
     }
 
-    function kirimPesanan() {
-      const nama = document.getElementById("nama").value.trim();
-      const alamat = document.getElementById("alamat").value.trim();
-      const waktuAntar = document.getElementById("waktuAntar").value;
-      const catatan = document.getElementById("catatan").value.trim();
-      const ruangan = document.getElementById("ruangan").value.trim();
-      const now = new Date();
-      const waktuOrder = now.toLocaleString("id-ID");
-
-      let listPesanan = Object.entries(pesanan)
-        .filter(([_, jumlah]) => jumlah > 0)
-        .map(([i, jumlah]) => `${data.menu[i].nama} x${jumlah} (Rp${jumlah * parseInt(data.menu[i].harga)})`)
-        .join("\n");
-
-      if (!listPesanan) {
-        alert("Belum ada item yang dipilih.");
-        return;
-      }
-
-      let totalHargaAll = Object.entries(pesanan).reduce((sum, [i, jml]) => sum + (jml * parseInt(data.menu[i].harga || 0)), 0);
-
-      let pesanWA = `🧾 Pesanan Baru dari ${nama || "Customer"}\n\n` +
-        `📅 Tanggal Order: ${waktuOrder}\n` +
-        (waktuAntar ? `🕒 Waktu Antar: ${new Date(waktuAntar).toLocaleString("id-ID")}\n` : "") +
-        (ruangan ? `🏨 Ruangan: ${ruangan}\n` : "") +
-        `\n📍 Alamat:\n${alamat}\n` +
-        `\n🛒 Pesanan:\n${listPesanan}\n\n` +
-        `💰 Total: Rp${totalHargaAll.toLocaleString()}\n` +
-        (catatan ? `\n📌 Catatan:\n${catatan}` : "");
-
-      const nomorAdminList = data.nomorWaAdmin || [];
-
-      if (nomorAdminList.length === 0) {
-        alert("⚠️ Tidak ada nomor admin yang tersedia.");
-        return;
-      }
-
-      nomorAdminList.forEach(nomor => {
-        const waLink = `https://wa.me/${nomor}?text=${encodeURIComponent(pesanWA)}`;
-        window.open(waLink, "_blank");
+    function kirimPesananWA() {
+      let pesan = "Pesanan:%0A";
+      let total = 0;
+      pesanan.forEach((qty, i) => {
+        if (qty > 0) {
+          const nama = window.menuData[i].nama;
+          const harga = window.menuData[i].harga;
+          pesan += `- ${nama} x ${qty} = Rp ${harga * qty}%0A`;
+          total += harga * qty;
+        }
       });
+      pesan += `%0ATotal: Rp ${total}`;
+      const nomor = document.getElementById("noWaRestoran").textContent.replace(/[^0-9]/g, "");
+      window.open(`https://wa.me/${nomor}?text=${pesan}`);
     }
 
-    // Mulai proses
-    bukaDB();
+    bukaDB()
+      .then(() => ambilData())
+      .then(data => {
+        document.getElementById("logo").src = data.logo;
+        document.getElementById("namaRestoran").textContent = data.namaRestoran;
+        document.getElementById("alamatRestoran").textContent = data.alamat;
+        document.getElementById("noWaRestoran").textContent = data.nomorWaAdmin;
+        window.menuData = data.menu || [];
+        pesanan = new Array(window.menuData.length).fill(0);
+        renderMenu(window.menuData);
+      })
+      .catch(err => {
+        alert("Gagal memuat data: " + err);
+      });
   </script>
 </body>
 </html>
