@@ -81,31 +81,6 @@
   color: white;
   border: none;
 }
-    .btn-hapus-gambar {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: none;
-  background: #ffecec;
-  color: #ff3333;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  padding: 0;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  transition: background 0.2s, transform 0.1s ease;
-}
-
-.btn-hapus-gambar:hover {
-  background: #ffcdcd;
-  transform: scale(1.05);
-}
-
-.btn-hapus-gambar svg {
-  width: 14px;
-  height: 14px;
-}
 .room-section > div:nth-child(2) button {
   padding: 6px 14px;
   border-radius: 6px;
@@ -140,16 +115,63 @@
   max-height: 80px;
   margin-top: 4px;
 }
-.btn-hapus-gambar {
+
+.gambar-preview-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-top: 10px;
+}
+
+.gambar-preview {
+  max-height: 80px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.hapus-gambar {
+  position: absolute;
+  top: -8px;
+  right: -8px;
   background: red;
   color: white;
   border: none;
-  padding: 2px 6px;
-  margin-left: 4px;
+  border-radius: 50%;
+  font-size: 14px;
+  width: 24px;
+  height: 24px;
   cursor: pointer;
-  font-size: 12px;
-  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: background 0.2s;
 }
+
+.hapus-gambar:hover {
+  background: #cc0000;
+}
+  .btn-hapus-gambar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: red;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  font-size: 14px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: background 0.2s, transform 0.1s ease;
+}
+
+.btn-hapus-gambar:hover {
+  background: #cc0000;
+  transform: scale(1.05);
+}
+
 
 
   </style>
@@ -497,8 +519,8 @@ function uploadGambarRoom(button) {
       const hapusBtn = wrapper.querySelector(".hapus-gambar");
 
       preview.src = event.target.result;
-      preview.style.display = "inline-block";
-      hapusBtn.style.display = "inline-block";
+      previewImg.style.display = "block";
+      hapusBtn.style.display = "flex"; // biar aktif
     };
     reader.readAsDataURL(file);
   };
@@ -871,6 +893,7 @@ async function loadData() {
   
 </body>
 </html>
+
 
 
 
