@@ -1,546 +1,189 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Order Makanan - Menuva</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #fefefe;
-      padding: 20px;
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
+    h2 { border-bottom: 2px solid #ddd; padding-bottom: 5px; }
+    .menu-item, .promo-item {
+      border: 1px solid #ccc; border-radius: 8px; margin: 10px 0; padding: 10px;
+      display: flex; align-items: center; background: #fff;
     }
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
+    .menu-item img, .promo-item img {
+      width: 80px; height: 80px; object-fit: cover; border-radius: 6px; margin-right: 10px;
     }
-    .menu-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #ccc;
-      padding: 10px 0;
+    .info { flex-grow: 1; }
+    .qty-control {
+      display: flex; align-items: center; gap: 5px;
     }
-    .menu-name {
-      font-weight: bold;
-    }
-    .qty-controls {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .qty-controls button {
-      padding: 5px 10px;
-      font-size: 16px;
-    }
-    input, textarea, select {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 16px;
-    }
-    label {
-      font-weight: bold;
-    }
-    .summary {
-      margin-top: 30px;
-    }
-    .summary p {
-      font-size: 18px;
-      margin: 10px 0;
-    }
-    .submit-btn {
-      margin-top: 20px;
-      padding: 12px 20px;
-      font-size: 16px;
-      background: orange;
-      border: none;
-      color: white;
-      cursor: pointer;
-      border-radius: 6px;
-    }
-    .logo-container {
-      text-align: center;
-      margin-bottom: 10px;
-    }
-    .logo-container img {
-      max-width: 100px;
-      max-height: 100px;
-    }
-  /* Container promo */
-#promo-list {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 20px;
-  padding: 10px;
-}
-
-/* Kartu promo */
-.promo-card {
-  width: 100%;
-  max-width: 320px;
-  border: 1px solid #ddd;
-  border-radius: 12px;
-  overflow: hidden;
-  background-color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
-
-/* Gambar */
-.promo-card img {
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-  display: block;
-}
-
-/* Konten dalam kartu */
-.promo-content {
-  padding: 10px;
-}
-
-.promo-title {
-  font-weight: bold;
-  font-size: 18px;
-  margin-bottom: 5px;
-}
-
-.promo-desc {
-  font-size: 14px;
-  color: #555;
-  margin-bottom: 5px;
-}
-
-.promo-price {
-  font-size: 16px;
-  color: #009688;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-/* Qty */
-.promo-qty {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.promo-qty button {
-  width: 30px;
-  height: 30px;
-  border: none;
-  background-color: #009688;
-  color: #fff;
-  font-size: 18px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.promo-qty span {
-  min-width: 24px;
-  text-align: center;
-  font-size: 16px;
-}
-
+    button { padding: 6px 10px; }
+    .total { font-weight: bold; margin-top: 15px; }
   </style>
 </head>
 <body>
-  <div class="logo-container" id="logoContainer"></div>
-  <h1 id="namaRestoranDisplay" style="font-size: 24px; font-weight: bold; margin-top: 10px; align-items: center;"></h1>
-
-  <h1>📝 Pesan Menu</h1>
-
-  <div id="promo-list" class="promo-container"></div>
-
-  <label for="kategoriFilter">Filter Kategori Menu:</label>
-  <select id="kategoriFilter" onchange="tampilkanMenu()">
-    <option value="Semua">Semua Kategori</option>
-  </select>
-
+  <h1>Pesan Menu</h1>
+  <div id="promo-list"></div>
+  <h2>Menu Utama</h2>
   <div id="menu-list"></div>
-
-  <div class="summary">
-    <p>Total Item: <span id="total-item">0</span></p>
-    <p>Total Harga: Rp<span id="total-harga">0</span></p>
-
-    <label for="nama">Nama Pemesan</label>
-    <input type="text" id="nama" placeholder="Contoh: Budi">
-
-    <label for="alamat">Alamat Pengantaran</label>
-    <textarea id="alamat" placeholder="Contoh: Jl. Kenanga No. 123"></textarea>
-
-    <label for="waktuAntar">Waktu Pengantaran (opsional)</label>
-    <input type="datetime-local" id="waktuAntar" />
-
-    <label for="catatan">Catatan Tambahan</label>
-    <textarea id="catatan" placeholder="Contoh: Daging jangan terlalu matang"></textarea>
-
-    <label for="ruangan">Catatan Pemakaian Ruangan</label>
-    <input type="text" id="ruangan" placeholder="Contoh: Superior Room">
-
-    <button class="submit-btn" onclick="kirimPesanan()">Kirim Pesanan</button>
-  </div>
+  <div class="total">Total: <span id="totalHarga">Rp 0</span></div>
+  <button onclick="kirimPesanan()">Kirim ke WhatsApp</button>
 
   <script>
-  let data = null;
-const pesanan = {};
+    let db;
+    const promoCart = {};
+    const orderCart = {};
 
-function openDB() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open("menuvaDB", 1); // konsisten semua pakai "menuvaDB"
-    request.onerror = () => reject("❌ Gagal membuka database");
-    request.onsuccess = (event) => resolve(event.target.result);
-    request.onupgradeneeded = (event) => {
-      const db = event.target.result;
-      if (!db.objectStoreNames.contains("menuvaData")) {
-        db.createObjectStore("menuvaData", { keyPath: "id" });
-      }
-    };
-  });
-}
+    function openDB() {
+      const request = indexedDB.open("menuvaDB", 1);
+      request.onerror = () => alert("Gagal membuka database");
+      request.onsuccess = (e) => {
+        db = e.target.result;
+        loadData();
+      };
+    }
 
-function getMainData() {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const db = await openDB();
+    function loadData() {
       const tx = db.transaction("menuvaData", "readonly");
       const store = tx.objectStore("menuvaData");
-      // Ganti keynya dari 1 ke "menuva" supaya sesuai
-      const getRequest = store.get("menuva");
+      const getData = store.get("menuva");
 
-      getRequest.onsuccess = () => {
-        if (getRequest.result) resolve(getRequest.result);
-        else reject("⚠️ Data tidak ditemukan");
+      getData.onsuccess = () => {
+        const data = getData.result;
+        if (!data) return alert("Data tidak ditemukan");
+
+        tampilkanPromo(data.promo || []);
+        tampilkanMenu(data.menu || []);
       };
-      getRequest.onerror = () => reject("❌ Gagal membaca data dari store");
-    } catch (e) {
-      reject(e);
     }
-  });
-}
 
-document.addEventListener("DOMContentLoaded", async () => {
-  try {
-    data = await getMainData();
+    function tampilkanPromo(promoList) {
+      const container = document.getElementById("promo-list");
+      if (!promoList.length) return;
 
-    const menuList = document.getElementById("menu-list");
-    const totalItem = document.getElementById("total-item");
-    const totalHarga = document.getElementById("total-harga");
-    const kategoriFilter = document.getElementById("kategoriFilter");
-    const logoContainer = document.getElementById("logoContainer");
+      const title = document.createElement("h2");
+      title.textContent = "Promo Spesial";
+      container.appendChild(title);
 
-    console.log("🔥 Promo data yang diterima:", data.menuPromo)
+      promoList.forEach((promo, index) => {
+        const div = document.createElement("div");
+        div.className = "promo-item";
 
-    if (data && data.menu && data.menu.length) {
-     
-      // Isi filter kategori
-      const kategoriUnik = [...new Set(data.menu.map(m => m.kategori).filter(k => k && k.trim() !== ""))];
-      kategoriUnik.forEach(k => {
-        const opt = document.createElement("option");
-        opt.value = k;
-        opt.textContent = k;
-        kategoriFilter.appendChild(opt);
+        div.innerHTML = `
+          <img src="${promo.gambar}" alt="${promo.namaPromo}">
+          <div class="info">
+            <strong>${promo.namaPromo}</strong><br>
+            <small>${promo.deskripsi || ""}</small><br>
+            <b>Rp ${promo.harga}</b>
+          </div>
+          <div class="qty-control">
+            <button onclick="ubahQty('promo', ${index}, -1)">-</button>
+            <span id="promoQty${index}">0</span>
+            <button onclick="ubahQty('promo', ${index}, 1)">+</button>
+          </div>
+        `;
+
+        container.appendChild(div);
       });
-      if (data.promo && data.promo.length) {
-      tampilkanPromo(data.promo);
-      }
-
-
-      // Tampilkan menu pertama kali
-      tampilkanMenu();
-    } else {
-      menuList.innerHTML = "<p>⚠️ Tidak ada menu tersedia</p>";
-    }
-    tampilkanIdentitasRestoran(data);
-
-  } catch (err) {
-    console.error("❌ Gagal ambil data dari IndexedDB:", err);
-    document.getElementById("menu-list").innerHTML = "<p>⚠️ Gagal membaca data</p>";
-  }
-  
-});
-    function tampilkanIdentitasRestoran(data) {
-  const logoContainer = document.getElementById("logoContainer");
-  const namaDisplay = document.getElementById("namaRestoranDisplay");
-
-  const identitasContainer = document.createElement("div");
-  identitasContainer.id = "identitasContainer";
-  identitasContainer.style.textAlign = "center";
-  identitasContainer.style.marginBottom = "20px";
-
-  // Logo
-  if (data.logo) {
-    const img = document.createElement("img");
-    img.src = data.logo;
-    img.alt = "Logo Resto";
-    img.style.maxWidth = "120px";
-    img.style.marginBottom = "10px";
-    identitasContainer.appendChild(img);
-  }
-
-  // Nama Restoran
-  if (data.namaRestoran) {
-    const nama = document.createElement("h2");
-    nama.textContent = data.namaRestoran;
-    nama.style.margin = "5px 0";
-    identitasContainer.appendChild(nama);
-  }
-
- // Alamat Restoran
-if (data.restoAddress) {
-  const alamat = document.createElement("p");
-  alamat.textContent = data.restoAddress;
-  alamat.style.margin = "3px 0";
-  alamat.style.fontSize = "14px";
-  identitasContainer.appendChild(alamat);
-}
-
-// Nomor Telepon
-if (data.restoPhone) {
-  const telp = document.createElement("p");
-  telp.textContent = "Telp: " + data.restoPhone;
-  telp.style.margin = "3px 0";
-  telp.style.fontSize = "14px";
-  identitasContainer.appendChild(telp);
-}
- // Tampilkan promo jika ada
-if (data.promo && data.promo.length) {
-  tampilkanPromo(data.promo);
-}
-  logoContainer.innerHTML = ""; // Kosongkan dulu
-  logoContainer.appendChild(identitasContainer);
-}
-
- function tampilkanPromo(promoList) {
-    console.log("MENJALANKAN tampilkanPromo()", promoList);
-    const promoContainer = document.getElementById("promo-list");
-    promoContainer.innerHTML = "";
-
-    if (!Array.isArray(promoList) || promoList.length === 0) {
-      promoContainer.innerHTML = "<p>Tidak ada promo tersedia.</p>";
-      return;
     }
 
-    promoList.forEach((promo, index) => {
-      const promoCard = document.createElement("div");
-      promoCard.classList.add("promo-card");
+    function tampilkanMenu(menuList) {
+      const container = document.getElementById("menu-list");
 
-     promoCard.innerHTML = `
-  <img src="${promo.image}" alt="Promo Image" style="width:100%; max-height:150px; object-fit:cover;" />
-  <h3>${promo.namaPromo}</h3>
-  <p>${promo.deskripsi}</p>
-  <p>Harga Promo: <strong>Rp${Number(promo.harga).toLocaleString()}</strong></p>
-  <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:10px;">
-    <button onclick="updateQty(${index}, -1)">-</button>
-    <span id="qty-${index}">0</span>
-    <button onclick="updateQty(${index}, 1)">+</button>
-  </div>
-`;
+      menuList.forEach((menu, index) => {
+        const div = document.createElement("div");
+        div.className = "menu-item";
 
-  function tambahPromoKeKeranjang(index) {
-    const dbReq = indexedDB.open("menuvaDB", 1);
+        div.innerHTML = `
+          <img src="${menu.gambar}" alt="${menu.nama}">
+          <div class="info">
+            <strong>${menu.nama}</strong><br>
+            <small>${menu.kategori || ""}</small><br>
+            <b>Rp ${menu.harga}</b>
+          </div>
+          <div class="qty-control">
+            <button onclick="ubahQty('menu', ${index}, -1)">-</button>
+            <span id="menuQty${index}">0</span>
+            <button onclick="ubahQty('menu', ${index}, 1)">+</button>
+          </div>
+        `;
 
-    dbReq.onsuccess = function (event) {
-      const db = event.target.result;
+        container.appendChild(div);
+      });
+    }
+
+    function ubahQty(tipe, index, delta) {
+      const cart = tipe === "promo" ? promoCart : orderCart;
+      const id = `${tipe}${index}`;
+      cart[id] = (cart[id] || 0) + delta;
+      if (cart[id] < 0) cart[id] = 0;
+      document.getElementById(`${tipe}Qty${index}`).textContent = cart[id];
+
+      localStorage.setItem("promoCart", JSON.stringify(promoCart));
+      localStorage.setItem("orderCart", JSON.stringify(orderCart));
+
+      hitungTotal();
+    }
+
+    function hitungTotal() {
+      let total = 0;
+      const promoCartData = JSON.parse(localStorage.getItem("promoCart") || "{}");
+      const orderCartData = JSON.parse(localStorage.getItem("orderCart") || "{}");
+
       const tx = db.transaction("menuvaData", "readonly");
       const store = tx.objectStore("menuvaData");
-      const getRequest = store.get("dataMenuva");
+      const getData = store.get("menuva");
 
-      getRequest.onsuccess = function (e) {
-        const data = e.target.result;
-        const selectedPromo = data?.promo?.[index];
+      getData.onsuccess = () => {
+        const data = getData.result;
+        const promoList = data.promo || [];
+        const menuList = data.menu || [];
 
-        if (selectedPromo) {
-          const keranjang = JSON.parse(localStorage.getItem("promoCart")) || [];
-          keranjang.push(selectedPromo);
-          localStorage.setItem("promoCart", JSON.stringify(keranjang));
-          alert("✅ Promo ditambahkan ke keranjang!");
-        } else {
-          alert("❌ Gagal menambahkan promo ke keranjang.");
+        for (let key in promoCartData) {
+          const index = parseInt(key.replace("promo", ""));
+          const item = promoList[index];
+          if (item) total += item.harga * promoCartData[key];
         }
+
+        for (let key in orderCartData) {
+          const index = parseInt(key.replace("menu", ""));
+          const item = menuList[index];
+          if (item) total += item.harga * orderCartData[key];
+        }
+
+        document.getElementById("totalHarga").textContent = "Rp " + total.toLocaleString("id-ID");
       };
-    };
-  }
-      function updateQty(index, delta) {
-  if (!data.promo || !data.promo[index]) return;
-
-  const selectedPromo = data.promo[index];
-  let cart = JSON.parse(localStorage.getItem("promoCart")) || [];
-  const existingIndex = cart.findIndex(item => item.namaPromo === selectedPromo.namaPromo);
-
-  if (existingIndex > -1) {
-    cart[existingIndex].qty += delta;
-    if (cart[existingIndex].qty <= 0) {
-      cart.splice(existingIndex, 1);
     }
-  } else if (delta > 0) {
-    selectedPromo.qty = delta;
-    cart.push(selectedPromo);
-  }
 
-  localStorage.setItem("promoCart", JSON.stringify(cart));
-  document.getElementById(`qty-${index}`).innerText =
-    cart.find(item => item.namaPromo === selectedPromo.namaPromo)?.qty || 0;
-}
+    function kirimPesanan() {
+      const promoCartData = JSON.parse(localStorage.getItem("promoCart") || "{}");
+      const orderCartData = JSON.parse(localStorage.getItem("orderCart") || "{}");
 
-function updatePromoCart(namaPromo, harga, qty) {
-  let cart = JSON.parse(localStorage.getItem("promoCart") || "[]");
+      const tx = db.transaction("menuvaData", "readonly");
+      const store = tx.objectStore("menuvaData");
+      const getData = store.get("menuva");
 
-  const index = cart.findIndex((item) => item.nama === namaPromo);
+      getData.onsuccess = () => {
+        const data = getData.result;
+        const waNumber = data.noWA[0] || "";
+        let pesan = `Halo, saya ingin memesan:\n`;
 
-  if (qty === 0 && index !== -1) {
-    cart.splice(index, 1);
-  } else if (index !== -1) {
-    cart[index].qty = qty;
-    cart[index].total = harga * qty;
-  } else {
-    cart.push({ nama: namaPromo, qty, harga, total: harga * qty });
-  }
+        (data.promo || []).forEach((item, i) => {
+          const qty = promoCartData[`promo${i}`];
+          if (qty) pesan += `- ${item.namaPromo} x${qty}\n`;
+        });
 
-  localStorage.setItem("promoCart", JSON.stringify(cart));
-  console.log("✅ promoCart updated:", cart);
-}
+        (data.menu || []).forEach((item, i) => {
+          const qty = orderCartData[`menu${i}`];
+          if (qty) pesan += `- ${item.nama} x${qty}\n`;
+        });
 
-function tampilkanMenu() {
-  const kategoriFilter = document.getElementById("kategoriFilter");
-  const menuList = document.getElementById("menu-list");
-  const kategoriDipilih = kategoriFilter.value;
-  menuList.innerHTML = "";
+        window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(pesan)}`, "_blank");
+      };
+    }
 
-  if (!data || !data.menu || !Array.isArray(data.menu)) {
-    menuList.innerHTML = "<p>⚠️ Menu tidak ditemukan.</p>";
-    return;
-  }
-
-  const menuFiltered = data.menu.filter(item => {
-    return kategoriDipilih === "Semua" || item.kategori === kategoriDipilih;
-  });
-
-  if (menuFiltered.length === 0) {
-    menuList.innerHTML = "<p>⚠️ Tidak ada menu dalam kategori ini.</p>";
-    return;
-  }
-
-  menuFiltered.forEach(item => {
-    const indexInAll = data.menu.indexOf(item);
-
-    if (pesanan[indexInAll] === undefined) pesanan[indexInAll] = 0;
-
-    const itemEl = document.createElement("div");
-    itemEl.className = "menu-item";
-    itemEl.innerHTML = `
-      <div>
-        <div class="menu-name">${item.nama}</div>
-        <div>Rp${item.harga.toLocaleString()}</div>
-      </div>
-      <div class="qty-controls">
-        <button onclick="ubahJumlah(${indexInAll}, -1)">➖</button>
-        <span id="qty-${indexInAll}">${pesanan[indexInAll]}</span>
-        <button onclick="ubahJumlah(${indexInAll}, 1)">➕</button>
-      </div>
-    `;
-    menuList.appendChild(itemEl);
-  });
-
-  updateRingkasan();
-}
-
-function ubahJumlah(index, delta) {
-  if (!data.menu[index]) return;
-  pesanan[index] = Math.max(0, (pesanan[index] || 0) + delta);
-  document.getElementById(`qty-${index}`).innerText = pesanan[index];
-  updateRingkasan();
-}
-
-function updateRingkasan() {
-  let totalQty = 0;
-  let totalHargaValue = 0;
-
-  Object.entries(pesanan).forEach(([i, jumlah]) => {
-    totalQty += jumlah;
-    totalHargaValue += jumlah * parseInt(data.menu[i].harga || 0);
-  });
-
-  document.getElementById("total-item").innerText = totalQty;
-  document.getElementById("total-harga").innerText = totalHargaValue.toLocaleString();
-}
-
-function kirimPesanan() {
-  const nama = document.getElementById("nama").value.trim();
-  const alamat = document.getElementById("alamat").value.trim();
-  const waktuAntar = document.getElementById("waktuAntar").value;
-  const catatan = document.getElementById("catatan").value.trim();
-  const ruangan = document.getElementById("ruangan").value.trim();
-  const now = new Date();
-  const waktuOrder = now.toLocaleString("id-ID");
-
-  let listPesanan = Object.entries(pesanan)
-    .filter(([_, jumlah]) => jumlah > 0)
-    .map(([i, jumlah]) => `${data.menu[i].nama} x${jumlah} (Rp${(jumlah * parseInt(data.menu[i].harga)).toLocaleString()})`)
-    .join("\n");
-
-  if (!listPesanan) {
-    alert("Belum ada item yang dipilih.");
-    return;
-  }
-
-  let totalHargaAll = Object.entries(pesanan).reduce((sum, [i, jml]) => sum + (jml * parseInt(data.menu[i].harga || 0)), 0);
-
-  let pesanWA = `🧾 Pesanan Baru dari ${nama || "Customer"}\n\n` +
-    `📅 Tanggal Order: ${waktuOrder}\n` +
-    (waktuAntar ? `🕒 Waktu Antar: ${new Date(waktuAntar).toLocaleString("id-ID")}\n` : "") +
-    (ruangan ? `🏨 Ruangan: ${ruangan}\n` : "") +
-    `\n📍 Alamat:\n${alamat}\n` +
-    `\n🛒 Pesanan:\n${listPesanan}\n\n` +
-    `💰 Total: Rp${totalHargaAll.toLocaleString()}\n` +
-    (catatan ? `\n📌 Catatan:\n${catatan}` : "");
-
-  const nomorAdminList = data.nomorWaAdmin || [];
-
-  if (nomorAdminList.length === 0) {
-    alert("⚠️ Tidak ada nomor admin yang tersedia.");
-    return;
-  }
-
-  // Kirim ke semua nomor admin
-  nomorAdminList.forEach(nomor => {
-    const waLink = `https://wa.me/${nomor}?text=${encodeURIComponent(pesanWA)}`;
-    window.open(waLink, "_blank");
-  });
-}
-
+    openDB();
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
