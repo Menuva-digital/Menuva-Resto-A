@@ -6,47 +6,152 @@
   <title>Order Makanan - Menuva</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #fefefe;
-      padding: 20px;
-    }
-    h1, h2 {
-      text-align: center;
-    }
-    .info {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .menu-item {
-      border: 1px solid #ccc;
-      margin: 10px;
-      padding: 10px;
-      border-radius: 10px;
-    }
-    .qty-controls button {
-      margin: 0 5px;
-    }
-    .order-summary {
-      margin-top: 30px;
-      padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-    }
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #fefefe;
+  color: #333;
+  margin: 0;
+  padding: 20px;
+  max-width: 900px;
+  margin: auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.header img {
+  max-height: 100px;
+}
+h1 {
+  margin-top: 10px;
+  font-size: 28px;
+}
+
+.filter-container {
+  text-align: center;
+  margin: 20px 0;
+}
+.filter-container select {
+  padding: 10px;
+  font-size: 16px;
+}
+
+.menu-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  justify-content: center;
+}
+
+.menu-item {
+  border: 1px solid #ddd;
+  padding: 15px;
+  width: 250px;
+  border-radius: 10px;
+  background: white;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.menu-item .menu-name {
+  font-weight: bold;
+  font-size: 18px;
+}
+.menu-item .qty-controls {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.qty-controls button {
+  background: orange;
+  border: none;
+  padding: 6px 12px;
+  color: white;
+  font-size: 18px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.qty-controls span {
+  margin: 0 10px;
+  font-weight: bold;
+}
+
+.order-summary {
+  margin-top: 40px;
+  border: 1px solid #ccc;
+  padding: 25px;
+  border-radius: 12px;
+  background: #fff;
+}
+.order-summary h2 {
+  margin-bottom: 20px;
+}
+.order-summary input, .order-summary textarea {
+  width: 100%;
+  margin-bottom: 15px;
+  padding: 10px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+.submit-btn {
+  background: green;
+  color: white;
+  padding: 12px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.submit-btn:hover {
+  background: darkgreen;
+}
+
   </style>
 </head>
 <body>
-<div id="logoContainer"></div>
-<h2 id="namaRestoranDisplay"></h2>
-<p id="alamatRestoranDisplay"></p>
-<p id="teleponRestoranDisplay"></p>
+<div class="header">
+    <div id="logoContainer"></div>
+    <h1 id="namaRestoranDisplay"></h1>
+    <p id="alamatRestoranDisplay"></p>
+    <p id="teleponRestoranDisplay"></p>
+  </div>
 
-<label for="kategoriFilter">Filter Menu:</label>
-<select id="kategoriFilter" onchange="tampilkanMenu()">
-  <option value="Semua">Semua</option>
-</select>
+  <div class="filter-container">
+    <label for="kategoriFilter">Filter Menu:</label>
+    <select id="kategoriFilter" onchange="tampilkanMenu()">
+      <option value="Semua">Semua</option>
+    </select>
+  </div>
 
-<div id="menu-list"></div>
+  <div id="promoContainer"></div>
 
+  <div id="menu-list" class="menu-grid"></div>
+
+  <div class="order-summary">
+    <h2>🧾 Ringkasan Pesanan</h2>
+    <p>Total Item: <span id="total-item">0</span></p>
+    <p>Total Harga: Rp<span id="total-harga">0</span></p>
+
+    <label>Nama Pemesan</label>
+    <input id="nama" type="text" placeholder="Contoh: Budi">
+
+    <label>Alamat Pengantaran</label>
+    <textarea id="alamat" placeholder="Contoh: Jl. Kenanga No. 123"></textarea>
+
+    <label>Waktu Pengantaran</label>
+    <input type="datetime-local" id="waktuAntar">
+
+    <label>Catatan Tambahan</label>
+    <textarea id="catatan" placeholder="Contoh: Tanpa cabe, tolong cepat ya!"></textarea>
+
+    <label>Ruangan (opsional)</label>
+    <input type="text" id="ruangan" placeholder="Contoh: Kamar 301">
+
+    <button class="submit-btn" onclick="kirimPesanan()">📤 Kirim via WhatsApp</button>
+  </div>
 <script>
 let db;
 const DB_NAME = "MenuvaDB";
@@ -142,7 +247,6 @@ function tampilkanPromo() {
 
   document.body.insertBefore(promoContainer, document.getElementById("menu-list"));
 }
-
 function tampilkanMenu() {
   const kategoriDipilih = document.getElementById("kategoriFilter").value || "Semua";
   const menuList = document.getElementById("menu-list");
@@ -172,6 +276,7 @@ function tampilkanMenu() {
   updateRingkasan();
 }
 
+
 function ubahJumlah(index, delta) {
   pesanan[index] = Math.max(0, (pesanan[index] || 0) + delta);
   document.getElementById(`qty-${index}`).innerText = pesanan[index];
@@ -189,35 +294,6 @@ function updateRingkasan() {
 
   document.getElementById("total-item").innerText = totalQty;
   document.getElementById("total-harga").innerText = totalHargaValue.toLocaleString();
-}
-
-function tampilkanMenu() {
-  const kategoriDipilih = document.getElementById("kategoriFilter").value;
-  const menuList = document.getElementById("menu-list");
-  menuList.innerHTML = "";
-
-  data.menu.forEach((item, index) => {
-    if (kategoriDipilih !== "Semua" && item.kategori !== kategoriDipilih) return;
-
-    if (pesanan[index] === undefined) pesanan[index] = 0;
-
-    const itemEl = document.createElement("div");
-    itemEl.className = "menu-item";
-    itemEl.innerHTML = `
-      <div>
-        <div class="menu-name">${item.nama}</div>
-        <div>Rp${item.harga.toLocaleString()}</div>
-      </div>
-      <div class="qty-controls">
-        <button onclick="ubahJumlah(${index}, -1)">➖</button>
-        <span id="qty-${index}">${pesanan[index]}</span>
-        <button onclick="ubahJumlah(${index}, 1)">➕</button>
-      </div>
-    `;
-    menuList.appendChild(itemEl);
-  });
-
-  updateRingkasan();
 }
 
 function kirimPesanan() {
@@ -266,6 +342,7 @@ function kirimPesanan() {
 
 </body>
 </html>
+
 
 
 
