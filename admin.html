@@ -481,7 +481,7 @@
       container.appendChild(div);
     }
 
- function tambahRoom(kategori) {
+function tambahRoom(kategori) {
   const containerId = {
     hotel: "roomHotelContainer",
     meeting: "meetingRoomContainer",
@@ -493,7 +493,7 @@
   const container = document.getElementById(containerId);
 
   const wrapper = document.createElement("div");
-  wrapper.className = "room-form"; // ✅ PENTING! agar terbaca di ambilSemuaRoom()
+  wrapper.className = "room-form"; // <--- penting!
 
   wrapper.innerHTML = `
     <input type="text" class="room-nama" placeholder="Nama" />
@@ -511,7 +511,7 @@
   container.appendChild(wrapper);
 }
 
-  function uploadGambarRoom(button) {
+ function uploadGambarRoom(button) {
   const input = document.createElement("input");
   input.type = "file";
   input.accept = "image/*";
@@ -523,7 +523,7 @@
 
     const reader = new FileReader();
     reader.onload = function (event) {
-      const wrapper = button.closest(".room-form"); // pastikan class sudah diganti
+      const wrapper = button.closest(".room-form");
       const preview = wrapper.querySelector(".gambar-preview");
       const hapusBtn = wrapper.querySelector(".hapus-gambar");
 
@@ -532,7 +532,7 @@
       preview.style.display = "block";
       hapusBtn.style.display = "flex";
 
-      // ✅ Tambahkan ini supaya gambar tersimpan saat simpanData()
+      // ✅ Simpan image ke atribut data-image
       button.setAttribute("data-image", imageUrl);
     };
     reader.readAsDataURL(file);
@@ -545,15 +545,16 @@
 
     
 function hapusGambarRoom(button) {
-  const wrapper = button.closest(".room-item");
+  const wrapper = button.closest(".room-form");
   const preview = wrapper.querySelector(".gambar-preview");
+  const uploadBtn = wrapper.querySelector(".room-image-upload");
 
-  // Kosongkan src dan sembunyikan preview
   preview.src = "";
   preview.style.display = "none";
-
-  // Sembunyikan tombol ❌ juga
   button.style.display = "none";
+
+  // ✅ hapus data-image juga
+  if (uploadBtn) uploadBtn.removeAttribute("data-image");
 }
 
     
@@ -770,18 +771,19 @@ function hapusGambarRoom(button) {
   }
 }
 
-  
-  // Load data saat halaman dibuka
+    // Load data saat halaman dibuka
 async function loadData() {
   try {
     await initDB();
     const data = await loadDataFromDB();
 
+    // Data umum restoran
     document.getElementById("namaRestoran").value = data.namaRestoran || "";
     document.getElementById("restoAddress").value = data.restoAddress || "";
     document.getElementById("restoPhone").value = data.restoPhone || "";
     if (data.logo) document.getElementById("previewLogo").src = data.logo;
 
+    // Nomor WA Admin
     if (Array.isArray(data.nomorWaAdmin)) {
       const container = document.getElementById("nomorWaContainer");
       container.innerHTML = "";
@@ -792,39 +794,61 @@ async function loadData() {
       });
     }
 
+    // Promo
     if (Array.isArray(data.menuPromo)) {
       menuPromo = data.menuPromo;
       renderPromoUI();
     }
 
+    // Menu utama
     if (Array.isArray(data.menu)) {
       data.menu.forEach((m) => tambahMenu(m.kategori || "food", m.nama, m.harga));
     }
+
+    // Room/Package
     if (Array.isArray(data.roomData)) {
-  const grouped = {
-    hotel: document.getElementById("roomHotelContainer"),
-    meeting: document.getElementById("meetingRoomContainer"),
-    package: document.getElementById("packageContainer"),
-  };
+      const grouped = {
+        hotel: document.getElementById("roomHotelContainer"),
+        meeting: document.getElementById("meetingRoomContainer"),
+        package: document.getElementById("packageContainer"),
+      };
 
-  data.roomData.forEach(room => {
-    tambahRoom(room.kategori);
-    const forms = grouped[room.kategori].querySelectorAll(".room-form");
-    const lastForm = forms[forms.length - 1];
-    if (!lastForm) return;
+      data.roomData.forEach(room => {
+        tambahRoom(room.kategori); // ini bikin div .room-form baru
+        const forms = grouped[room.kategori].querySelectorAll(".room-form");
+        const lastForm = forms[forms.length - 1];
+        if (!lastForm) return;
 
-    lastForm.querySelector(".room-nama").value = room.nama;
-    lastForm.querySelector(".room-deskripsi").value = room.deskripsi;
-    lastForm.querySelector(".room-harga").value = room.harga;
-    if (room.image) {
-      const preview = lastForm.querySelector(".room-preview");
-      preview.innerHTML = `
-        <img src="${room.image}" style="max-height:80px;">
-        <button class="btn-hapus-gambar" onclick="this.parentElement.innerHTML=''">X</button>
-      `;
-      lastForm.querySelector(".room-image-upload").setAttribute("data-image", room.image);
+        // Set value input
+        lastForm.querySelector(".room-nama").value = room.nama;
+        lastForm.querySelector(".room-deskripsi").value = room.deskripsi;
+        lastForm.querySelector(".room-harga").value = room.harga;
+
+        // Jika ada gambar, tampilkan kembali preview
+        if (room.image) {
+          const preview = lastForm.querySelector(".gambar-preview");
+          const hapusBtn = lastForm.querySelector(".hapus-gambar");
+          const uploadBtn = lastForm.querySelector(".room-image-upload");
+
+          preview.src = room.image;
+          preview.style.display = "block";
+          if (hapusBtn) hapusBtn.style.display = "flex";
+          if (uploadBtn) uploadBtn.setAttribute("data-image", room.image);
+        }
+      });
     }
-  });
+
+    // Flipbook Ruangan
+    flipbookRuanganImages = data.flipbookRuanganImages || [];
+    flipbookRuanganImages.forEach((src) => renderImagePreview("ruangan", src));
+
+    // Flipbook Menu
+    flipbookMenuImages = data.flipbookMenuImages || [];
+    flipbookMenuImages.forEach((src) => renderImagePreview("menu", src));
+
+  } catch (err) {
+    console.error("❌ Gagal load data IndexedDB:", err);
+  }
 }
 
 
@@ -910,6 +934,7 @@ async function loadData() {
   
 </body>
 </html>
+
 
 
 
