@@ -1,86 +1,82 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Order Makanan - Menuva</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; background: #f9f9f9; }
-    h2 { border-bottom: 2px solid #ddd; padding-bottom: 5px; }
+    h1, h2 { text-align: center; }
     .menu-item, .promo-item {
-      border: 1px solid #ccc; border-radius: 8px; margin: 10px 0; padding: 10px;
+      border: 1px solid #ccc; border-radius: 10px; padding: 10px; margin: 10px 0;
       display: flex; align-items: center; background: #fff;
     }
-    .menu-item img, .promo-item img {
-      width: 80px; height: 80px; object-fit: cover; border-radius: 6px; margin-right: 10px;
-    }
+    .menu-item img, .promo-item img { width: 100px; height: 100px; object-fit: cover; border-radius: 8px; margin-right: 10px; }
     .info { flex-grow: 1; }
-    .qty-control {
-      display: flex; align-items: center; gap: 5px;
-    }
-    button { padding: 6px 10px; }
-    .total { font-weight: bold; margin-top: 15px; }
+    .qty-control { display: flex; align-items: center; gap: 10px; }
+    .qty-control button { width: 30px; height: 30px; font-size: 18px; }
+    .total-section { margin-top: 20px; font-size: 18px; text-align: center; }
+    .order-btn { margin-top: 20px; padding: 10px; font-size: 18px; background: #25d366; color: #fff; border: none; border-radius: 5px; cursor: pointer; width: 100%; }
   </style>
 </head>
 <body>
-  <h1>Pesan Menu</h1>
-  <div id="promo-list"></div>
-  <h2>Menu Utama</h2>
-  <div id="menu-list"></div>
-  <div class="total">Total: <span id="totalHarga">Rp 0</span></div>
-  <button onclick="kirimPesanan()">Kirim ke WhatsApp</button>
+
+  <h1>Order Menu</h1>
+  <div id="promo-list"><h2>Promo</h2></div>
+  <div id="menu-list"><h2>Menu</h2></div>
+
+  <div class="total-section">
+    Total: <span id="total-price">Rp 0</span>
+  </div>
+  <button class="order-btn" onclick="kirimPesanan()">Kirim Pesanan via WhatsApp</button>
 
   <script>
-    let db;
-    const promoCart = {};
-    const orderCart = {};
+    let db, keranjang = {};
 
-    function openDB() {
-      const request = indexedDB.open("menuvaDB", 1);
-      request.onerror = () => alert("Gagal membuka database");
-      request.onsuccess = (e) => {
-        db = e.target.result;
-        loadData();
-      };
+    function bukaDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.open("menuvaDB", 1);
+        request.onerror = () => reject("Gagal membuka database");
+        request.onsuccess = () => {
+          db = request.result;
+          resolve(db);
+        };
+      });
     }
 
-    function loadData() {
-      const tx = db.transaction("menuvaData", "readonly");
-      const store = tx.objectStore("menuvaData");
-      const getData = store.get("menuva");
+    function ambilDataRestoran() {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction("menuvaData", "readonly");
+        const store = tx.objectStore("menuvaData");
+        const getData = store.get("menuva");
 
-      getData.onsuccess = () => {
-        const data = getData.result;
-        if (!data) return alert("Data tidak ditemukan");
-
-        tampilkanPromo(data.promo || []);
-        tampilkanMenu(data.menu || []);
-      };
+        getData.onsuccess = () => {
+          if (getData.result) resolve(getData.result);
+          else reject("Data tidak ditemukan");
+        };
+        getData.onerror = () => reject("Gagal mengambil data");
+      });
     }
 
-    function tampilkanPromo(promoList) {
-      const container = document.getElementById("promo-list");
-      if (!promoList.length) return;
-
-      const title = document.createElement("h2");
-      title.textContent = "Promo Spesial";
-      container.appendChild(title);
-
-      promoList.forEach((promo, index) => {
+    function renderItem(data, container, isPromo = false) {
+      data.forEach((item, index) => {
         const div = document.createElement("div");
-        div.className = "promo-item";
+        div.className = isPromo ? "promo-item" : "menu-item";
+
+        const qtyKey = `${isPromo ? "promo" : "menu"}-${index}`;
+        keranjang[qtyKey] = 0;
 
         div.innerHTML = `
-          <img src="${promo.gambar}" alt="${promo.namaPromo}">
+          <img src="${item.gambar || ""}" alt="gambar">
           <div class="info">
-            <strong>${promo.namaPromo}</strong><br>
-            <small>${promo.deskripsi || ""}</small><br>
-            <b>Rp ${promo.harga}</b>
+            <strong>${item.nama}</strong><br/>
+            <small>${item.deskripsi || ""}</small><br/>
+            <strong>Rp ${item.harga}</strong>
           </div>
           <div class="qty-control">
-            <button onclick="ubahQty('promo', ${index}, -1)">-</button>
-            <span id="promoQty${index}">0</span>
-            <button onclick="ubahQty('promo', ${index}, 1)">+</button>
+            <button onclick="ubahQty('${qtyKey}', -1)">−</button>
+            <span id="qty-${qtyKey}">0</span>
+            <button onclick="ubahQty('${qtyKey}', 1)">+</button>
           </div>
         `;
 
@@ -88,102 +84,62 @@
       });
     }
 
-    function tampilkanMenu(menuList) {
-      const container = document.getElementById("menu-list");
-
-      menuList.forEach((menu, index) => {
-        const div = document.createElement("div");
-        div.className = "menu-item";
-
-        div.innerHTML = `
-          <img src="${menu.gambar}" alt="${menu.nama}">
-          <div class="info">
-            <strong>${menu.nama}</strong><br>
-            <small>${menu.kategori || ""}</small><br>
-            <b>Rp ${menu.harga}</b>
-          </div>
-          <div class="qty-control">
-            <button onclick="ubahQty('menu', ${index}, -1)">-</button>
-            <span id="menuQty${index}">0</span>
-            <button onclick="ubahQty('menu', ${index}, 1)">+</button>
-          </div>
-        `;
-
-        container.appendChild(div);
-      });
-    }
-
-    function ubahQty(tipe, index, delta) {
-      const cart = tipe === "promo" ? promoCart : orderCart;
-      const id = `${tipe}${index}`;
-      cart[id] = (cart[id] || 0) + delta;
-      if (cart[id] < 0) cart[id] = 0;
-      document.getElementById(`${tipe}Qty${index}`).textContent = cart[id];
-
-      localStorage.setItem("promoCart", JSON.stringify(promoCart));
-      localStorage.setItem("orderCart", JSON.stringify(orderCart));
-
+    function ubahQty(key, delta) {
+      keranjang[key] = Math.max(0, (keranjang[key] || 0) + delta);
+      document.getElementById(`qty-${key}`).textContent = keranjang[key];
       hitungTotal();
     }
 
     function hitungTotal() {
       let total = 0;
-      const promoCartData = JSON.parse(localStorage.getItem("promoCart") || "{}");
-      const orderCartData = JSON.parse(localStorage.getItem("orderCart") || "{}");
-
-      const tx = db.transaction("menuvaData", "readonly");
-      const store = tx.objectStore("menuvaData");
-      const getData = store.get("menuva");
-
-      getData.onsuccess = () => {
-        const data = getData.result;
-        const promoList = data.promo || [];
-        const menuList = data.menu || [];
-
-        for (let key in promoCartData) {
-          const index = parseInt(key.replace("promo", ""));
-          const item = promoList[index];
-          if (item) total += item.harga * promoCartData[key];
-        }
-
-        for (let key in orderCartData) {
-          const index = parseInt(key.replace("menu", ""));
-          const item = menuList[index];
-          if (item) total += item.harga * orderCartData[key];
-        }
-
-        document.getElementById("totalHarga").textContent = "Rp " + total.toLocaleString("id-ID");
-      };
+      Object.keys(keranjang).forEach(key => {
+        const [tipe, index] = key.split("-");
+        const item = dataGlobal[tipe][index];
+        total += keranjang[key] * Number(item.harga || 0);
+      });
+      document.getElementById("total-price").textContent = "Rp " + total.toLocaleString();
     }
 
     function kirimPesanan() {
-      const promoCartData = JSON.parse(localStorage.getItem("promoCart") || "{}");
-      const orderCartData = JSON.parse(localStorage.getItem("orderCart") || "{}");
+      const lines = [];
+      Object.keys(keranjang).forEach(key => {
+        if (keranjang[key] > 0) {
+          const [tipe, index] = key.split("-");
+          const item = dataGlobal[tipe][index];
+          lines.push(`- ${item.nama} x ${keranjang[key]}`);
+        }
+      });
 
-      const tx = db.transaction("menuvaData", "readonly");
-      const store = tx.objectStore("menuvaData");
-      const getData = store.get("menuva");
+      if (lines.length === 0) return alert("Keranjang masih kosong!");
 
-      getData.onsuccess = () => {
-        const data = getData.result;
-        const waNumber = data.noWA[0] || "";
-        let pesan = `Halo, saya ingin memesan:\n`;
-
-        (data.promo || []).forEach((item, i) => {
-          const qty = promoCartData[`promo${i}`];
-          if (qty) pesan += `- ${item.namaPromo} x${qty}\n`;
-        });
-
-        (data.menu || []).forEach((item, i) => {
-          const qty = orderCartData[`menu${i}`];
-          if (qty) pesan += `- ${item.nama} x${qty}\n`;
-        });
-
-        window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(pesan)}`, "_blank");
-      };
+      const text = `Halo Admin, saya ingin memesan:\n${lines.join("\n")}`;
+      const wa = dataGlobal.noWA?.[0] || "628123456789";
+      const link = `https://wa.me/${wa}?text=${encodeURIComponent(text)}`;
+      window.open(link, "_blank");
     }
 
-    openDB();
+    let dataGlobal = {};
+
+    bukaDB()
+      .then(() => ambilDataRestoran())
+      .then(data => {
+        dataGlobal = data;
+
+        const promoList = document.getElementById("promo-list");
+        const menuList = document.getElementById("menu-list");
+
+        if (data.promo && data.promo.length) {
+          renderItem(data.promo, promoList, true);
+        }
+
+        if (data.menu && data.menu.length) {
+          renderItem(data.menu, menuList, false);
+        }
+
+      })
+      .catch(err => {
+        document.body.innerHTML = "<h2 style='color:red;text-align:center;'>Gagal memuat data: " + err + "</h2>";
+      });
   </script>
 </body>
 </html>
