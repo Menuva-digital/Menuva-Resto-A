@@ -481,7 +481,7 @@
       container.appendChild(div);
     }
 
-  function tambahRoom(kategori) {
+ function tambahRoom(kategori) {
   const containerId = {
     hotel: "roomHotelContainer",
     meeting: "meetingRoomContainer",
@@ -493,26 +493,25 @@
   const container = document.getElementById(containerId);
 
   const wrapper = document.createElement("div");
-  wrapper.className = "room-item";
+  wrapper.className = "room-form"; // ✅ PENTING! agar terbaca di ambilSemuaRoom()
 
   wrapper.innerHTML = `
-    <input type="text" placeholder="Nama" />
-    <input type="number" placeholder="Harga" />
-    <textarea placeholder="Deskripsi"></textarea>
+    <input type="text" class="room-nama" placeholder="Nama" />
+    <input type="number" class="room-harga" placeholder="Harga" />
+    <textarea class="room-deskripsi" placeholder="Deskripsi"></textarea>
 
     <div class="gambar-preview-wrapper">
       <img class="gambar-preview" style="display:none;" />
       <button class="hapus-gambar" onclick="hapusGambarRoom(this)" style="display:none;">×</button>
     </div>
 
-    <button onclick="uploadGambarRoom(this)">🖼️ Upload Gambar</button>
+    <button class="room-image-upload" data-image="" onclick="uploadGambarRoom(this)">🖼️ Upload Gambar</button>
   `;
 
   container.appendChild(wrapper);
 }
 
-    
-function uploadGambarRoom(button) {
+  function uploadGambarRoom(button) {
   const input = document.createElement("input");
   input.type = "file";
   input.accept = "image/*";
@@ -524,13 +523,17 @@ function uploadGambarRoom(button) {
 
     const reader = new FileReader();
     reader.onload = function (event) {
-      const wrapper = button.closest(".room-item");
+      const wrapper = button.closest(".room-form"); // pastikan class sudah diganti
       const preview = wrapper.querySelector(".gambar-preview");
       const hapusBtn = wrapper.querySelector(".hapus-gambar");
 
-      preview.src = event.target.result;
-      preview.style.display = "block"; // ✅ ini dia
+      const imageUrl = event.target.result;
+      preview.src = imageUrl;
+      preview.style.display = "block";
       hapusBtn.style.display = "flex";
+
+      // ✅ Tambahkan ini supaya gambar tersimpan saat simpanData()
+      button.setAttribute("data-image", imageUrl);
     };
     reader.readAsDataURL(file);
   };
@@ -539,6 +542,7 @@ function uploadGambarRoom(button) {
   input.click();
   document.body.removeChild(input);
 }
+
     
 function hapusGambarRoom(button) {
   const wrapper = button.closest(".room-item");
@@ -906,6 +910,7 @@ async function loadData() {
   
 </body>
 </html>
+
 
 
 
