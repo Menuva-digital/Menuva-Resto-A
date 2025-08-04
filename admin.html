@@ -106,6 +106,50 @@
   width: 14px;
   height: 14px;
 }
+.room-section {
+  border: 1px solid #ddd;
+  padding: 16px;
+  margin-bottom: 24px;
+  border-radius: 8px;
+  background-color: #fdfdfd;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+}
+.room-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.room-form {
+  padding: 10px;
+  border: 1px dashed #ccc;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  background-color: #fff;
+}
+.room-form input[type="text"],
+.room-form input[type="number"],
+.room-form input[type="file"] {
+  display: block;
+  margin-bottom: 8px;
+  width: 100%;
+  padding: 6px;
+  font-size: 14px;
+}
+.room-form .room-preview img {
+  max-height: 80px;
+  margin-top: 4px;
+}
+.btn-hapus-gambar {
+  background: red;
+  color: white;
+  border: none;
+  padding: 2px 6px;
+  margin-left: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  border-radius: 4px;
+}
 
 
   </style>
@@ -171,28 +215,32 @@
   <div id="flipbookMenuPreview"></div>
 </div>
 
-  <h2>Input Room & Package</h2>
-<form id="formRoom" onsubmit="simpanRoom(event)">
-  <label>Nama:</label><br>
-  <input type="text" id="roomNama" required><br><br>
+<h2>Room / Package</h2>
 
-  <label>Kategori:</label><br>
-  <select id="roomKategori" required>
-    <option value="Hotel Room">Hotel Room</option>
-    <option value="Meeting Room">Meeting Room</option>
-    <option value="Package">Package</option>
-  </select><br><br>
+<!-- ROOM HOTEL -->
+<div id="roomHotelContainer" class="room-section">
+  <div class="room-section-header">
+    <h3>Room Hotel</h3>
+    <button onclick="tambahRoom('hotel')">+ Tambah Room Hotel</button>
+  </div>
+</div>
 
-  <label>Deskripsi:</label><br>
-  <textarea id="roomDeskripsi" rows="3" required></textarea><br><br>
+<!-- MEETING ROOM -->
+<div id="meetingRoomContainer" class="room-section">
+  <div class="room-section-header">
+    <h3>Meeting Room</h3>
+    <button onclick="tambahRoom('meeting')">+ Tambah Meeting Room</button>
+  </div>
+</div>
 
-  <label>Harga (dalam angka):</label><br>
-  <input type="number" id="roomHarga" required><br><br>
+<!-- PACKAGE -->
+<div id="packageContainer" class="room-section">
+  <div class="room-section-header">
+    <h3>Package</h3>
+    <button onclick="tambahRoom('package')">+ Tambah Package</button>
+  </div>
+</div>
 
-  <label>Gambar (URL atau base64):</label><br>
-  <input type="text" id="roomImage"><br><br>
-
-  <button type="submit">💾 Simpan Room/Package</button>
 </form>
 
 <hr>
@@ -406,52 +454,73 @@
       container.appendChild(div);
     }
 
-    function simpanRoom(e) {
-  e.preventDefault();
+    function tambahRoom(kategori = "hotel") {
+  const containerId = {
+    hotel: "roomHotelContainer",
+    meeting: "meetingRoomContainer",
+    package: "packageContainer",
+  }[kategori];
 
-  const data = {
-    nama: document.getElementById("roomNama").value,
-    kategori: document.getElementById("roomKategori").value,
-    deskripsi: document.getElementById("roomDeskripsi").value,
-    harga: parseInt(document.getElementById("roomHarga").value),
-    image: document.getElementById("roomImage").value
-  };
+  const container = document.getElementById(containerId);
+  const div = document.createElement("div");
+  div.className = "room-form";
 
-  const tx = db.transaction("roomData", "readwrite");
-  const store = tx.objectStore("roomData");
-  store.add(data);
+  div.innerHTML = `
+    <input type="text" placeholder="Nama Room" class="room-nama">
+    <input type="text" placeholder="Deskripsi" class="room-deskripsi">
+    <input type="number" placeholder="Harga" class="room-harga">
+    <input type="file" class="room-image-upload">
+    <div class="room-preview"></div>
+    <button onclick="this.parentElement.remove()" class="btn-danger">Hapus Room</button>
+  `;
 
-  tx.oncomplete = () => {
-    alert("✅ Data Room/Package tersimpan!");
-    document.getElementById("formRoom").reset();
-    tampilkanListRoom();
-  };
+  container.appendChild(div);
+
+  const fileInput = div.querySelector(".room-image-upload");
+  const previewDiv = div.querySelector(".room-preview");
+
+  fileInput.addEventListener("change", async function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const imgURL = await resizeIfNeeded(file);
+    previewDiv.innerHTML = `
+      <img src="${imgURL}" style="max-height:80px;">
+      <button class="btn-hapus-gambar" onclick="this.parentElement.innerHTML=''">X</button>
+    `;
+    fileInput.setAttribute("data-image", imgURL);
+  });
 }
 
-function tampilkanListRoom() {
-  const tx = db.transaction("roomData", "readonly");
-  const store = tx.objectStore("roomData");
-  const req = store.getAll();
 
-  req.onsuccess = () => {
-    const list = req.result;
-    const container = document.getElementById("listRoom");
+    function ambilSemuaRoom() {
+  const kategoriIds = [
+    { id: "roomHotelContainer", kategori: "hotel" },
+    { id: "meetingRoomContainer", kategori: "meeting" },
+    { id: "packageContainer", kategori: "package" }
+  ];
+
+  const hasil = [];
+
+  kategoriIds.forEach(({ id, kategori }) => {
+    const container = document.getElementById(id);
     if (!container) return;
-    container.innerHTML = "<h3>Data Tersimpan:</h3>";
-    list.forEach(item => {
-      container.innerHTML += `
-        <div style="border:1px solid #ccc;padding:10px;margin-bottom:10px;">
-          <b>${item.nama}</b> (${item.kategori})<br>
-          Rp${item.harga.toLocaleString()}<br>
-          <small>${item.deskripsi}</small><br>
-          ${item.image ? `<img src="${item.image}" style="max-height:80px;">` : ""}
-        </div>
-      `;
+
+    const forms = container.querySelectorAll(".room-form");
+    forms.forEach(form => {
+      const nama = form.querySelector(".room-nama")?.value || "";
+      const deskripsi = form.querySelector(".room-deskripsi")?.value || "";
+      const harga = parseInt(form.querySelector(".room-harga")?.value || "0");
+      const image = form.querySelector(".room-image-upload")?.getAttribute("data-image") || "";
+
+      if (nama && harga) {
+        hasil.push({ nama, deskripsi, harga, image, kategori });
+      }
     });
-  };
+  });
+
+  return hasil;
 }
 
-  
     // Tambah nomor WA admin
     function tambahNomorWa() {
       const container = document.getElementById("nomorWaContainer");
@@ -600,40 +669,42 @@ function tampilkanListRoom() {
     }
   
     // Simpan semua data ke IndexedDB
-    async function simpanData() {
-      try {
-        const namaRestoran = document.getElementById("namaRestoran").value;
-        const restoAddress = document.getElementById("restoAddress").value.trim();
-        const restoPhone = document.getElementById("restoPhone").value.trim();
-        const logo = document.getElementById("previewLogo").src || "";
-        const nomorWaInputs = document.querySelectorAll(".nomor-wa");
-        const nomorWaAdmin = Array.from(nomorWaInputs).map((input) => input.value);
-  
-        const menuData = [
-          ...ambilMenu("menuFoodContainer"),
-          ...ambilMenu("menuSnackContainer"),
-          ...ambilMenu("menuDrinkContainer"),
-        ];
-  
-        const data = {
-          namaRestoran,
-          restoAddress,
-          restoPhone,
-          logo,
-          nomorWaAdmin,
-          menuPromo,
-          flipbookRuanganImages,
-          flipbookMenuImages,
-          menu: menuData,
-        };
-  
-        await saveDataToDB(data);
-        alert("✅ Data berhasil disimpan");
-      } catch (error) {
-        console.error("❌ Gagal menyimpan data:", error);
-        alert("❌ Gagal menyimpan data. Cek console (F12) untuk detail error.");
-      }
-    }
+  async function simpanData() {
+  try {
+    const namaRestoran = document.getElementById("namaRestoran").value;
+    const restoAddress = document.getElementById("restoAddress").value.trim();
+    const restoPhone = document.getElementById("restoPhone").value.trim();
+    const logo = document.getElementById("previewLogo").src || "";
+    const nomorWaInputs = document.querySelectorAll(".nomor-wa");
+    const nomorWaAdmin = Array.from(nomorWaInputs).map((input) => input.value);
+
+    const menuData = [
+      ...ambilMenu("menuFoodContainer"),
+      ...ambilMenu("menuSnackContainer"),
+      ...ambilMenu("menuDrinkContainer"),
+    ];
+
+    const data = {
+      namaRestoran,
+      restoAddress,
+      restoPhone,
+      logo,
+      nomorWaAdmin,
+      menuPromo,
+      flipbookRuanganImages,
+      flipbookMenuImages,
+      menu: menuData,
+      roomData: ambilSemuaRoom()
+    };
+
+    await saveDataToDB(data);
+    alert("✅ Semua data berhasil disimpan!");
+  } catch (error) {
+    console.error("❌ Gagal menyimpan data:", error);
+    alert("❌ Gagal menyimpan data. Lihat console (F12) untuk detail.");
+  }
+}
+
   
   // Load data saat halaman dibuka
 async function loadData() {
@@ -664,6 +735,33 @@ async function loadData() {
     if (Array.isArray(data.menu)) {
       data.menu.forEach((m) => tambahMenu(m.kategori || "food", m.nama, m.harga));
     }
+    if (Array.isArray(data.roomData)) {
+  const grouped = {
+    hotel: document.getElementById("roomHotelContainer"),
+    meeting: document.getElementById("meetingRoomContainer"),
+    package: document.getElementById("packageContainer"),
+  };
+
+  data.roomData.forEach(room => {
+    tambahRoom(room.kategori);
+    const forms = grouped[room.kategori].querySelectorAll(".room-form");
+    const lastForm = forms[forms.length - 1];
+    if (!lastForm) return;
+
+    lastForm.querySelector(".room-nama").value = room.nama;
+    lastForm.querySelector(".room-deskripsi").value = room.deskripsi;
+    lastForm.querySelector(".room-harga").value = room.harga;
+    if (room.image) {
+      const preview = lastForm.querySelector(".room-preview");
+      preview.innerHTML = `
+        <img src="${room.image}" style="max-height:80px;">
+        <button class="btn-hapus-gambar" onclick="this.parentElement.innerHTML=''">X</button>
+      `;
+      lastForm.querySelector(".room-image-upload").setAttribute("data-image", room.image);
+    }
+  });
+}
+
 
     flipbookRuanganImages = data.flipbookRuanganImages || [];
     flipbookRuanganImages.forEach((src) => renderImagePreview("ruangan", src));
@@ -747,6 +845,7 @@ async function loadData() {
   
 </body>
 </html>
+
 
 
 
