@@ -57,160 +57,224 @@
     <button onclick="kirimPesananWA()">Kirim Pesanan via WA</button>
   </div>
 <script>
-  const DB_NAME = "MenuvaDB";
-  const STORE_NAME = "menuvaData";
-  const DB_VERSION = 1;
+let db;
+const DB_NAME = "MenuvaDB";
+const STORE_NAME = "menuvaData";
+const DB_VERSION = 1;
+let data = {};
+const pesanan = {};
 
-  let db;
-  let data;
-  const pesanan = {};
+document.addEventListener("DOMContentLoaded", initDB);
 
-  const menuList = document.getElementById("menu-list");
-  const totalItem = document.getElementById("total-item");
-  const totalHarga = document.getElementById("total-harga");
-  const kategoriFilter = document.getElementById("kategoriFilter");
-  const logoContainer = document.getElementById("logoContainer");
+// Inisialisasi DB & ambil data
+function initDB() {
+  const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-  // Inisialisasi IndexedDB
-  const openReq = indexedDB.open(DB_NAME, DB_VERSION);
+  request.onerror = () => {
+    console.error("❌ IndexedDB gagal dibuka");
+  };
 
-  openReq.onerror = () => alert("❌ Gagal membuka database");
-  openReq.onsuccess = (event) => {
+  request.onsuccess = (event) => {
     db = event.target.result;
     loadDataFromDB();
   };
 
-  function loadDataFromDB() {
-    const tx = db.transaction(STORE_NAME, "readonly");
-    const store = tx.objectStore(STORE_NAME);
-    const getReq = store.get(1);
+  request.onupgradeneeded = (event) => {
+    db = event.target.result;
+  };
+}
 
-    getReq.onsuccess = () => {
-      data = getReq.result;
-      if (!data || !data.menu || !data.menu.length) {
-        menuList.innerHTML = "<p>⚠️ Tidak ada menu tersedia</p>";
-        return;
-      }
+function loadDataFromDB() {
+  const tx = db.transaction(STORE_NAME, "readonly");
+  const store = tx.objectStore(STORE_NAME);
+  const getReq = store.get(1);
 
-      // Tampilkan logo
-      if (data.logo) {
-        logoContainer.innerHTML = `<img src="${data.logo}" alt="Logo Resto" />`;
-      }
-
-      // Nama Restoran
-      if (data.namaRestoran) {
-        document.getElementById("namaRestoranDisplay").textContent = data.namaRestoran;
-      }
-
-      // Isi dropdown kategori
-      const kategoriUnik = [...new Set(data.menu.map(m => m.kategori).filter(k => k && k.trim() !== ""))];
-      kategoriUnik.forEach(k => {
-        const opt = document.createElement("option");
-        opt.value = k;
-        opt.textContent = k;
-        kategoriFilter.appendChild(opt);
-      });
-
-      tampilkanMenu();
-    };
-
-    getReq.onerror = () => {
-      menuList.innerHTML = "<p>❌ Gagal mengambil data dari database</p>";
-    };
-  }
-
-  function tampilkanMenu() {
-    const kategoriDipilih = kategoriFilter.value;
-    menuList.innerHTML = "";
-
-    data.menu.forEach((item, index) => {
-      if (kategoriDipilih !== "Semua" && item.kategori !== kategoriDipilih) return;
-
-      if (pesanan[index] === undefined) pesanan[index] = 0;
-
-      const itemEl = document.createElement("div");
-      itemEl.className = "menu-item";
-      itemEl.innerHTML = `
-        <div>
-          <div class="menu-name">${item.nama}</div>
-          <div>Rp${item.harga}</div>
-        </div>
-        <div class="qty-controls">
-          <button onclick="ubahJumlah(${index}, -1)">➖</button>
-          <span id="qty-${index}">${pesanan[index]}</span>
-          <button onclick="ubahJumlah(${index}, 1)">➕</button>
-        </div>
-      `;
-      menuList.appendChild(itemEl);
-    });
-
-    updateRingkasan();
-  }
-
-  function ubahJumlah(index, delta) {
-    pesanan[index] = Math.max(0, (pesanan[index] || 0) + delta);
-    document.getElementById(`qty-${index}`).innerText = pesanan[index];
-    updateRingkasan();
-  }
-
-  function updateRingkasan() {
-    let totalQty = 0;
-    let totalHargaValue = 0;
-
-    Object.entries(pesanan).forEach(([i, jumlah]) => {
-      totalQty += jumlah;
-      totalHargaValue += jumlah * parseInt(data.menu[i].harga || 0);
-    });
-
-    totalItem.innerText = totalQty;
-    totalHarga.innerText = totalHargaValue.toLocaleString();
-  }
-
-  function kirimPesanan() {
-    const nama = document.getElementById("nama").value.trim();
-    const alamat = document.getElementById("alamat").value.trim();
-    const waktuAntar = document.getElementById("waktuAntar").value;
-    const catatan = document.getElementById("catatan").value.trim();
-    const ruangan = document.getElementById("ruangan").value.trim();
-    const now = new Date();
-    const waktuOrder = now.toLocaleString("id-ID");
-
-    let listPesanan = Object.entries(pesanan)
-      .filter(([_, jumlah]) => jumlah > 0)
-      .map(([i, jumlah]) => `${data.menu[i].nama} x${jumlah} (Rp${jumlah * parseInt(data.menu[i].harga)})`)
-      .join("\n");
-
-    if (!listPesanan) {
-      alert("Belum ada item yang dipilih.");
+  getReq.onsuccess = () => {
+    data = getReq.result;
+    if (!data) {
+      document.body.innerHTML = "<p>❌ Data belum tersedia. Silakan input dari admin.html dulu.</p>";
       return;
     }
 
-    let totalHargaAll = Object.entries(pesanan).reduce((sum, [i, jml]) => sum + (jml * parseInt(data.menu[i].harga || 0)), 0);
+    tampilkanHeader();
+    tampilkanFilterKategori();
+    tampilkanPromo();
+    tampilkanMenu();
+  };
 
-    let pesanWA = `🧾 Pesanan Baru dari ${nama || "Customer"}\n\n` +
-      `📅 Tanggal Order: ${waktuOrder}\n` +
-      (waktuAntar ? `🕒 Waktu Antar: ${new Date(waktuAntar).toLocaleString("id-ID")}\n` : "") +
-      (ruangan ? `🏨 Ruangan: ${ruangan}\n` : "") +
-      `\n📍 Alamat:\n${alamat}\n` +
-      `\n🛒 Pesanan:\n${listPesanan}\n\n` +
-      `💰 Total: Rp${totalHargaAll.toLocaleString()}\n` +
-      (catatan ? `\n📌 Catatan:\n${catatan}` : "");
+  getReq.onerror = () => {
+    console.error("❌ Gagal ambil data dari IndexedDB");
+  };
+}
 
-    const nomorAdminList = data.nomorWaAdmin || [];
-
-    if (nomorAdminList.length === 0) {
-      alert("⚠️ Tidak ada nomor admin yang tersedia.");
-      return;
-    }
-
-    nomorAdminList.forEach(nomor => {
-      const waLink = `https://wa.me/${nomor}?text=${encodeURIComponent(pesanWA)}`;
-      window.open(waLink, "_blank");
-    });
+function tampilkanHeader() {
+  if (data.logo) {
+    document.getElementById("logoContainer").innerHTML = `<img src="${data.logo}" alt="Logo Restoran" />`;
   }
+
+  const nama = data.namaRestoran || "";
+  const alamat = data.restoAddress || "";
+  const telp = data.restoPhone || "";
+  document.getElementById("namaRestoranDisplay").innerHTML = `
+    <b>${nama}</b><br>${alamat}<br>${telp}
+  `;
+}
+
+function tampilkanFilterKategori() {
+  const kategoriFilter = document.getElementById("kategoriFilter");
+  const kategoriUnik = [...new Set(data.menu.map(m => m.kategori).filter(Boolean))];
+  kategoriUnik.forEach(k => {
+    const opt = document.createElement("option");
+    opt.value = k;
+    opt.textContent = k.charAt(0).toUpperCase() + k.slice(1);
+    kategoriFilter.appendChild(opt);
+  });
+}
+
+function tampilkanPromo() {
+  if (!Array.isArray(data.menuPromo) || data.menuPromo.length === 0) return;
+
+  const promoContainer = document.createElement("div");
+  promoContainer.innerHTML = `<h2>🔥 Promo Spesial</h2>`;
+  data.menuPromo.forEach((promo) => {
+    const div = document.createElement("div");
+    div.style.marginBottom = "10px";
+    div.innerHTML = `
+      ${promo.image ? `<img src="${promo.image}" style="max-width:100px;max-height:100px;">` : ""}
+      <div><b>${promo.namaPromo}</b> - ${promo.namaMenu}</div>
+      <div>${promo.deskripsi}</div>
+      <div>Rp${promo.harga?.toLocaleString() || "0"} | Berlaku s.d ${promo.tanggalAkhir}</div>
+      <hr>
+    `;
+    promoContainer.appendChild(div);
+  });
+
+  document.body.insertBefore(promoContainer, document.getElementById("menu-list"));
+}
+
+function tampilkanMenu() {
+  const kategoriDipilih = document.getElementById("kategoriFilter").value || "Semua";
+  const menuList = document.getElementById("menu-list");
+  menuList.innerHTML = "";
+
+  data.menu.forEach((item, index) => {
+    if (kategoriDipilih !== "Semua" && item.kategori !== kategoriDipilih) return;
+
+    if (pesanan[index] === undefined) pesanan[index] = 0;
+
+    const itemEl = document.createElement("div");
+    itemEl.className = "menu-item";
+    itemEl.innerHTML = `
+      <div>
+        <div class="menu-name">${item.nama}</div>
+        <div>Rp${parseInt(item.harga).toLocaleString()}</div>
+      </div>
+      <div class="qty-controls">
+        <button onclick="ubahJumlah(${index}, -1)">➖</button>
+        <span id="qty-${index}">${pesanan[index]}</span>
+        <button onclick="ubahJumlah(${index}, 1)">➕</button>
+      </div>
+    `;
+    menuList.appendChild(itemEl);
+  });
+
+  updateRingkasan();
+}
+
+function ubahJumlah(index, delta) {
+  pesanan[index] = Math.max(0, (pesanan[index] || 0) + delta);
+  document.getElementById(`qty-${index}`).innerText = pesanan[index];
+  updateRingkasan();
+}
+
+function updateRingkasan() {
+  let totalQty = 0;
+  let totalHargaValue = 0;
+
+  Object.entries(pesanan).forEach(([i, jumlah]) => {
+    totalQty += jumlah;
+    totalHargaValue += jumlah * parseInt(data.menu[i].harga || 0);
+  });
+
+  document.getElementById("total-item").innerText = totalQty;
+  document.getElementById("total-harga").innerText = totalHargaValue.toLocaleString();
+}
+
+function tampilkanMenu() {
+  const kategoriDipilih = document.getElementById("kategoriFilter").value;
+  const menuList = document.getElementById("menu-list");
+  menuList.innerHTML = "";
+
+  data.menu.forEach((item, index) => {
+    if (kategoriDipilih !== "Semua" && item.kategori !== kategoriDipilih) return;
+
+    if (pesanan[index] === undefined) pesanan[index] = 0;
+
+    const itemEl = document.createElement("div");
+    itemEl.className = "menu-item";
+    itemEl.innerHTML = `
+      <div>
+        <div class="menu-name">${item.nama}</div>
+        <div>Rp${item.harga.toLocaleString()}</div>
+      </div>
+      <div class="qty-controls">
+        <button onclick="ubahJumlah(${index}, -1)">➖</button>
+        <span id="qty-${index}">${pesanan[index]}</span>
+        <button onclick="ubahJumlah(${index}, 1)">➕</button>
+      </div>
+    `;
+    menuList.appendChild(itemEl);
+  });
+
+  updateRingkasan();
+}
+
+function kirimPesanan() {
+  const nama = document.getElementById("nama").value.trim();
+  const alamat = document.getElementById("alamat").value.trim();
+  const waktuAntar = document.getElementById("waktuAntar").value;
+  const catatan = document.getElementById("catatan").value.trim();
+  const ruangan = document.getElementById("ruangan").value.trim();
+  const now = new Date();
+  const waktuOrder = now.toLocaleString("id-ID");
+
+  let listPesanan = Object.entries(pesanan)
+    .filter(([_, jumlah]) => jumlah > 0)
+    .map(([i, jumlah]) => `${data.menu[i].nama} x${jumlah} (Rp${jumlah * parseInt(data.menu[i].harga)})`)
+    .join("\n");
+
+  if (!listPesanan) {
+    alert("Belum ada item yang dipilih.");
+    return;
+  }
+
+  let totalHargaAll = Object.entries(pesanan).reduce((sum, [i, jml]) => sum + (jml * parseInt(data.menu[i].harga || 0)), 0);
+
+  let pesanWA = `🧾 Pesanan Baru dari ${nama || "Customer"}\n\n` +
+    `📅 Tanggal Order: ${waktuOrder}\n` +
+    (waktuAntar ? `🕒 Waktu Antar: ${new Date(waktuAntar).toLocaleString("id-ID")}\n` : "") +
+    (ruangan ? `🏨 Ruangan: ${ruangan}\n` : "") +
+    `\n📍 Alamat:\n${alamat}\n` +
+    `\n🛒 Pesanan:\n${listPesanan}\n\n` +
+    `💰 Total: Rp${totalHargaAll.toLocaleString()}\n` +
+    (catatan ? `\n📌 Catatan:\n${catatan}` : "");
+
+  const nomorAdminList = data.nomorWaAdmin || [];
+
+  if (nomorAdminList.length === 0) {
+    alert("⚠️ Tidak ada nomor admin yang tersedia.");
+    return;
+  }
+
+  nomorAdminList.forEach(nomor => {
+    const waLink = `https://wa.me/${nomor}?text=${encodeURIComponent(pesanWA)}`;
+    window.open(waLink, "_blank");
+  });
+}
 </script>
 
 </body>
 </html>
+
 
 
