@@ -123,10 +123,13 @@
 }
 
 .gambar-preview {
-  max-height: 150px;
-  max-width: 100%;     /* biar responsif */
-  object-fit: contain; /* biar proporsional */
+  height: auto !important;
+  width: auto !important;
+  max-height: 200px !important; /* Ubah sesuai keinginan */
+  max-width: 100% !important;
+  display: block;
 }
+
 
 
 .hapus-gambar {
@@ -478,30 +481,36 @@
       container.appendChild(div);
     }
 
-    function tambahRoom(kategori) {
+  function tambahRoom(kategori) {
   const containerId = {
     hotel: "roomHotelContainer",
     meeting: "meetingRoomContainer",
-    package: "packageContainer",
+    package: "packageContainer"
   }[kategori];
 
+  if (!containerId) return;
+
   const container = document.getElementById(containerId);
-  const div = document.createElement("div");
-  div.className = "room-item";
-  div.innerHTML = `
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "room-item";
+
+  wrapper.innerHTML = `
     <input type="text" placeholder="Nama" />
     <input type="number" placeholder="Harga" />
     <textarea placeholder="Deskripsi"></textarea>
 
     <div class="gambar-preview-wrapper">
-      <img class="gambar-preview" style="display:none; max-height:80px;" />
-      <button class="hapus-gambar" onclick="hapusGambarRoom(this)" style="display:none;">❌</button>
+      <img class="gambar-preview" style="display:none;" />
+      <button class="hapus-gambar" onclick="hapusGambarRoom(this)" style="display:none;">×</button>
     </div>
 
     <button onclick="uploadGambarRoom(this)">🖼️ Upload Gambar</button>
   `;
-  container.appendChild(div);
+
+  container.appendChild(wrapper);
 }
+
     
 function uploadGambarRoom(button) {
   const input = document.createElement("input");
@@ -885,6 +894,7 @@ async function loadData() {
   
 </body>
 </html>
+
 
 
 
