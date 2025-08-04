@@ -106,13 +106,13 @@
   width: 14px;
   height: 14px;
 }
-.room-section {
-  border: 1px solid #ddd;
-  padding: 16px;
-  margin-bottom: 24px;
-  border-radius: 8px;
-  background-color: #fdfdfd;
-  box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+.room-section > div:nth-child(2) button {
+  padding: 6px 14px;
+  border-radius: 6px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
 }
 .room-section-header {
   display: flex;
@@ -215,30 +215,27 @@
   <div id="flipbookMenuPreview"></div>
 </div>
 
-<h2>Room / Package</h2>
+<h2>🏨 Room / Package</h2>
 
-<!-- ROOM HOTEL -->
-<div id="roomHotelContainer" class="room-section">
-  <div class="room-section-header">
-    <h3>Room Hotel</h3>
-    <button onclick="tambahRoom('hotel')">+ Tambah Room Hotel</button>
-  </div>
+<div class="room-section-header">
+  <h3>🛏️ Room Hotel</h3>
+</div>
+<div style="margin-bottom: 10px;">
+  <button onclick="tambahRoom('hotel')">+ Tambah Room Hotel</button>
 </div>
 
-<!-- MEETING ROOM -->
-<div id="meetingRoomContainer" class="room-section">
-  <div class="room-section-header">
-    <h3>Meeting Room</h3>
-    <button onclick="tambahRoom('meeting')">+ Tambah Meeting Room</button>
-  </div>
+<div class="room-section-header">
+  <h3>💼 Meeting Room</h3>
+</div>
+<div style="margin-bottom: 10px;">
+  <button onclick="tambahRoom('meeting')">+ Tambah Meeting Room</button>
 </div>
 
-<!-- PACKAGE -->
-<div id="packageContainer" class="room-section">
-  <div class="room-section-header">
-    <h3>Package</h3>
-    <button onclick="tambahRoom('package')">+ Tambah Package</button>
-  </div>
+<div class="room-section-header">
+  <h3>🎁 Package</h3>
+</div>
+<div style="margin-bottom: 10px;">
+  <button onclick="tambahRoom('package')">+ Tambah Package</button>
 </div>
 
 </form>
@@ -845,6 +842,7 @@ async function loadData() {
   
 </body>
 </html>
+
 
 
 
