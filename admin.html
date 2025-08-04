@@ -519,8 +519,8 @@ function uploadGambarRoom(button) {
       const hapusBtn = wrapper.querySelector(".hapus-gambar");
 
       preview.src = event.target.result;
-      previewImg.style.display = "block";
-      hapusBtn.style.display = "flex"; // biar aktif
+      preview.style.display = "block"; // ✅ ini dia
+      hapusBtn.style.display = "flex";
     };
     reader.readAsDataURL(file);
   };
@@ -528,15 +528,6 @@ function uploadGambarRoom(button) {
   document.body.appendChild(input);
   input.click();
   document.body.removeChild(input);
-}
-
-function hapusGambarRoom(button) {
-  const wrapper = button.closest(".room-item");
-  const preview = wrapper.querySelector(".gambar-preview");
-
-  preview.src = "";
-  preview.style.display = "none";
-  button.style.display = "none";
 }
 
     
@@ -893,6 +884,7 @@ async function loadData() {
   
 </body>
 </html>
+
 
 
 
