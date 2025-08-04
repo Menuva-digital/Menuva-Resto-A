@@ -46,6 +46,7 @@ h1 {
 .menu-item {
   border: 1px solid #ddd;
   padding: 15px;
+  text-align: center;
   width: 250px;
   border-radius: 10px;
   background: white;
@@ -183,6 +184,22 @@ h1 {
   background-color: #ccc;
   color: #333;
 }
+    .contact-info {
+  font-size: 14px;
+  color: #666;
+  background: #f3f3f3;
+  padding: 10px;
+  margin-top: 5px;
+  border-radius: 6px;
+  display: inline-block;
+  text-align: center;
+}
+
+.menu-item .menu-name,
+.menu-item .menu-price {
+  text-align: center;
+  display: block;
+}
 
   </style>
 </head>
@@ -190,8 +207,10 @@ h1 {
 <div class="header">
     <div id="logoContainer"></div>
     <h1 id="namaRestoranDisplay"></h1>
-    <p id="alamatRestoranDisplay"></p>
-    <p id="teleponRestoranDisplay"></p>
+    <div class="contact-info">
+     <p id="alamatRestoranDisplay"></p>
+     <p id="teleponRestoranDisplay"></p>
+   </div>
   </div>
 
   <div id="promoContainer"></div>
@@ -287,9 +306,10 @@ function tampilkanHeader() {
   const nama = data.namaRestoran || "";
   const alamat = data.restoAddress || "";
   const telp = data.restoPhone || "";
-  document.getElementById("namaRestoranDisplay").innerHTML = `
-    <b>${nama}</b><br>${alamat}<br>${telp}
-  `;
+
+  document.getElementById("namaRestoranDisplay").textContent = nama;
+  document.getElementById("alamatRestoranDisplay").textContent = alamat;
+  document.getElementById("teleponRestoranDisplay").textContent = telp;
 }
 
 function tampilkanFilterKategori() {
@@ -352,17 +372,18 @@ function tampilkanMenu() {
 
     const itemEl = document.createElement("div");
     itemEl.className = "menu-item";
+    itemEl.style.textAlign = "center";
+
     itemEl.innerHTML = `
-      <div>
-        <div class="menu-name">${item.nama}</div>
-        <div>Rp${parseInt(item.harga).toLocaleString()}</div>
-      </div>
+      <div class="menu-name">${item.nama}</div>
+      <div style="margin: 5px 0;">Rp${parseInt(item.harga).toLocaleString()}</div>
       <div class="qty-controls">
         <button onclick="ubahJumlah(${index}, -1)">➖</button>
         <span id="qty-${index}">${pesanan[index]}</span>
         <button onclick="ubahJumlah(${index}, 1)">➕</button>
       </div>
     `;
+
     menuList.appendChild(itemEl);
   });
 
@@ -474,6 +495,7 @@ function kirimPesanan() {
 
 </body>
 </html>
+
 
 
 
