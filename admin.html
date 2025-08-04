@@ -539,6 +539,18 @@ function uploadGambarRoom(button) {
   input.click();
   document.body.removeChild(input);
 }
+    
+function hapusGambarRoom(button) {
+  const wrapper = button.closest(".room-item");
+  const preview = wrapper.querySelector(".gambar-preview");
+
+  // Kosongkan src dan sembunyikan preview
+  preview.src = "";
+  preview.style.display = "none";
+
+  // Sembunyikan tombol ❌ juga
+  button.style.display = "none";
+}
 
     
     function ambilSemuaRoom() {
@@ -894,6 +906,7 @@ async function loadData() {
   
 </body>
 </html>
+
 
 
 
