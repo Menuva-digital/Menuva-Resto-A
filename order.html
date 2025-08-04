@@ -70,90 +70,81 @@
       max-width: 100px;
       max-height: 100px;
     }
-    /* Container promo */
+  /* Container promo */
 #promo-list {
   display: flex;
-  flex-wrap: wrap;      /* agar promo bisa pindah baris */
+  flex-wrap: wrap;
   justify-content: center;
-  gap: 15px;            /* jarak antar promo */
+  gap: 20px;
   padding: 10px;
 }
 
-/* Tiap kartu promo */
+/* Kartu promo */
 .promo-card {
-  display: flex;
-  flex-direction: row;  /* gambar di kiri, teks di kanan */
-  align-items: center;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 10px;
-  width: 100%;          /* default full lebar */
-  max-width: 480px;     /* max lebar supaya gak terlalu lebar di desktop */
-  box-sizing: border-box;
+  width: 100%;
+  max-width: 320px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
-/* Gambar promo */
+/* Gambar */
 .promo-card img {
-  width: 100px;
-  height: 100px;
-  object-fit: contain;
-  margin-right: 15px;
-  flex-shrink: 0;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  display: block;
 }
 
-/* Isi teks promo */
-.promo-card div {
-  flex: 1;
+/* Konten dalam kartu */
+.promo-content {
+  padding: 10px;
 }
 
-/* Responsive: di layar kecil (portrait) ubah layout jadi kolom */
-@media (max-width: 480px) {
-  .promo-card {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .promo-card img {
-    margin-right: 0;
-    margin-bottom: 10px;
-    width: 100%;
-    height: auto;
-  }
-}
-.promo-info h3 {
-  margin: 0 0 5px;
-  font-size: 16px;
+.promo-title {
   font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 5px;
 }
 
-.promo-info p {
-  margin: 0 0 5px;
+.promo-desc {
   font-size: 14px;
+  color: #555;
+  margin-bottom: 5px;
 }
 
-.promo-info .harga {
-  color: green;
+.promo-price {
+  font-size: 16px;
+  color: #009688;
   font-weight: bold;
   margin-bottom: 10px;
 }
 
-.qty-control {
+/* Qty */
+.promo-qty {
   display: flex;
+  justify-content: center;
   align-items: center;
   gap: 8px;
+  margin-bottom: 10px;
 }
 
-.qty-control button {
-  width: 32px;
-  height: 32px;
-  font-size: 18px;
-  background-color: #eee;
+.promo-qty button {
+  width: 30px;
+  height: 30px;
   border: none;
+  background-color: #009688;
+  color: #fff;
+  font-size: 18px;
   border-radius: 4px;
   cursor: pointer;
 }
 
-.qty-control input {
-  width: 40px;
+.promo-qty span {
+  min-width: 24px;
   text-align: center;
   font-size: 16px;
 }
@@ -339,102 +330,115 @@ if (data.menuPromo && data.menuPromo.length) {
   promoContainer.appendChild(judul);
 
   promoList.forEach((promo, index) => {
-    console.log("PROMO ITEM:", promo);
-    const card = document.createElement("div");
-    card.className = "promo-card";
-    card.style.border = "1px solid #ccc";
-    card.style.borderRadius = "8px";
-    card.style.margin = "10px 0";
-    card.style.padding = "10px";
-    card.style.display = "flex";
-    card.style.alignItems = "center";
+  const card = document.createElement("div");
+  card.className = "promo-card";
+  card.style.border = "1px solid #ccc";
+  card.style.borderRadius = "12px";
+  card.style.margin = "15px 0";
+  card.style.padding = "10px";
+  card.style.background = "#fff";
+  card.style.boxShadow = "0 2px 8px rgba(0,0,0,0.05)";
+  card.style.display = "flex";
+  card.style.flexDirection = "column";
+  card.style.alignItems = "center";
 
-    const img = document.createElement("img");
-    img.src = promo.image;
-    img.alt = promo.namaPromo;
-    img.style.width = "80px";
-    img.style.height = "80px";
-    img.style.objectFit = "contain";
-    img.style.marginRight = "10px";
+  const img = document.createElement("img");
+  img.src = promo.image;
+  img.alt = promo.namaPromo;
+  img.style.width = "100%";
+  img.style.maxWidth = "300px";
+  img.style.borderRadius = "8px";
+  img.style.objectFit = "cover";
+  img.style.marginBottom = "10px";
 
-    const isi = document.createElement("div");
-    isi.style.flex = "1";
+  const nama = document.createElement("h4");
+  nama.textContent = promo.namaPromo;
+  nama.style.margin = "5px 0 5px 0";
+  nama.style.textAlign = "center";
 
-    const nama = document.createElement("h4");
-    nama.textContent = promo.namaPromo;
-    nama.style.margin = "0 0 5px 0";
+  const namaMenu = document.createElement("p");
+  namaMenu.textContent = "🍽 " + (promo.namaMenu || "-");
+  namaMenu.style.margin = "0";
+  namaMenu.style.fontStyle = "italic";
+  namaMenu.style.fontSize = "14px";
+  namaMenu.style.textAlign = "center";
 
-    const namaMenu = document.createElement("p");
-    namaMenu.textContent = "🍽 " + (promo.namaMenu || "-");
-    namaMenu.style.margin = "0 0 5px 0";
-    namaMenu.style.fontStyle = "italic";
-    namaMenu.style.fontSize = "14px";
+  const deskripsi = document.createElement("p");
+  deskripsi.textContent = promo.deskripsi || "-";
+  deskripsi.style.margin = "5px 0";
+  deskripsi.style.fontSize = "13px";
+  deskripsi.style.color = "#555";
+  deskripsi.style.textAlign = "center";
 
-    const deskripsi = document.createElement("p");
-    deskripsi.textContent = promo.deskripsi || "-";
-    deskripsi.style.margin = "0 0 10px 0";
-    deskripsi.style.fontSize = "13px";
-    deskripsi.style.color = "#555";
+  const hargaValue = parseInt(promo.hargaPromo || promo.harga || 0);
+  const harga = document.createElement("p");
+  harga.textContent = "Rp " + hargaValue.toLocaleString();
+  harga.style.fontWeight = "bold";
+  harga.style.margin = "5px 0";
+  harga.style.textAlign = "center";
 
-    const hargaValue = parseInt(promo.hargaPromo || promo.harga || 0);
-    const harga = document.createElement("p");
-    harga.textContent = "Rp " + hargaValue.toLocaleString();
-    harga.style.margin = "0 0 5px 0";
+  // 🔁 Buat tombol - qty +
+  const qtyWrapper = document.createElement("div");
+  qtyWrapper.className = "qty-wrapper";
+  qtyWrapper.style.display = "flex";
+  qtyWrapper.style.alignItems = "center";
+  qtyWrapper.style.justifyContent = "center";
+  qtyWrapper.style.gap = "10px";
+  qtyWrapper.style.marginTop = "8px";
 
-    // 🔁 Buat tombol - qty +
-    const qtyWrapper = document.createElement("div");
-    qtyWrapper.className = "qty-wrapper";
-    qtyWrapper.style.display = "flex";
-    qtyWrapper.style.alignItems = "center";
-    qtyWrapper.style.gap = "10px";
+  const btnMinus = document.createElement("button");
+  btnMinus.textContent = "−";
+  btnMinus.style.padding = "4px 12px";
+  btnMinus.style.fontSize = "18px";
+  btnMinus.style.borderRadius = "5px";
+  btnMinus.style.border = "1px solid #888";
 
-    const btnMinus = document.createElement("button");
-    btnMinus.textContent = "−";
-    btnMinus.style.padding = "4px 10px";
-    btnMinus.style.fontSize = "16px";
+  const qtyDisplay = document.createElement("span");
+  qtyDisplay.textContent = "0";
+  qtyDisplay.dataset.nama = promo.namaPromo;
+  qtyDisplay.dataset.harga = hargaValue;
+  qtyDisplay.classList.add("qty-promo");
+  qtyDisplay.style.fontSize = "16px";
+  qtyDisplay.style.minWidth = "20px";
+  qtyDisplay.style.textAlign = "center";
 
-    const qtyDisplay = document.createElement("span");
-    qtyDisplay.textContent = "0";
-    qtyDisplay.dataset.nama = promo.namaPromo;
-    qtyDisplay.dataset.harga = hargaValue;
-    qtyDisplay.classList.add("qty-promo");
+  const btnPlus = document.createElement("button");
+  btnPlus.textContent = "+";
+  btnPlus.style.padding = "4px 12px";
+  btnPlus.style.fontSize = "18px";
+  btnPlus.style.borderRadius = "5px";
+  btnPlus.style.border = "1px solid #888";
 
-    const btnPlus = document.createElement("button");
-    btnPlus.textContent = "+";
-    btnPlus.style.padding = "4px 10px";
-    btnPlus.style.fontSize = "16px";
-
-    // 🔁 Event listener tombol
-    btnMinus.addEventListener("click", () => {
-      let currentQty = parseInt(qtyDisplay.textContent);
-      if (currentQty > 0) {
-        qtyDisplay.textContent = currentQty - 1;
-        updatePromoCart(promo.namaPromo, hargaValue, currentQty - 1);
-      }
-    });
-
-    btnPlus.addEventListener("click", () => {
-      let currentQty = parseInt(qtyDisplay.textContent);
-      qtyDisplay.textContent = currentQty + 1;
-      updatePromoCart(promo.namaPromo, hargaValue, currentQty + 1);
-    });
-
-    qtyWrapper.appendChild(btnMinus);
-    qtyWrapper.appendChild(qtyDisplay);
-    qtyWrapper.appendChild(btnPlus);
-
-    // 🧱 Susun isi card
-    isi.appendChild(nama);
-    isi.appendChild(namaMenu);
-    isi.appendChild(deskripsi);
-    isi.appendChild(harga);
-    isi.appendChild(qtyWrapper);
-
-    card.appendChild(img);
-    card.appendChild(isi);
-    promoContainer.appendChild(card);
+  // 🔁 Event listener tombol
+  btnMinus.addEventListener("click", () => {
+    let currentQty = parseInt(qtyDisplay.textContent);
+    if (currentQty > 0) {
+      qtyDisplay.textContent = currentQty - 1;
+      updatePromoCart(promo.namaPromo, hargaValue, currentQty - 1);
+    }
   });
-}
+
+  btnPlus.addEventListener("click", () => {
+    let currentQty = parseInt(qtyDisplay.textContent);
+    qtyDisplay.textContent = currentQty + 1;
+    updatePromoCart(promo.namaPromo, hargaValue, currentQty + 1);
+  });
+
+  qtyWrapper.appendChild(btnMinus);
+  qtyWrapper.appendChild(qtyDisplay);
+  qtyWrapper.appendChild(btnPlus);
+
+  // 🧱 Susun isi card
+  card.appendChild(img);
+  card.appendChild(nama);
+  card.appendChild(namaMenu);
+  card.appendChild(deskripsi);
+  card.appendChild(harga);
+  card.appendChild(qtyWrapper);
+
+  promoContainer.appendChild(card);
+});
+
 function updatePromoCart(namaPromo, harga, qty) {
   let cart = JSON.parse(localStorage.getItem("promoCart") || "[]");
 
@@ -564,6 +568,7 @@ function kirimPesanan() {
   </script>
 </body>
 </html>
+
 
 
 
