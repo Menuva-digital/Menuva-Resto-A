@@ -42,6 +42,11 @@
     <span id="alamatRestoran">Alamat Restoran</span><br>
     <span id="noWaRestoran">No. WhatsApp</span>
   </div>
+  
+  <img id="logoRestoran" alt="Logo Restoran" style="max-height:80px;" />
+ <h2 id="namaRestoran"></h2>
+ <p id="alamatRestoran"></p>
+ <p id="teleponRestoran"></p>
 
   <div id="menuList"></div>
 
@@ -51,119 +56,47 @@
     <p>Total: <span id="totalHarga">Rp 0</span></p>
     <button onclick="kirimPesananWA()">Kirim Pesanan via WA</button>
   </div>
-
   <script>
-    let db;
+  function getDataFromDB() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open("menuvaDB", 1);
 
-    function bukaDB() {
-      return new Promise((resolve, reject) => {
-        const request = indexedDB.open("menuvaDB", 1);
+      request.onerror = () => reject("❌ Gagal membuka database");
 
-        request.onsuccess = (event) => {
-          db = event.target.result;
-          resolve(db);
+      request.onsuccess = () => {
+        const db = request.result;
+        const transaction = db.transaction(["menuvaData"], "readonly");
+        const objectStore = transaction.objectStore("menuvaData");
+        const getRequest = objectStore.get("menuva");
+
+        getRequest.onsuccess = () => {
+          if (getRequest.result) {
+            resolve(getRequest.result);
+          } else {
+            reject("❌ Data tidak ditemukan");
+          }
         };
 
-        request.onerror = (event) => {
-          reject("Gagal membuka database");
-        };
-      });
-    }
+        getRequest.onerror = () => reject("❌ Gagal mengambil data");
+      };
+    });
+  }
 
-    function ambilData() {
-      return new Promise((resolve, reject) => {
-        const transaksi = db.transaction(["menuvaData"], "readonly");
-        const store = transaksi.objectStore("menuvaData");
-        const request = store.get("menuva");
+  window.onload = () => {
+    getDataFromDB().then(data => {
+      // Tampilkan info restoran
+      document.getElementById("namaRestoran").textContent = data.namaRestoran || "";
+      document.getElementById("alamatRestoran").textContent = data.restoAddress || "";
+      document.getElementById("teleponRestoran").textContent = data.restoPhone || "";
+      document.getElementById("logoRestoran").src = data.logo || "";
 
-        request.onsuccess = (event) => {
-          const data = event.target.result;
-          if (data) resolve(data);
-          else reject("Data tidak ditemukan");
-        };
-
-        request.onerror = () => reject("Gagal mengambil data");
-      });
-    }
-
-    function renderMenu(menuArray) {
-      const menuList = document.getElementById("menuList");
-      menuList.innerHTML = "";
-      menuArray.forEach((menu, index) => {
-        const item = document.createElement("div");
-        item.className = "menu-item";
-        item.innerHTML = `
-          <strong>${menu.nama}</strong><br>
-          <em>${menu.kategori}</em><br>
-          <span>Rp ${menu.harga}</span><br>
-          <div class="qty-controls">
-            <button onclick="ubahQty(${index}, -1)">-</button>
-            <input type="number" id="qty-${index}" value="0" min="0" readonly style="width: 30px; text-align: center;" />
-            <button onclick="ubahQty(${index}, 1)">+</button>
-          </div>
-        `;
-        menuList.appendChild(item);
-      });
-    }
-
-    let pesanan = [];
-
-    function ubahQty(index, delta) {
-      const input = document.getElementById(`qty-${index}`);
-      let val = parseInt(input.value) + delta;
-      if (val < 0) val = 0;
-      input.value = val;
-      pesanan[index] = val;
-      updateRingkasan();
-    }
-
-    function updateRingkasan() {
-      const list = document.getElementById("orderList");
-      list.innerHTML = "";
-      let total = 0;
-      pesanan.forEach((qty, i) => {
-        if (qty > 0) {
-          const nama = window.menuData[i].nama;
-          const harga = window.menuData[i].harga;
-          const li = document.createElement("li");
-          li.textContent = `${nama} x ${qty} = Rp ${harga * qty}`;
-          list.appendChild(li);
-          total += harga * qty;
-        }
-      });
-      document.getElementById("totalHarga").textContent = `Rp ${total}`;
-    }
-
-    function kirimPesananWA() {
-      let pesan = "Pesanan:%0A";
-      let total = 0;
-      pesanan.forEach((qty, i) => {
-        if (qty > 0) {
-          const nama = window.menuData[i].nama;
-          const harga = window.menuData[i].harga;
-          pesan += `- ${nama} x ${qty} = Rp ${harga * qty}%0A`;
-          total += harga * qty;
-        }
-      });
-      pesan += `%0ATotal: Rp ${total}`;
-      const nomor = document.getElementById("noWaRestoran").textContent.replace(/[^0-9]/g, "");
-      window.open(`https://wa.me/${nomor}?text=${pesan}`);
-    }
-
-    bukaDB()
-      .then(() => ambilData())
-      .then(data => {
-        document.getElementById("logo").src = data.logo;
-        document.getElementById("namaRestoran").textContent = data.namaRestoran;
-        document.getElementById("alamatRestoran").textContent = data.alamat;
-        document.getElementById("noWaRestoran").textContent = data.nomorWaAdmin;
-        window.menuData = data.menu || [];
-        pesanan = new Array(window.menuData.length).fill(0);
-        renderMenu(window.menuData);
-      })
-      .catch(err => {
-        alert("Gagal memuat data: " + err);
-      });
-  </script>
+      // Tambahan: Bisa lanjut render menu dan promo di sini juga
+    }).catch(error => {
+      console.error(error);
+      alert(error);
+    });
+  };
+</script>
 </body>
 </html>
+
