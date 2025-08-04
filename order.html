@@ -108,6 +108,24 @@ h1 {
 .submit-btn:hover {
   background: darkgreen;
 }
+    .section-title {
+  text-align: center;
+  font-size: 22px;
+  margin: 30px 0 15px;
+  font-weight: bold;
+}
+
+.promo-item {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.promo-item img {
+  display: block;
+  margin: 0 auto 10px;
+  max-width: 100px;
+  max-height: 100px;
+}
+
 
   </style>
 </head>
@@ -119,6 +137,8 @@ h1 {
     <p id="teleponRestoranDisplay"></p>
   </div>
 
+  <div id="promoContainer"></div>
+
   <div class="filter-container">
     <label for="kategoriFilter">Filter Menu:</label>
     <select id="kategoriFilter" onchange="tampilkanMenu()">
@@ -126,8 +146,7 @@ h1 {
     </select>
   </div>
 
-  <div id="promoContainer"></div>
-
+  <h2 class="section-title">🍽️ Reguler Menu</h2>
   <div id="menu-list" class="menu-grid"></div>
 
   <div class="order-summary">
@@ -226,27 +245,26 @@ function tampilkanFilterKategori() {
     kategoriFilter.appendChild(opt);
   });
 }
-
 function tampilkanPromo() {
   if (!Array.isArray(data.menuPromo) || data.menuPromo.length === 0) return;
 
-  const promoContainer = document.createElement("div");
-  promoContainer.innerHTML = `<h2>🔥 Promo Spesial</h2>`;
+  const promoContainer = document.getElementById("promoContainer");
+  promoContainer.innerHTML = `<h2 class="section-title">🔥 Promo Spesial</h2>`;
+
   data.menuPromo.forEach((promo) => {
     const div = document.createElement("div");
-    div.style.marginBottom = "10px";
+    div.className = "promo-item";
     div.innerHTML = `
-      ${promo.image ? `<img src="${promo.image}" style="max-width:100px;max-height:100px;">` : ""}
+      ${promo.image ? `<img src="${promo.image}" alt="Promo">` : ""}
       <div><b>${promo.namaPromo}</b> - ${promo.namaMenu}</div>
       <div>${promo.deskripsi}</div>
       <div>Rp${promo.harga?.toLocaleString() || "0"} | Berlaku s.d ${promo.tanggalAkhir}</div>
-      <hr>
     `;
     promoContainer.appendChild(div);
   });
-
-  document.body.insertBefore(promoContainer, document.getElementById("menu-list"));
 }
+
+
 function tampilkanMenu() {
   const kategoriDipilih = document.getElementById("kategoriFilter").value || "Semua";
   const menuList = document.getElementById("menu-list");
@@ -342,6 +360,7 @@ function kirimPesanan() {
 
 </body>
 </html>
+
 
 
 
