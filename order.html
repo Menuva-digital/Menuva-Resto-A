@@ -302,8 +302,6 @@ if (data.menuPromo && data.menuPromo.length) {
 
   promoList.forEach((promo, index) => {
     console.log("PROMO ITEM:", promo);
-    console.log("🖼️ Gambar promo:", promo.gambar); // ✅ Tambahan log
-
     const card = document.createElement("div");
     card.className = "promo-card";
     card.style.border = "1px solid #ccc";
@@ -341,33 +339,81 @@ if (data.menuPromo && data.menuPromo.length) {
     deskripsi.style.color = "#555";
 
     const hargaValue = parseInt(promo.hargaPromo || promo.harga || 0);
-    console.log("📦 hargaPromo:", promo.hargaPromo, "harga:", promo.harga, "→ hargaValue:", hargaValue);
-
     const harga = document.createElement("p");
     harga.textContent = "Rp " + hargaValue.toLocaleString();
     harga.style.margin = "0 0 5px 0";
 
-    const qtyInput = document.createElement("input");
-    qtyInput.type = "number";
-    qtyInput.min = "0";
-    qtyInput.value = "0";
-    qtyInput.dataset.nama = promo.namaPromo;
-    qtyInput.dataset.harga = hargaValue;
-    qtyInput.classList.add("qty-promo");
-    qtyInput.style.width = "60px";
+    // 🔁 Buat tombol - qty +
+    const qtyWrapper = document.createElement("div");
+    qtyWrapper.className = "qty-wrapper";
+    qtyWrapper.style.display = "flex";
+    qtyWrapper.style.alignItems = "center";
+    qtyWrapper.style.gap = "10px";
 
+    const btnMinus = document.createElement("button");
+    btnMinus.textContent = "−";
+    btnMinus.style.padding = "4px 10px";
+    btnMinus.style.fontSize = "16px";
+
+    const qtyDisplay = document.createElement("span");
+    qtyDisplay.textContent = "0";
+    qtyDisplay.dataset.nama = promo.namaPromo;
+    qtyDisplay.dataset.harga = hargaValue;
+    qtyDisplay.classList.add("qty-promo");
+
+    const btnPlus = document.createElement("button");
+    btnPlus.textContent = "+";
+    btnPlus.style.padding = "4px 10px";
+    btnPlus.style.fontSize = "16px";
+
+    // 🔁 Event listener tombol
+    btnMinus.addEventListener("click", () => {
+      let currentQty = parseInt(qtyDisplay.textContent);
+      if (currentQty > 0) {
+        qtyDisplay.textContent = currentQty - 1;
+        updatePromoCart(promo.namaPromo, hargaValue, currentQty - 1);
+      }
+    });
+
+    btnPlus.addEventListener("click", () => {
+      let currentQty = parseInt(qtyDisplay.textContent);
+      qtyDisplay.textContent = currentQty + 1;
+      updatePromoCart(promo.namaPromo, hargaValue, currentQty + 1);
+    });
+
+    qtyWrapper.appendChild(btnMinus);
+    qtyWrapper.appendChild(qtyDisplay);
+    qtyWrapper.appendChild(btnPlus);
+
+    // 🧱 Susun isi card
     isi.appendChild(nama);
-    isi.appendChild(namaMenu);     // ✅ Tambahan
-    isi.appendChild(deskripsi);    // ✅ Tambahan
+    isi.appendChild(namaMenu);
+    isi.appendChild(deskripsi);
     isi.appendChild(harga);
-    isi.appendChild(qtyInput);
+    isi.appendChild(qtyWrapper);
 
     card.appendChild(img);
     card.appendChild(isi);
     promoContainer.appendChild(card);
   });
 }
+function updatePromoCart(namaPromo, harga, qty) {
+  let cart = JSON.parse(localStorage.getItem("promoCart") || "[]");
 
+  const index = cart.findIndex((item) => item.nama === namaPromo);
+
+  if (qty === 0 && index !== -1) {
+    cart.splice(index, 1);
+  } else if (index !== -1) {
+    cart[index].qty = qty;
+    cart[index].total = harga * qty;
+  } else {
+    cart.push({ nama: namaPromo, qty, harga, total: harga * qty });
+  }
+
+  localStorage.setItem("promoCart", JSON.stringify(cart));
+  console.log("✅ promoCart updated:", cart);
+}
 
 function tampilkanMenu() {
   const kategoriFilter = document.getElementById("kategoriFilter");
@@ -480,6 +526,7 @@ function kirimPesanan() {
   </script>
 </body>
 </html>
+
 
 
 
