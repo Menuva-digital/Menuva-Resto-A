@@ -327,17 +327,17 @@ if (data.menuPromo && data.menuPromo.length) {
       const promoCard = document.createElement("div");
       promoCard.classList.add("promo-card");
 
-      promoCard.innerHTML = `
-        <img src="${promo.gambar}" alt="Promo Gambar" />
-        <h3>${promo.namaPromo}</h3>
-        <p>${promo.deskripsi}</p>
-        <p>Harga Promo: <strong>Rp${Number(promo.harga).toLocaleString()}</strong></p>
-        <button onclick="tambahPromoKeKeranjang(${index})">Tambah ke Keranjang Promo</button>
-      `;
-
-      promoContainer.appendChild(promoCard);
-    });
-  }
+     promoCard.innerHTML = `
+  <img src="${promo.image}" alt="Promo Image" style="width:100%; max-height:150px; object-fit:cover;" />
+  <h3>${promo.namaPromo}</h3>
+  <p>${promo.deskripsi}</p>
+  <p>Harga Promo: <strong>Rp${Number(promo.harga).toLocaleString()}</strong></p>
+  <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:10px;">
+    <button onclick="updateQty(${index}, -1)">-</button>
+    <span id="qty-${index}">0</span>
+    <button onclick="updateQty(${index}, 1)">+</button>
+  </div>
+`;
 
   function tambahPromoKeKeranjang(index) {
     const dbReq = indexedDB.open("menuvaDB", 1);
@@ -363,6 +363,41 @@ if (data.menuPromo && data.menuPromo.length) {
       };
     };
   }
+      function updateQty(index, delta) {
+  const dbReq = indexedDB.open("menuvaDB", 1);
+
+  dbReq.onsuccess = function (event) {
+    const db = event.target.result;
+    const tx = db.transaction("menuvaData", "readonly");
+    const store = tx.objectStore("menuvaData");
+    const getRequest = store.get("dataMenuva");
+
+    getRequest.onsuccess = function (e) {
+      const data = e.target.result;
+      const selectedPromo = data?.promo?.[index];
+
+      if (!selectedPromo) return;
+
+      let cart = JSON.parse(localStorage.getItem("promoCart")) || [];
+      const existingIndex = cart.findIndex(item => item.namaPromo === selectedPromo.namaPromo);
+
+      if (existingIndex > -1) {
+        cart[existingIndex].qty += delta;
+        if (cart[existingIndex].qty <= 0) {
+          cart.splice(existingIndex, 1); // hapus jika qty <= 0
+        }
+      } else if (delta > 0) {
+        selectedPromo.qty = delta;
+        cart.push(selectedPromo);
+      }
+
+      localStorage.setItem("promoCart", JSON.stringify(cart));
+      document.getElementById(`qty-${index}`).innerText =
+        cart.find(item => item.namaPromo === selectedPromo.namaPromo)?.qty || 0;
+    };
+  };
+}
+
 
   // Ambil data promo dari IndexedDB dan tampilkan
   function ambilDataPromo() {
@@ -521,6 +556,7 @@ function kirimPesanan() {
   </script>
 </body>
 </html>
+
 
 
 
