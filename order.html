@@ -143,6 +143,40 @@ h1 {
   justify-content: center;
   align-items: center;
 }
+    .bottom-buttons {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  background: #fff;
+  padding: 10px;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+  z-index: 999;
+}
+
+.bottom-buttons button {
+  flex: 1;
+  margin: 0 5px;
+  padding: 12px;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-back {
+  background-color: #ccc;
+  color: #333;
+}
+
+.btn-wa {
+  background-color: green;
+  color: white;
+}
+
   </style>
 </head>
 <body>
@@ -186,7 +220,6 @@ h1 {
     <label>Ruangan (opsional)</label>
     <input type="text" id="ruangan" placeholder="Contoh: Kamar 301">
 
-    <button class="submit-btn" onclick="kirimPesanan()">📤 Kirim via WhatsApp</button>
   </div>
 <script>
 let db;
@@ -358,8 +391,6 @@ function updateRingkasan() {
   document.getElementById("total-item").innerText = totalQty;
   document.getElementById("total-harga").innerText = totalHargaValue.toLocaleString();
 }
-
-
 function kirimPesanan() {
   const nama = document.getElementById("nama").value.trim();
   const alamat = document.getElementById("alamat").value.trim();
@@ -369,26 +400,40 @@ function kirimPesanan() {
   const now = new Date();
   const waktuOrder = now.toLocaleString("id-ID");
 
+  if (!data) {
+    alert("❌ Data restoran tidak ditemukan.");
+    return;
+  }
+
   let listPesanan = Object.entries(pesanan)
-  .filter(([_, jumlah]) => jumlah > 0)
-  .map(([i, jumlah]) => {
-    if (i.startsWith("promo-")) {
-      const idx = parseInt(i.split("-")[1]);
-      const item = data.menuPromo[idx];
-      return `${item.namaPromo} x${jumlah} (Rp${jumlah * parseInt(item.harga)})`;
-    } else {
-      const item = data.menu[i];
-      return `${item.nama} x${jumlah} (Rp${jumlah * parseInt(item.harga)})`;
-    }
-  })
-  .join("\n");
+    .filter(([_, jumlah]) => jumlah > 0)
+    .map(([i, jumlah]) => {
+      if (i.startsWith("promo-")) {
+        const idx = parseInt(i.split("-")[1]);
+        const item = data.menuPromo[idx];
+        return `${item.namaPromo} x${jumlah} (Rp${jumlah * parseInt(item.harga)})`;
+      } else {
+        const item = data.menu[i];
+        return `${item.nama} x${jumlah} (Rp${jumlah * parseInt(item.harga)})`;
+      }
+    })
+    .join("\n");
 
   if (!listPesanan) {
     alert("Belum ada item yang dipilih.");
     return;
   }
 
-  let totalHargaAll = Object.entries(pesanan).reduce((sum, [i, jml]) => sum + (jml * parseInt(data.menu[i].harga || 0)), 0);
+  let totalHargaAll = Object.entries(pesanan).reduce((sum, [i, jml]) => {
+    if (i.startsWith("promo-")) {
+      const idx = parseInt(i.split("-")[1]);
+      const item = data.menuPromo[idx];
+      return sum + (jml * parseInt(item.harga || 0));
+    } else {
+      const item = data.menu[i];
+      return sum + (jml * parseInt(item.harga || 0));
+    }
+  }, 0);
 
   let pesanWA = `🧾 Pesanan Baru dari ${nama || "Customer"}\n\n` +
     `📅 Tanggal Order: ${waktuOrder}\n` +
@@ -411,10 +456,16 @@ function kirimPesanan() {
     window.open(waLink, "_blank");
   });
 }
+
 </script>
+<div class="bottom-buttons">
+  <button onclick="window.location.href='menu.html'" class="btn-back">⬅️ Kembali ke Menu</button>
+  <button onclick="kirimPesanan()" class="btn-wa">📤 Kirim via WhatsApp</button>
+</div>
 
 </body>
 </html>
+
 
 
 
