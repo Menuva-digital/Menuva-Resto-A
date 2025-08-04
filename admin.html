@@ -123,10 +123,11 @@
 }
 
 .gambar-preview {
-  max-height: 80px;
-  border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  max-height: 150px;
+  max-width: 100%;     /* biar responsif */
+  object-fit: contain; /* biar proporsional */
 }
+
 
 .hapus-gambar {
   position: absolute;
@@ -884,6 +885,7 @@ async function loadData() {
   
 </body>
 </html>
+
 
 
 
