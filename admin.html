@@ -204,6 +204,57 @@
     border-radius: 6px;
     cursor: pointer;
   }
+    /* 🔮 Tombol Tambah - Ungu/Biru Neon */
+.btn-tambah-room {
+  background: linear-gradient(135deg, #7f5af0, #2cb5e8);
+  color: #fff;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  box-shadow: 0 4px 10px rgba(127, 90, 240, 0.3);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.btn-tambah-room:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(44, 181, 232, 0.5);
+}
+
+/* 🌅 Tombol Hapus - Coral/Peach */
+.btn-hapus-room {
+  background: linear-gradient(135deg, #ff6b6b, #fbc687);
+  color: #fff;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  box-shadow: 0 4px 10px rgba(255, 107, 107, 0.3);
+  margin-top: 10px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.btn-hapus-room:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(251, 198, 135, 0.5);
+}
+
+/* 🖼️ Upload Gambar - Sky Blue Gradient */
+.btn-upload-gambar {
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  color: white;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  margin-top: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.3s ease;
+}
+.btn-upload-gambar:hover {
+  opacity: 0.85;
+}
+
     
   </style>
 </head>
@@ -522,17 +573,18 @@ function tambahRoom(kategori) {
   const wrapper = document.createElement("div");
   wrapper.className = "room-form"; // ✅ ini penting
   wrapper.innerHTML = `
-    <input type="text" class="room-nama" placeholder="Nama" />
-    <input type="number" class="room-harga" placeholder="Harga" />
-    <textarea class="room-deskripsi" placeholder="Deskripsi"></textarea>
+  <input type="text" class="room-nama" placeholder="Nama" />
+  <input type="number" class="room-harga" placeholder="Harga" />
+  <textarea class="room-deskripsi" placeholder="Deskripsi"></textarea>
 
-    <div class="gambar-preview-wrapper">
-      <img class="gambar-preview" style="display:none;" />
-      <button class="hapus-gambar" onclick="hapusGambarRoom(this)" style="display:none;">×</button>
-    </div>
+  <div class="gambar-preview-wrapper">
+    <img class="gambar-preview" style="display:none;" />
+    <button class="hapus-gambar" onclick="hapusGambarRoom(this)" style="display:none;">×</button>
+  </div>
 
-    <button class="room-image-upload" onclick="uploadGambarRoom(this)">🖼️ Upload Gambar</button>
-  `;
+  <button class="btn-upload-gambar" onclick="uploadGambarRoom(this)">🖼️ Upload Gambar</button>
+  <button class="btn-hapus-room" onclick="hapusFormRoom(this)">🗑️ Hapus Room</button>
+`;
   container.appendChild(wrapper);
 }
 
@@ -1010,6 +1062,7 @@ async function loadData() {
   
 </body>
 </html>
+
 
 
 
