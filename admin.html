@@ -509,6 +509,33 @@ function tambahRoom(kategori) {
   container.appendChild(wrapper);
 }
 
+    async function tampilkanListRoom() {
+  try {
+    const data = await loadDataFromDB();
+    const listContainer = document.getElementById("listRuangan");
+    listContainer.innerHTML = ""; // Kosongkan sebelum render ulang
+
+    if (!data.rooms || data.rooms.length === 0) {
+      listContainer.innerHTML = "<p>Tidak ada ruangan yang tersedia.</p>";
+      return;
+    }
+
+    data.rooms.forEach((room, index) => {
+      const item = document.createElement("div");
+      item.classList.add("room-card"); // opsional: styling
+      item.innerHTML = `
+        <strong>Ruangan ${index + 1}:</strong><br>
+        Nama: ${room.namaRuangan}<br>
+        Kapasitas: ${room.kapasitas}
+        <hr>
+      `;
+      listContainer.appendChild(item);
+    });
+  } catch (err) {
+    console.error("Gagal menampilkan daftar ruangan:", err);
+  }
+}
+
    
 function uploadGambarRoom(button) {
   const input = document.createElement("input");
@@ -758,7 +785,7 @@ function hapusGambarRoom(button) {
       flipbookRuanganImages,
       flipbookMenuImages,
       menu: menuData,
-      roomData: ambilSemuaRoom()
+      room: ambilSemuaRoom()
     };
 
     await saveDataToDB(data);
@@ -920,6 +947,7 @@ async function loadData() {
   
 </body>
 </html>
+
 
 
 
