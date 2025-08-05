@@ -612,6 +612,40 @@ function hapusGambarRoom(button) {
   return hasil;
 }
 
+    function restoreRoomFromData(rooms = []) {
+  rooms.forEach(room => {
+    // Buat ulang form berdasarkan kategori
+    tambahRoom(room.kategori);
+
+    const containerId = {
+      hotel: "roomHotelContainer",
+      meeting: "meetingRoomContainer",
+      package: "packageContainer"
+    }[room.kategori];
+
+    const container = document.getElementById(containerId);
+    const forms = container.querySelectorAll(".room-form");
+    const lastForm = forms[forms.length - 1]; // ambil form yang baru dibuat
+
+    lastForm.querySelector(".room-nama").value = room.nama || "";
+    lastForm.querySelector(".room-deskripsi").value = room.deskripsi || "";
+    lastForm.querySelector(".room-harga").value = room.harga || "";
+
+    // restore gambar
+    const preview = lastForm.querySelector(".gambar-preview");
+    const hapusBtn = lastForm.querySelector(".hapus-gambar");
+    const uploadBtn = lastForm.querySelector(".room-image-upload");
+
+    if (room.image) {
+      preview.src = room.image;
+      preview.style.display = "block";
+      hapusBtn.style.display = "flex";
+      uploadBtn.setAttribute("data-image", room.image);
+    }
+  });
+}
+
+
 
     // Tambah nomor WA admin
     function tambahNomorWa() {
@@ -832,14 +866,14 @@ async function loadData() {
     }
 
     // Room/Package
-        if (Array.isArray(data.roomData)) {
+        if (Array.isArray(data.rooms)) {
       const grouped = {
         hotel: document.getElementById("roomHotelContainer"),
         meeting: document.getElementById("meetingRoomContainer"),
         package: document.getElementById("packageContainer"),
       };
 
-      data.roomData.forEach((room) => {
+      data.rooms.forEach((room) => {
         tambahRoom(room.kategori);
 
         const forms = grouped[room.kategori].querySelectorAll(".room-form");
@@ -948,6 +982,7 @@ async function loadData() {
   
 </body>
 </html>
+
 
 
 
