@@ -480,8 +480,8 @@
       `;
       container.appendChild(div);
     }
-
-    function tambahRoom(kategori) {
+    
+function tambahRoom(kategori) {
   const containerId = {
     hotel: "roomHotelContainer",
     meeting: "meetingRoomContainer",
@@ -489,11 +489,11 @@
   }[kategori];
 
   if (!containerId) return;
+
   const container = document.getElementById(containerId);
 
   const wrapper = document.createElement("div");
-  wrapper.className = "room-form"; // <== INI PENTING!
-
+  wrapper.className = "room-form"; // ✅ ini penting
   wrapper.innerHTML = `
     <input type="text" class="room-nama" placeholder="Nama" />
     <input type="number" class="room-harga" placeholder="Harga" />
@@ -504,12 +504,12 @@
       <button class="hapus-gambar" onclick="hapusGambarRoom(this)" style="display:none;">×</button>
     </div>
 
-    <button class="room-image-upload" onclick="uploadGambarRoom(this)" data-image="">🖼️ Upload Gambar</button>
+    <button class="room-image-upload" onclick="uploadGambarRoom(this)">🖼️ Upload Gambar</button>
   `;
-
   container.appendChild(wrapper);
 }
 
+   
 function uploadGambarRoom(button) {
   const input = document.createElement("input");
   input.type = "file";
@@ -848,18 +848,6 @@ async function loadData() {
     console.error("❌ Gagal load data IndexedDB:", err);
   }
 }
-
-
-    flipbookRuanganImages = data.flipbookRuanganImages || [];
-    flipbookRuanganImages.forEach((src) => renderImagePreview("ruangan", src));
-
-    flipbookMenuImages = data.flipbookMenuImages || [];
-    flipbookMenuImages.forEach((src) => renderImagePreview("menu", src));
-  } catch (err) {
-    console.error("❌ Gagal load data IndexedDB:", err);
-  }
-}
-
     // Reset semua data
     async function resetData() {
       if (!confirm("Yakin ingin menghapus semua data?")) return;
@@ -932,6 +920,7 @@ async function loadData() {
   
 </body>
 </html>
+
 
 
 
