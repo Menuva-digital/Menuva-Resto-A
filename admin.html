@@ -221,12 +221,15 @@
     <button class="btn-success" onclick="tambahMenu('drink')">+ Tambah Menu</button>
   </div>
   
+  <!-- 📱 Nomor WhatsApp Admin -->
+<div class="section-box" id="waContainerBox">
   <h3>📱 Nomor WhatsApp Admin (Penerima Pesanan/Reservasi)</h3>
   <div id="nomorWaContainer">
-  <input type="text" class="nomor-wa" placeholder="Contoh: 6281234567890">
+    <input type="text" class="nomor-wa" placeholder="Contoh: 6281234567890">
   </div>
-  <button onclick="tambahNomorWa()">Tambah Nomor WA</button>
-
+  <button onclick="tambahNomorWa()">+ Tambah Nomor WA</button>
+</div>
+  
  <div class="section">
   <h2>📸 Galeri Ruangan</h2>
   <button onclick="tambahGambar('ruangan')">+ Tambah Gambar Ruangan</button>
@@ -241,30 +244,30 @@
   <div id="flipbookMenuPreview"></div>
 </div>
 
-<h2>🏨 Room / Package</h2>
+<!-- 🏨 Room / Package -->
+<div class="section-box" id="roomContainerBox">
+  <h2>🏨 Room / Package</h2>
 
-<div class="room-section-header">
-  <h3>🛏️ Room Hotel</h3>
-</div>
-<div style="margin-bottom: 10px;">
-  <button onclick="tambahRoom('hotel')">+ Tambah Room Hotel</button>
-  <div id="roomHotelContainer"></div>
-</div>
+  <!-- Room Hotel -->
+  <div class="room-section">
+    <h3>🛏️ Room Hotel</h3>
+    <button onclick="tambahRoom('hotel')">+ Tambah Room Hotel</button>
+    <div id="roomHotelContainer"></div>
+  </div>
 
-<div class="room-section-header">
-  <h3>💼 Meeting Room</h3>
-</div>
-<div style="margin-bottom: 10px;">
-  <button onclick="tambahRoom('meeting')">+ Tambah Meeting Room</button>
-  <div id="meetingRoomContainer"></div>
-</div>
+  <!-- Meeting Room -->
+  <div class="room-section">
+    <h3>💼 Meeting Room</h3>
+    <button onclick="tambahRoom('meeting')">+ Tambah Meeting Room</button>
+    <div id="meetingRoomContainer"></div>
+  </div>
 
-<div class="room-section-header">
-  <h3>🎁 Package</h3>
-</div>
-<div style="margin-bottom: 10px;">
-  <button onclick="tambahRoom('package')">+ Tambah Package</button>
-  <div id="packageContainer"></div>
+  <!-- Package -->
+  <div class="room-section">
+    <h3>🎁 Package</h3>
+    <button onclick="tambahRoom('package')">+ Tambah Package</button>
+    <div id="packageContainer"></div>
+  </div>
 </div>
 
 
@@ -980,6 +983,7 @@ async function loadData() {
   
 </body>
 </html>
+
 
 
 
