@@ -195,7 +195,15 @@
   margin-bottom: 10px;
   backgound-color: tosca;
 }
-
+.btn-simpan {
+    background-color: #17a2b8; /* cyan *
+    color: white;
+    font-weight: bold;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
 
   </style>
 </head>
@@ -294,7 +302,7 @@
 
 <hr>
   <div class="section">
-    <button onclick="simpanData()">💾 Simpan Semua</button>
+    <button class="btn-simpan">💾 Simpan Semua</button>
     <button onclick="window.open('menu.html')" style="margin-top: 10px;">👁️ Lihat Halaman Customer</button>
     <button id="btnSalinLink" onclick="salinLinkMenu()" style="display:none; background-color: rgb(58, 82, 219); color: white; padding: 10px; border: none; border-radius: 8px; margin-top: 10px;">
       📋 Copy Link Untuk Dibagikan Ke Customers
@@ -1002,6 +1010,7 @@ async function loadData() {
   
 </body>
 </html>
+
 
 
 
