@@ -255,37 +255,61 @@
 .btn-upload-gambar:hover {
   opacity: 0.85;
 }
-#stickyButtons {
+/* Fixed button bar bawah layar */
+.fixed-bar {
   position: fixed;
   bottom: 0;
   left: 0;
-  right: 0;
-  background: #f2f2f2; /* warna latar tombol */
-  padding: 12px 16px;
+  width: 100%;
+  background: #fff;
+  border-top: 1px solid #ddd;
+  box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
   display: flex;
-  gap: 10px;
   justify-content: center;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
+  gap: 15px;
+  padding: 10px 20px;
+  z-index: 10000;
 }
 
-#stickyButtons button {
+.fixed-bar button {
   flex: 1;
-  padding: 12px;
+  padding: 10px 0;
   font-size: 16px;
-  border: none;
+  font-weight: bold;
   border-radius: 8px;
+  border: none;
   cursor: pointer;
+  transition: background-color 0.3s ease;
+  color: white;
 }
-  .btn-secondary {
-    background-color: #8dace6;
-    color: white;
-  }
 
-  .btn-danger {
-    background-color: #e68d8d;
-    color: white;
+.btn-order {
+  background-color: #007bff;
+}
+.btn-order:hover {
+  background-color: #0056b3;
+}
+.btn-room {
+  background-color: #28a745;
+}
+.btn-room:hover {
+  background-color: #1e7e34;
+}
+
+@media (max-width: 480px) {
+  .fixed-bar {
+    flex-direction: column;
+    padding: 10px;
   }
+  .fixed-bar button {
+    width: 95%;
+    margin-bottom: 8px;
+  }
+  .fixed-bar button:last-child {
+    margin-bottom: 0;
+  }
+}
+
     
   </style>
 </head>
@@ -1089,15 +1113,15 @@ async function loadData() {
   tampilkanListRoom(); // ini kunci
 });
   </script>
-    
-     <!-- TARUH INI DI PALING BAWAH HALAMAN -->
-<div id="stickyButtons">
-  <button onclick="window.location.href='index.html'" class="btn-secondary">🔒 Logout</button>
-  <button onclick="resetData()" class="btn-danger">🗑️ Reset Semua Data</button>
-</div>
+
+    <div class="fixed-bar">
+  <button onclick="window.location.href='index.html'" class="btn-order">🔒 Logout</button>
+  <button onclick="resetData()" class="btn-room">🗑️ Reset Semua Data</button>
+  </div>
    
 </body>
 </html>
+
 
 
 
