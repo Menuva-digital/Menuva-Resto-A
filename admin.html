@@ -663,6 +663,12 @@ function hapusGambarRoom(button) {
   if (uploadBtn) uploadBtn.removeAttribute("data-image");
 }
 
+    function hapusFormRoom(button) {
+  const form = button.closest(".room-form");
+  if (form) form.remove();
+}
+
+
     function ambilSemuaRoom() {
   const kategoriIds = [
     { id: "roomHotelContainer", kategori: "hotel" },
@@ -1062,6 +1068,7 @@ async function loadData() {
   
 </body>
 </html>
+
 
 
 
