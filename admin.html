@@ -415,11 +415,7 @@
     ⚠️ Proses restore akan menggantikan seluruh data yang ada saat ini dan tidak bisa dibatalkan.<br>
     💡 Gunakan fitur ini sebelum mengganti perangkat atau membersihkan data browser.
   </div>
-<!-- TARUH INI DI PALING BAWAH HALAMAN -->
-<div id="stickyButtons">
-  <button onclick="window.location.href='index.html'" class="btn-secondary">🔒 Logout</button>
-  <button onclick="resetData()" class="btn-danger">🗑️ Reset Semua Data</button>
-</div>
+
   <script>
     let db;
     const DB_NAME = "MenuvaDB";
@@ -1095,9 +1091,16 @@ async function loadData() {
   tampilkanListRoom(); // ini kunci
 });
   </script>
+    
+    <!-- TARUH INI DI PALING BAWAH HALAMAN -->
+<div id="stickyButtons">
+  <button onclick="window.location.href='index.html'" class="btn-secondary">🔒 Logout</button>
+  <button onclick="resetData()" class="btn-danger">🗑️ Reset Semua Data</button>
+</div>
   
 </body>
 </html>
+
 
 
 
