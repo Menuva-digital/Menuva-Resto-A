@@ -204,11 +204,7 @@
     border-radius: 6px;
     cursor: pointer;
   }
-     .btn-tambah-room {
-    background-color: #6f42c1; /* ungu */
-    color: white;
-  }
-
+    
   </style>
 </head>
 <body>
@@ -282,21 +278,21 @@
   <!-- Room Hotel -->
   <div class="room-section">
     <h3>🛏️ Room Hotel</h3>
-    <button class="btn-tambah-room" onclick="tambahRoom('hotel')">+ Tambah Room Hotel</button>
+    <button onclick="tambahRoom('hotel')">+ Tambah Room Hotel</button>
     <div id="roomHotelContainer"></div>
   </div>
 
   <!-- Meeting Room -->
   <div class="room-section">
     <h3>💼 Meeting Room</h3>
-    <button class="btn-tambah-room" onclick="tambahRoom('meeting')">+ Tambah Meeting Room</button>
+    <button onclick="tambahRoom('meeting')">+ Tambah Meeting Room</button>
     <div id="meetingRoomContainer"></div>
   </div>
 
   <!-- Package -->
   <div class="room-section">
     <h3>🎁 Package</h3>
-    <button class="btn-tambah-room" onclick="tambahRoom('package')">+ Tambah Package</button>
+    <button onclick="tambahRoom('package')">+ Tambah Package</button>
     <div id="packageContainer"></div>
   </div>
 </div>
@@ -1014,6 +1010,7 @@ async function loadData() {
   
 </body>
 </html>
+
 
 
 
