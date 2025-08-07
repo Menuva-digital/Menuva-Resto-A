@@ -6,7 +6,7 @@
   
   <title>Admin Panel - Menuva</title>
   <style>
-    * { box-sizing: border-box; }
+   
        body {
       font-family: Arial, sans-serif;
       padding: 20px;
@@ -64,6 +64,10 @@
     }
     .btn-success {
       background-color: #2ecc71;
+      color: white;
+    }
+     .btn-plus {
+      background-color: #87CEFA;
       color: white;
     }
     .btn-secondary {
@@ -197,7 +201,7 @@
 
 .room-section button {
   margin-bottom: 10px;
-  backgound-color: tosca;
+  backgound-color: #CAE1FF;
 }
 .btn-simpan {
     background-color: #17a2b8; /* cyan *
@@ -348,19 +352,19 @@
   <div id="nomorWaContainer">
     <input type="text" class="nomor-wa" placeholder="Contoh: 6281234567890">
   </div>
-  <button onclick="tambahNomorWa()">+ Tambah Nomor WA</button>
+  <button class="btn-plus" onclick="tambahNomorWa()">+ Tambah Nomor WA</button>
 </div>
   
  <div class="section">
   <h2>📸 Galeri Ruangan</h2>
-  <button onclick="tambahGambar('ruangan')">+ Tambah Gambar Ruangan</button>
+  <button class="btn-plus" onclick="tambahGambar('ruangan')">+ Tambah Gambar Ruangan</button>
   <input type="file" id="flipbookRuanganUpload" accept="image/*" multiple style="display:none;" />
   <div id="flipbookRuanganPreview"></div>
 </div>
 
 <div class="section">
   <h2>📖 Menu Restoran</h2>
-  <button onclick="tambahGambar('menu')">+ Tambah Gambar Menu</button>
+  <button class="btn-plus" onclick="tambahGambar('menu')">+ Tambah Gambar Menu</button>
   <input type="file" id="flipbookMenuUpload" accept="image/*" multiple style="display:none;" />
   <div id="flipbookMenuPreview"></div>
 </div>
@@ -372,28 +376,28 @@
   <!-- Room Hotel -->
   <div class="room-section">
     <h3>🛏️ Room Hotel</h3>
-    <button onclick="tambahRoom('hotel')">+ Tambah Room Hotel</button>
+    <button class="btn-plus" onclick="tambahRoom('hotel')">+ Tambah Room Hotel</button>
     <div id="roomHotelContainer"></div>
   </div>
 
   <!-- Meeting Room -->
   <div class="room-section">
     <h3>💼 Meeting Room</h3>
-    <button onclick="tambahRoom('meeting')">+ Tambah Meeting Room</button>
+    <button class="btn-plus" onclick="tambahRoom('meeting')">+ Tambah Meeting Room</button>
     <div id="meetingRoomContainer"></div>
   </div>
 
   <!-- Package -->
   <div class="room-section">
     <h3>🎁 Package</h3>
-    <button onclick="tambahRoom('package')">+ Tambah Package</button>
+    <button class="btn-plus" onclick="tambahRoom('package')">+ Tambah Package</button>
     <div id="packageContainer"></div>
   </div>
 </div>
 
 <hr>
   <div class="section">
-    <button class="btn-simpan" onclick="simpanData()">💾 Simpan Semua</button>
+    <button class="btn-upload-gambar" onclick="simpanData()">💾 Simpan Semua</button>
     <button onclick="window.open('menu.html')" style="margin-top: 10px;" class="btn-orange">👁️ Lihat Halaman Customer</button>
     <button id="btnSalinLink" onclick="salinLinkMenu()" style="display:none; background-color: rgb(58, 82, 219); color: white; padding: 10px; border: none; border-radius: 8px; margin-top: 10px;">
       📋 Copy Link Untuk Dibagikan Ke Customers
@@ -403,7 +407,7 @@
 
     <div class="section">
       <h2>🔁 Backup & Restore Data</h2>
-     <button onclick="backupData()">📦 Backup Data</button>
+     <button class="btn-secondary" onclick="backupData()">📦 Backup Data</button>
 
      <!-- Tempat status -->
      <div id="backupDownloadLink" style="margin-top:10px;"></div>
@@ -1110,6 +1114,7 @@ async function loadData() {
   </div>
    
 </html>
+
 
 
 
