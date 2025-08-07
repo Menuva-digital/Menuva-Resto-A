@@ -198,10 +198,10 @@
 
 .room-section button {
   margin-bottom: 10px;
-  backgound-color: #CAE1FF;
+  background-color: #CAE1FF;
 }
 .btn-simpan {
-    background-color: #17a2b8; /* cyan *
+    background-color: #17a2b8;
     color: white;
     font-weight: bold;
     border: none;
@@ -225,8 +225,6 @@
   transform: scale(1.05);
   box-shadow: 0 4px 12px rgba(44, 181, 232, 0.5);
 }
-
-/* 🌅 Tombol Hapus - Coral/Peach */
 .btn-hapus-room {
   background: linear-gradient(135deg, #ff6b6b, #fbc687);
   color: #fff;
@@ -259,45 +257,59 @@
 .btn-upload-gambar:hover {
   opacity: 0.85;
 }
-.fixed-bar {
-  position: fixed !important;
-  bottom: 0;
-  left: 0;
-  width: 100vw;
-  background: #fff;
-  border-top: 1px solid #ddd;
-  box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  padding: 10px 20px;
-  z-index: 9999;
-}
 
-.fixed-bar button {
-  flex: 1;
-  padding: 12px;
-  font-size: 16px;
-  font-weight: bold;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  color: white;
-}
+    /* Fixed button bar bawah layar */
+    .fixed-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: #fff;
+      border-top: 1px solid #ddd;
+      box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      padding: 10px 20px;
+      z-index: 10000;
+    }
+    .fixed-bar button {
+      flex: 1;
+      padding: 10px 0;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      color: white;
+    }
+    .btn-order {
+      background-color: #007bff;
+    }
+    .btn-order:hover {
+      background-color: #0056b3;
+    }
+    .btn-room {
+      background-color: #28a745;
+    }
+    .btn-room:hover {
+      background-color: #1e7e34;
+    }
 
-.btn-order {
-  background-color: #007bff;
-}
-.btn-order:hover {
-  background-color: #0056b3;
-}
-.btn-room {
-  background-color: #e74c3c;
-}
-.btn-room:hover {
-  background-color: #c0392b;
-}
+    @media (max-width: 480px) {
+      .fixed-bar {
+        flex-direction: column;
+        padding: 10px;
+      }
+      .fixed-bar button {
+        width: 95%;
+        margin-bottom: 8px;
+      }
+      .fixed-bar button:last-child {
+        margin-bottom: 0;
+      }
+    }
 
     
   </style>
@@ -1112,6 +1124,7 @@ async function loadData() {
   
 </body>
 </html>
+
 
 
 
