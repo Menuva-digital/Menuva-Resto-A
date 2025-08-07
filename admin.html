@@ -6,15 +6,14 @@
   
   <title>Admin Panel - Menuva</title>
   <style>
-   
+   * { box-sizing: border-box; }
        body {
       font-family: Arial, sans-serif;
       padding: 20px;
-      padding-bottom: 10px;
+      padding-bottom: 5px;
       background-color: #f4f4f4;
       margin: 0;
       position: relative; /* pastikan body bisa nampung fixed element */
-      padding-bottom: 20px; /* kasih ruang supaya konten gak ketiban tombol */
       overflow-x: hidden; /* hindari horizontal scroll */
     }
     .menuva-logo {
@@ -397,7 +396,7 @@
 
 <hr>
   <div class="section">
-    <button class="btn-upload-gambar" onclick="simpanData()">💾 Simpan Semua</button>
+    <button class="btn-success" onclick="simpanData()">💾 Simpan Semua</button>
     <button onclick="window.open('menu.html')" style="margin-top: 10px;" class="btn-orange">👁️ Lihat Halaman Customer</button>
     <button id="btnSalinLink" onclick="salinLinkMenu()" style="display:none; background-color: rgb(58, 82, 219); color: white; padding: 10px; border: none; border-radius: 8px; margin-top: 10px;">
       📋 Copy Link Untuk Dibagikan Ke Customers
@@ -622,8 +621,8 @@ function tambahRoom(kategori) {
     <button class="hapus-gambar" onclick="hapusGambarRoom(this)" style="display:none;">×</button>
   </div>
 
-  <button class="btn-upload-gambar room-image-upload" onclick="uploadGambarRoom(this)">🖼️ Upload Gambar</button>
-  <button class="btn-hapus-room" onclick="hapusFormRoom(this)">🗑️ Hapus Room</button>
+  <button class="btn-success room-image-upload" onclick="uploadGambarRoom(this)">🖼️ Upload Gambar</button>
+  <button class="btn-danger" onclick="hapusFormRoom(this)">🗑️ Hapus Room</button>
 `;
   container.appendChild(wrapper);
 }
@@ -1114,6 +1113,7 @@ async function loadData() {
   </div>
    
 </html>
+
 
 
 
