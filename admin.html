@@ -964,7 +964,7 @@ async function simpanData() {
     await saveDataToDB(data);
 
     // 2️⃣ Simpan ke server (online)
-    const response = await fetch("save_data.php", {
+    const response = await fetch("https://script.google.com/macros/s/AKfycbx1Bs1G00tk4oua9aSBGn6Yn56tgFBjSZIFgeRKHeOokHYr45aJ3v0-yArr0s7WjFI/exec", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1158,6 +1158,7 @@ async function simpanKeServer(data) {
   
 </body>
 </html>
+
 
 
 
