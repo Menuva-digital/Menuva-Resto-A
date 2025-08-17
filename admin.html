@@ -931,8 +931,8 @@ function hapusGambarRoom(button) {
       document.body.removeChild(input);
     }
   
-    // Simpan semua data ke IndexedDB
-  async function simpanData() {
+   // Simpan semua data ke IndexedDB + Server
+async function simpanData() {
   try {
     const namaRestoran = document.getElementById("namaRestoran").value;
     const restoAddress = document.getElementById("restoAddress").value.trim();
@@ -960,8 +960,23 @@ function hapusGambarRoom(button) {
       rooms: ambilSemuaRoom()
     };
 
+    // 1️⃣ Simpan ke IndexedDB (offline)
     await saveDataToDB(data);
-    alert("✅ Semua data berhasil disimpan!");
+
+    // 2️⃣ Simpan ke server (online)
+    const response = await fetch("save_data.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error("Gagal simpan ke server");
+    }
+
+    alert("✅ Semua data berhasil disimpan (IndexedDB + Server)!");
   } catch (error) {
     console.error("❌ Gagal menyimpan data:", error);
     alert("❌ Gagal menyimpan data. Lihat console (F12) untuk detail.");
@@ -1116,6 +1131,24 @@ async function loadData() {
   tampilkanListRoom(); // ini kunci
 });
   </script>
+  <script>
+async function simpanKeServer(data) {
+  try {
+    const response = await fetch("YOUR_WEBAPP_URL", {
+      method: "POST",
+      mode: "no-cors", // biar ga kena CORS
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    console.log("Data terkirim ke server:", data);
+  } catch (err) {
+    console.error("Gagal kirim ke server:", err);
+  }
+}
+</script>
+
 
 
   <div class="fixed-bar">
@@ -1125,6 +1158,7 @@ async function loadData() {
   
 </body>
 </html>
+
 
 
 
