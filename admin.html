@@ -773,24 +773,6 @@ window.onload=async()=>{
   initRestoreListener();
 };
 
-   // Listener buat tombol Restore
-  document.getElementById("restoreFileInput").addEventListener("change", function(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      try {
-        const jsonData = JSON.parse(e.target.result);
-        console.log("✅ File JSON terbaca:", jsonData);
-        restoreData(jsonData); // panggil fungsi restore
-      } catch (err) {
-        console.error("❌ Error parsing JSON:", err);
-        alert("Gagal membaca file JSON. Pastikan format benar.");
-      }
-    };
-    reader.readAsText(file);
-  });
 </script>
 
   <div class="fixed-bar">
@@ -800,6 +782,7 @@ window.onload=async()=>{
   
 </body>
 </html>
+
 
 
 
