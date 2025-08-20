@@ -424,10 +424,11 @@
 
       
       <!-- Input Restore -->
-      <label for="restoreInput" style="margin-top: 20px; display: block;">
-        📂 Pilih File JSON untuk Restore:
-      </label>
-      <input type="file" id="restoreInput" accept=".json" onchange="restoreDataFromFile(event)" />
+     <label for="restoreFileInput" style="margin-top: 20px; display: block;">
+      📂 Pilih File JSON untuk Restore:
+     </label>
+     <input type="file" id="restoreFileInput" accept=".json" />
+
     </div>
   
   <div style="background: #fef9e7; padding: 10px; border-left: 5px solid #f1c40f; margin-top: 10px; font-size: 14px;">
@@ -780,6 +781,7 @@ window.onload=async()=>{
   
 </body>
 </html>
+
 
 
 
