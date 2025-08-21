@@ -332,108 +332,117 @@
   <input type="text" id="restoPhone" placeholder="No. Telepon" />
 </div>
 
-<!-- Menu Promo -->
+<!-- Menu Promo Fix -->
 <div class="section">
   <h2>🔥 Menu Promo</h2>
   <input type="text" id="promoNama" placeholder="Nama Promo">
   <input type="text" id="promoHarga" placeholder="Harga Promo">
   <input type="text" id="promoDesc" placeholder="Deskripsi Promo">
   <div id="promoContainer"></div>
-  <button class="btn-orange" 
-    onclick="tambahPromo(
+  <button class="btn-orange" onclick="
+    tambahPromo(
       document.getElementById('promoNama').value,
       document.getElementById('promoHarga').value,
       document.getElementById('promoDesc').value
-    )">+ Tambah Menu Promo</button>
+    )
+  ">+ Tambah Menu Promo</button>
 </div>
 
-<!-- Food Menu -->
+<!-- Food Menu Fix -->
 <div class="section">
   <h2>📋 FOOD MENU</h2>
   <input type="text" id="menuFoodNama" placeholder="Nama Menu Food">
   <input type="text" id="menuFoodHarga" placeholder="Harga Menu Food">
   <div id="menuFoodContainer"></div>
-  <button class="btn-success" onclick="tambahMenu('food', document.getElementById('menuFoodNama').value, document.getElementById('menuFoodHarga').value)">+ Tambah Menu</button>
+  <button class="btn-success" onclick="
+    tambahMenu('food',
+      document.getElementById('menuFoodNama').value,
+      document.getElementById('menuFoodHarga').value
+    )
+  ">+ Tambah Menu</button>
 </div>
 
-<!-- Snack Menu -->
+<!-- Snack Menu Fix -->
 <div class="section">
   <h2>📋 SNACK & DESSERT</h2>
   <input type="text" id="menuSnackNama" placeholder="Nama Menu Snack">
   <input type="text" id="menuSnackHarga" placeholder="Harga Menu Snack">
   <div id="menuSnackContainer"></div>
-  <button class="btn-success" onclick="tambahMenu('snack', document.getElementById('menuSnackNama').value, document.getElementById('menuSnackHarga').value)">+ Tambah Menu</button>
+  <button class="btn-success" onclick="
+    tambahMenu('snack',
+      document.getElementById('menuSnackNama').value,
+      document.getElementById('menuSnackHarga').value
+    )
+  ">+ Tambah Menu</button>
 </div>
 
-<!-- Drink Menu -->
+<!-- Drink Menu Fix -->
 <div class="section">
   <h2>📋 DRINK</h2>
   <input type="text" id="menuDrinkNama" placeholder="Nama Menu Drink">
   <input type="text" id="menuDrinkHarga" placeholder="Harga Menu Drink">
   <div id="menuDrinkContainer"></div>
-  <button class="btn-success" onclick="tambahMenu('drink', document.getElementById('menuDrinkNama').value, document.getElementById('menuDrinkHarga').value)">+ Tambah Menu</button>
+  <button class="btn-success" onclick="
+    tambahMenu('drink',
+      document.getElementById('menuDrinkNama').value,
+      document.getElementById('menuDrinkHarga').value
+    )
+  ">+ Tambah Menu</button>
 </div>
 
-<!-- Nomor WhatsApp Admin -->
-<div class="section">
-  <h3>📱 Nomor WhatsApp Admin</h3>
+<!-- Nomor WhatsApp Admin Fix -->
+<div class="section-box" id="waContainerBox">
+  <h3>📱 Nomor WhatsApp Admin (Penerima Pesanan/Reservasi)</h3>
   <input type="text" id="inputNomorWa" placeholder="Contoh: 6281234567890">
   <div id="nomorWaContainer"></div>
-  <button class="btn-plus" onclick="tambahNomorWa(document.getElementById('inputNomorWa').value)">+ Tambah Nomor WA</button>
+  <button onclick="tambahNomorWa(document.getElementById('inputNomorWa').value)">+ Tambah Nomor WA</button>
 </div>
 
-<!-- Galeri Ruangan -->
-<div class="section">
-  <h2>📸 Galeri Ruangan</h2>
-  <button class="btn-plus" onclick="document.getElementById('flipbookRuanganUpload').click()">+ Tambah Gambar Ruangan</button>
-  <input type="file" id="flipbookRuanganUpload" accept="image/*" multiple onchange="tambahGambar('ruangan', this.files)" style="display:none;">
-  <div id="flipbookRuanganPreview"></div>
-</div>
-
-<!-- Galeri Menu -->
-<div class="section">
-  <h2>📖 Menu Restoran</h2>
-  <button class="btn-plus" onclick="document.getElementById('flipbookMenuUpload').click()">+ Tambah Gambar Menu</button>
-  <input type="file" id="flipbookMenuUpload" accept="image/*" multiple onchange="tambahGambar('menu', this.files)" style="display:none;">
-  <div id="flipbookMenuPreview"></div>
-</div>
-
-<!-- Room / Package -->
-<div class="section">
+<!-- Room / Package Fix -->
+<div class="section-box" id="roomContainerBox">
   <h2>🏨 Room / Package</h2>
-  <!-- Hotel -->
-  <input type="text" id="roomHotelNama" placeholder="Nama Room Hotel">
-  <input type="text" id="roomHotelKapasitas" placeholder="Kapasitas">
-  <div id="roomHotelContainer"></div>
-  <button class="btn-plus" onclick="tambahRoom('hotel', document.getElementById('roomHotelNama').value, document.getElementById('roomHotelKapasitas').value)">+ Tambah Room Hotel</button>
-  <!-- Meeting -->
-  <input type="text" id="roomMeetingNama" placeholder="Nama Meeting Room">
-  <input type="text" id="roomMeetingKapasitas" placeholder="Kapasitas">
-  <div id="meetingRoomContainer"></div>
-  <button class="btn-plus" onclick="tambahRoom('meeting', document.getElementById('roomMeetingNama').value, document.getElementById('roomMeetingKapasitas').value)">+ Tambah Meeting Room</button>
+
+  <!-- Room Hotel -->
+  <div class="room-section">
+    <h3>🛏️ Room Hotel</h3>
+    <input type="text" id="roomHotelNama" placeholder="Nama Room Hotel">
+    <input type="number" id="roomHotelKapasitas" placeholder="Kapasitas">
+    <div id="roomHotelContainer"></div>
+    <button onclick="
+      tambahRoom('hotel',
+        document.getElementById('roomHotelNama').value,
+        document.getElementById('roomHotelKapasitas').value
+      )
+    ">+ Tambah Room Hotel</button>
+  </div>
+
+  <!-- Meeting Room -->
+  <div class="room-section">
+    <h3>💼 Meeting Room</h3>
+    <input type="text" id="roomMeetingNama" placeholder="Nama Meeting Room">
+    <input type="number" id="roomMeetingKapasitas" placeholder="Kapasitas">
+    <div id="meetingRoomContainer"></div>
+    <button onclick="
+      tambahRoom('meeting',
+        document.getElementById('roomMeetingNama').value,
+        document.getElementById('roomMeetingKapasitas').value
+      )
+    ">+ Tambah Meeting Room</button>
+  </div>
+
   <!-- Package -->
-  <input type="text" id="packageNama" placeholder="Nama Package">
-  <input type="text" id="packageKapasitas" placeholder="Kapasitas / Jumlah">
-  <div id="packageContainer"></div>
-  <button class="btn-plus" onclick="tambahRoom('package', document.getElementById('packageNama').value, document.getElementById('packageKapasitas').value)">+ Tambah Package</button>
-</div>
-
-<hr>
-
-<!-- Tombol Simpan & Lihat -->
-<div class="section">
-  <button class="btn-success" onclick="simpanSemua()">💾 Simpan Semua</button>
-  <button onclick="window.open('menu.html')" class="btn-orange" style="margin-top: 10px;">👁️ Lihat Halaman Customer</button>
-  <button id="btnSalinLink" onclick="salinLinkMenu()" style="display:none; background-color: rgb(58,82,219); color:white; padding:10px; border:none; border-radius:8px; margin-top:10px;">📋 Copy Link Untuk Dibagikan</button>
-</div>
-
-<!-- Backup & Restore -->
-<div class="section">
-  <h2>🔁 Backup & Restore Data</h2>
-  <button onclick="backupData()">📦 Backup Data</button>
-  <div id="backupDownloadLink"></div>
-  <label for="restoreInput" style="margin-top: 10px; display:block;">📂 Pilih File JSON untuk Restore:</label>
-  <input type="file" id="restoreInput" accept=".json" onchange="restoreDataFromFile(event)">
+  <div class="room-section">
+    <h3>🎁 Package</h3>
+    <input type="text" id="packageNama" placeholder="Nama Package">
+    <input type="number" id="packageKapasitas" placeholder="Kapasitas / Jumlah">
+    <div id="packageContainer"></div>
+    <button onclick="
+      tambahRoom('package',
+        document.getElementById('packageNama').value,
+        document.getElementById('packageKapasitas').value
+      )
+    ">+ Tambah Package</button>
+  </div>
 </div>
 
 
@@ -703,6 +712,7 @@ window.addEventListener("error",(e)=>{console.error("Global error:",e?.error||e?
   
 </body>
 </html>
+
 
 
 
