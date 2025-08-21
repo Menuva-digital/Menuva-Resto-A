@@ -437,27 +437,31 @@
   </div>
   </div>
 
-<script type="module">
-  // ───────────── IMPORT & INIT FIREBASE ─────────────
-import { initializeApp } from "firebase/app";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
+<!-- Firebase CDN (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
 
-// Firebase config
-const firebaseConfig = {
-  apiKey: "AIzaSyBxKnIO_cIX8B94608zdx5uGs_o4M7ctEk",
-  authDomain: "menuvaresto.firebaseapp.com",
-  projectId: "menuvaresto",
-  storageBucket: "menuvaresto.appspot.com",
-  messagingSenderId: "576149783998",
-  appId: "1:576149783998:web:7ace26d67b02d45226e5ef"
-};
+<script type="text/javascript">
+  /* =========================
+     Firebase Init (Compat)
+     ========================= */
+  const firebaseConfig = {
+    apiKey: "AIzaSyBxKnIO_cIX8B94608zdx5uGs_o4M7ctEk",
+    authDomain: "menuvaresto.firebaseapp.com",
+    projectId: "menuvaresto",
+    storageBucket: "menuvaresto.appspot.com",
+    messagingSenderId: "576149783998",
+    appId: "1:576149783998:web:7ace26d67b02d45226e5ef"
+  };
+  const app = firebase.initializeApp(firebaseConfig);
+  const firestore = firebase.firestore(app); // compat style
 
-const firebaseApp = initializeApp(firebaseConfig);
-const firestore = getFirestore(firebaseApp);
-
-const DB_NAME = "menuvaDB";
-  const STORE = "menuvaData";
-  const FIX_ID = "menuvaData";
+  /* =========================
+     IndexedDB Helpers
+     ========================= */
+  const DB_NAME = "menuvaDB";
+  const STORE   = "menuvaData";
+  const FIX_ID  = "menuvaData";
 
   function openDB() {
     return new Promise((resolve, reject) => {
@@ -469,45 +473,52 @@ const DB_NAME = "menuvaDB";
         }
       };
       req.onsuccess = (e) => resolve(e.target.result);
-      req.onerror = () => reject(req.error);
+      req.onerror   = () => reject(req.error);
     });
   }
 
-  async function saveDataToDB(data) {
-    if (!data.id) data.id = FIX_ID;
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE, "readwrite");
-      const store = tx.objectStore(STORE);
-      const clearReq = store.clear();
-      clearReq.onsuccess = () => {
-        const putReq = store.put(data);
-        putReq.onsuccess = () => resolve(true);
-        putReq.onerror = () => reject(putReq.error);
-      };
-      clearReq.onerror = () => reject(clearReq.error);
-      tx.oncomplete = () => db.close();
+  function saveDataToDB(data) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        if (!data.id) data.id = FIX_ID;
+        const db = await openDB();
+        const tx = db.transaction(STORE, "readwrite");
+        const store = tx.objectStore(STORE);
+
+        const clearReq = store.clear();
+        clearReq.onsuccess = () => {
+          const putReq = store.put(data);
+          putReq.onsuccess = () => { db.close(); resolve(true); };
+          putReq.onerror   = () => { db.close(); reject(putReq.error); };
+        };
+        clearReq.onerror = () => { db.close(); reject(clearReq.error); };
+      } catch (err) {
+        reject(err);
+      }
     });
   }
 
-  async function loadDataFromDB() {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(STORE, "readonly");
-      const store = tx.objectStore(STORE);
-      const getReq = store.get(FIX_ID);
-      getReq.onsuccess = () => resolve(getReq.result || null);
-      getReq.onerror = () => reject(getReq.error);
-      tx.oncomplete = () => db.close();
+  function loadDataFromDB() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const db = await openDB();
+        const tx = db.transaction(STORE, "readonly");
+        const store = tx.objectStore(STORE);
+        const getReq = store.get(FIX_ID);
+        getReq.onsuccess = () => { db.close(); resolve(getReq.result || null); };
+        getReq.onerror   = () => { db.close(); reject(getReq.error); };
+      } catch (err) {
+        reject(err);
+      }
     });
   }
 
   /* =========================
-     Firestore Save (seperti punyamu)
+     Firestore Save (Compat)
      ========================= */
   async function saveToFirestore(data) {
     try {
-      await setDoc(doc(firestore, "menuva", "data"), data);
+      await firestore.collection("menuva").doc("data").set(data);
       console.log("Data tersimpan di Firestore ✅");
     } catch (err) {
       console.error("Gagal simpan Firestore", err);
@@ -526,7 +537,7 @@ const DB_NAME = "menuvaDB";
       }
       const filename = `menuva-backup-${Date.now()}.json`;
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
+      const url  = URL.createObjectURL(blob);
 
       const a = document.createElement("a");
       a.href = url; a.download = filename;
@@ -553,7 +564,7 @@ const DB_NAME = "menuvaDB";
     reader.onload = async (e) => {
       try {
         const json = JSON.parse(e.target.result);
-        if (!json.id) json.id = FIX_ID; // penting!
+        if (!json.id) json.id = FIX_ID;
         await saveDataToDB(json);
         alert("✅ Data berhasil direstore dari file!\nHalaman akan dimuat ulang...");
         location.reload();
@@ -571,12 +582,12 @@ const DB_NAME = "menuvaDB";
   async function simpanSemua() {
     const identitas = {
       namaRestoran: document.getElementById("restoName")?.value || "",
-      nomorWA: document.getElementById("restoWA")?.value || "",
-      logo: document.getElementById("logoPreview")?.src || "",
+      nomorWA:     document.getElementById("restoWA")?.value   || "",
+      logo:        document.getElementById("logoPreview")?.src || "",
     };
 
     const menus = [
-      ...(window.ambilMenu ? window.ambilMenu("menuFoodContainer") : []),
+      ...(window.ambilMenu ? window.ambilMenu("menuFoodContainer")  : []),
       ...(window.ambilMenu ? window.ambilMenu("menuSnackContainer") : []),
       ...(window.ambilMenu ? window.ambilMenu("menuDrinkContainer") : []),
     ];
@@ -590,12 +601,12 @@ const DB_NAME = "menuvaDB";
       promo: window.menuPromo || [],
       rooms,
       flipbookRuangan: window.flipbookRuanganImages || [],
-      flipbookMenu: window.flipbookMenuImages || []
+      flipbookMenu:    window.flipbookMenuImages    || []
     };
 
     try {
-      await saveDataToDB(data);
-      await saveToFirestore(data);
+      await saveDataToDB(data);     // IndexedDB
+      await saveToFirestore(data);  // Firestore
       alert("✅ Data tersimpan di IndexedDB + Firestore");
     } catch (err) {
       console.error(err);
@@ -609,32 +620,35 @@ const DB_NAME = "menuvaDB";
       if (!data || Object.keys(data).length === 0) return;
 
       const restoName = document.getElementById("restoName");
-      const restoWA = document.getElementById("restoWA");
-      const logoPrev = document.getElementById("logoPreview");
+      const restoWA   = document.getElementById("restoWA");
+      const logoPrev  = document.getElementById("logoPreview");
 
       if (restoName) restoName.value = data.identitas?.namaRestoran || "";
-      if (restoWA) restoWA.value = data.identitas?.nomorWA || "";
+      if (restoWA)   restoWA.value   = data.identitas?.nomorWA      || "";
       if (logoPrev && data.identitas?.logo) logoPrev.src = data.identitas.logo;
 
       window.menuPromo = data.promo || [];
-      if (window.renderPromoUI) window.renderPromoUI();
+      if (typeof window.renderPromoUI === "function") window.renderPromoUI();
 
       ["menuFoodContainer","menuSnackContainer","menuDrinkContainer"].forEach(id=>{
         const el = document.getElementById(id);
         if (el) el.innerHTML = "";
       });
+
       (data.menu || []).forEach(m => {
-        if (window.tambahMenu) window.tambahMenu(m.kategori, m.nama, m.harga);
+        if (typeof window.tambahMenu === "function") window.tambahMenu(m.kategori, m.nama, m.harga);
       });
 
-      if (window.restoreRoomFromData) window.restoreRoomFromData(data.rooms || []);
+      if (typeof window.restoreRoomFromData === "function") {
+        window.restoreRoomFromData(data.rooms || []);
+      }
 
       window.flipbookRuanganImages = data.flipbookRuangan || [];
-      window.flipbookMenuImages = data.flipbookMenu || [];
+      window.flipbookMenuImages    = data.flipbookMenu    || [];
 
-      if (window.renderImagePreview) {
-        (window.flipbookRuanganImages).forEach(url=>window.renderImagePreview("ruangan", url));
-        (window.flipbookMenuImages).forEach(url=>window.renderImagePreview("menu", url));
+      if (typeof window.renderImagePreview === "function") {
+        (window.flipbookRuanganImages).forEach(url => window.renderImagePreview("ruangan", url));
+        (window.flipbookMenuImages).forEach(url    => window.renderImagePreview("menu",    url));
       }
 
       console.log("Data berhasil dimuat ✅");
@@ -644,9 +658,10 @@ const DB_NAME = "menuvaDB";
   }
 
   /* =========================
-     Upload → Preview (logo/gambar sederhana)
-     HTML contoh: <input type="file" id="logoInput" onchange="handleImageUpload(event,'logoPreview')">
-                  <img id="logoPreview">
+     Upload → Preview
+     HTML contoh:
+       <input type="file" id="logoInput" onchange="handleImageUpload(event,'logoPreview')">
+       <img id="logoPreview">
      ========================= */
   function handleImageUpload(e, previewId) {
     const file = e?.target?.files?.[0];
@@ -660,35 +675,24 @@ const DB_NAME = "menuvaDB";
   }
 
   /* =========================
-     EKSPOS KE GLOBAL (FIX UTAMA)
-     Supaya onclick/onchange di HTML bisa manggil fungsi-fungsi ini.
+     Auto-init + Global Error Log
      ========================= */
-  Object.assign(window, {
-    backupData,
-    restoreDataFromFile,
-    simpanSemua,
-    loadSemuaData,
-    saveDataToDB,
-    loadDataFromDB,
-    saveToFirestore,
-    handleImageUpload
-    // Tambahkan juga yang lain kalau kamu panggil dari HTML:
-    // tambahMenu, tambahPromo, renderPromoUI, renderImagePreview, ambilMenu, ambilSemuaRoom, restoreRoomFromData
-  });
-
-  /* =========================
-     Init aman setelah DOM siap
-     ========================= */
-  window.addEventListener("DOMContentLoaded", () => {
-    // otomatis load data kalau ada
+  document.addEventListener("DOMContentLoaded", () => {
     loadSemuaData();
   });
 
-  // Logger global biar keliatan kalau ada error fatal yang nge-blok
   window.addEventListener("error", (e) => {
     console.error("Global error:", e?.error || e?.message);
   });
+
+  // Fungsi-fungsi di atas otomatis global (non-module).
+  // Pastikan tombol HTML memanggil nama-nama ini:
+  // - backupData()
+  // - restoreDataFromFile(event)
+  // - simpanSemua()
+  // - handleImageUpload(event,'logoPreview')
 </script>
+
 
   <div class="fixed-bar">
   <button onclick="window.location.href='index.html'" class="btn-success">🔒 Logout</button>
@@ -697,6 +701,7 @@ const DB_NAME = "menuvaDB";
   
 </body>
 </html>
+
 
 
 
