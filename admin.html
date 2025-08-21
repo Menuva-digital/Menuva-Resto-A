@@ -413,22 +413,21 @@
       📋 Copy Link Untuk Dibagikan Ke Customers
     </button>
     
-    <!-- Backup dan Restore -->
+     <!-- Backup dan Restore -->
 
     <div class="section">
       <h2>🔁 Backup & Restore Data</h2>
-     <button class="btn-secondary" onclick="backupData()">📦 Backup Data</button>
+     <button onclick="backupData()">📦 Backup Data</button>
 
      <!-- Tempat status -->
      <div id="backupDownloadLink" style="margin-top:10px;"></div>
 
       
       <!-- Input Restore -->
-     <label for="restoreFileInput" style="margin-top: 20px; display: block;">
-      📂 Pilih File JSON untuk Restore:
-     </label>
-     <input type="file" id="restoreFileInput" accept=".json" />
-
+      <label for="restoreInput" style="margin-top: 20px; display: block;">
+        📂 Pilih File JSON untuk Restore:
+      </label>
+      <input type="file" id="restoreInput" accept=".json" onchange="restoreDataFromFile(event)" />
     </div>
   
   <div style="background: #fef9e7; padding: 10px; border-left: 5px solid #f1c40f; margin-top: 10px; font-size: 14px;">
@@ -731,38 +730,57 @@ async function loadSemuaData(){
   }catch(err){console.error("Gagal load data",err);}
 }
 
-// ───────────── BACKUP & RESTORE JSON ─────────────
-function backupData(){
-  loadDataFromDB().then(data=>{
-    const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement("a");
-    a.href=url;
-    a.download="menuva_backup.json";
-    a.click();
-    URL.revokeObjectURL(url);
-  }).catch(err=>console.error(err));
-}
-
-function initRestoreListener(){
-  const restoreInput=document.getElementById("restoreFileInput");
-  if(!restoreInput) return;
-  restoreInput.addEventListener("change",async e=>{
-    const file=e.target.files[0];
-    if(!file) return;
-    const reader=new FileReader();
-    reader.onload=async ev=>{
-      try{
-        const json=JSON.parse(ev.target.result);
-        await saveDataToDB(json);
-        await loadSemuaData();
-        alert("✅ Data berhasil direstore!");
-      }catch(err){console.error(err); alert("❌ File JSON tidak valid!");}
-    };
-    reader.readAsText(file);
-  });
-}
-
+ // Backup data ke file JSON
+    async function backupData() {
+      try {
+        const data = await loadDataFromDB();
+        if (!data) {
+          alert("Tidak ada data untuk di-backup!");
+          return;
+        }
+  
+        const filename = `menuva-backup-${Date.now()}.json`;
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+  
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+  
+        const statusDiv = document.getElementById("backupDownloadLink");
+        statusDiv.innerHTML = `
+          ✅ Backup berhasil! File <strong>${filename}</strong> siap di-download.<br>
+          <a href="${url}" download="${filename}" style="margin-top:10px;display:inline-block;padding:10px 16px;background:#007bff;color:white;text-decoration:none;border-radius:6px;">
+            📥 Klik di sini jika download tidak dimulai otomatis
+          </a>
+        `;
+      } catch (err) {
+        alert("❌ Gagal backup data: " + err.message);
+      }
+    }
+  
+    // Restore data dari file JSON
+    function restoreDataFromFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+  
+      const reader = new FileReader();
+      reader.onload = async function (e) {
+        try {
+          const json = JSON.parse(e.target.result);
+          await saveDataToDB(json);
+          alert("✅ Data berhasil direstore dari file!\nHalaman akan dimuat ulang...");
+          location.reload();
+        } catch (err) {
+          alert("❌ Gagal membaca file JSON. Pastikan file valid.");
+          console.error("Restore error:", err);
+        }
+      };
+      reader.readAsText(file);
+    }
 // ───────────── INIT ─────────────
 window.onload=async()=>{
   await initDB();
@@ -782,6 +800,7 @@ window.onload=async()=>{
   
 </body>
 </html>
+
 
 
 
