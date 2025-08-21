@@ -442,257 +442,243 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
 
 <script type="text/javascript">
-  /* =========================
-     Firebase Init (Compat)
-     ========================= */
-  const firebaseConfig = {
-    apiKey: "AIzaSyBxKnIO_cIX8B94608zdx5uGs_o4M7ctEk",
-    authDomain: "menuvaresto.firebaseapp.com",
-    projectId: "menuvaresto",
-    storageBucket: "menuvaresto.appspot.com",
-    messagingSenderId: "576149783998",
-    appId: "1:576149783998:web:7ace26d67b02d45226e5ef"
-  };
-  const app = firebase.initializeApp(firebaseConfig);
-  const firestore = firebase.firestore(app); // compat style
+/* =========================
+   Firebase Init (Compat)
+========================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyBxKnIO_cIX8B94608zdx5uGs_o4M7ctEk",
+  authDomain: "menuvaresto.firebaseapp.com",
+  projectId: "menuvaresto",
+  storageBucket: "menuvaresto.appspot.com",
+  messagingSenderId: "576149783998",
+  appId: "1:576149783998:web:7ace26d67b02d45226e5ef"
+};
+const app = firebase.initializeApp(firebaseConfig);
+const firestore = firebase.firestore(app); // compat style
 
-  /* =========================
-     IndexedDB Helpers
-     ========================= */
-  const DB_NAME = "menuvaDB";
-  const STORE   = "menuvaData";
-  const FIX_ID  = "menuvaData";
+/* =========================
+   IndexedDB Helpers
+========================= */
+const DB_NAME = "menuvaDB";
+const STORE   = "menuvaData";
+const FIX_ID  = "menuvaData";
 
-  function openDB() {
-    return new Promise((resolve, reject) => {
-      const req = indexedDB.open(DB_NAME, 1);
-      req.onupgradeneeded = (e) => {
-        const db = e.target.result;
-        if (!db.objectStoreNames.contains(STORE)) {
-          db.createObjectStore(STORE, { keyPath: "id" });
-        }
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE)) {
+        db.createObjectStore(STORE, { keyPath: "id" });
+      }
+    };
+    req.onsuccess = (e) => resolve(e.target.result);
+    req.onerror   = () => reject(req.error);
+  });
+}
+
+function saveDataToDB(data) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!data.id) data.id = FIX_ID;
+      const db = await openDB();
+      const tx = db.transaction(STORE, "readwrite");
+      const store = tx.objectStore(STORE);
+
+      const clearReq = store.clear();
+      clearReq.onsuccess = () => {
+        const putReq = store.put(data);
+        putReq.onsuccess = () => { db.close(); resolve(true); };
+        putReq.onerror   = () => { db.close(); reject(putReq.error); };
       };
-      req.onsuccess = (e) => resolve(e.target.result);
-      req.onerror   = () => reject(req.error);
-    });
-  }
-
-  function saveDataToDB(data) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        if (!data.id) data.id = FIX_ID;
-        const db = await openDB();
-        const tx = db.transaction(STORE, "readwrite");
-        const store = tx.objectStore(STORE);
-
-        const clearReq = store.clear();
-        clearReq.onsuccess = () => {
-          const putReq = store.put(data);
-          putReq.onsuccess = () => { db.close(); resolve(true); };
-          putReq.onerror   = () => { db.close(); reject(putReq.error); };
-        };
-        clearReq.onerror = () => { db.close(); reject(clearReq.error); };
-      } catch (err) {
-        reject(err);
-      }
-    });
-  }
-
-  function loadDataFromDB() {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const db = await openDB();
-        const tx = db.transaction(STORE, "readonly");
-        const store = tx.objectStore(STORE);
-        const getReq = store.get(FIX_ID);
-        getReq.onsuccess = () => { db.close(); resolve(getReq.result || null); };
-        getReq.onerror   = () => { db.close(); reject(getReq.error); };
-      } catch (err) {
-        reject(err);
-      }
-    });
-  }
-
-  /* =========================
-     Firestore Save (Compat)
-     ========================= */
-  async function saveToFirestore(data) {
-    try {
-      await firestore.collection("menuva").doc("data").set(data);
-      console.log("Data tersimpan di Firestore ✅");
+      clearReq.onerror = () => { db.close(); reject(clearReq.error); };
     } catch (err) {
-      console.error("Gagal simpan Firestore", err);
+      reject(err);
     }
-  }
-
-  /* =========================
-     Backup & Restore
-     ========================= */
-  async function backupData() {
-    try {
-      const data = await loadDataFromDB();
-      if (!data) {
-        alert("Tidak ada data untuk di-backup!");
-        return;
-      }
-      const filename = `menuva-backup-${Date.now()}.json`;
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-      const url  = URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url; a.download = filename;
-      document.body.appendChild(a); a.click(); a.remove();
-
-      const statusDiv = document.getElementById("backupDownloadLink");
-      if (statusDiv) {
-        statusDiv.innerHTML = `
-          ✅ Backup berhasil! File <strong>${filename}</strong> siap di-download.<br>
-          <a href="${url}" download="${filename}" style="margin-top:10px;display:inline-block;padding:10px 16px;background:#007bff;color:white;text-decoration:none;border-radius:6px;">
-            📥 Klik di sini jika download tidak dimulai otomatis
-          </a>
-        `;
-      }
-    } catch (err) {
-      alert("❌ Gagal backup data: " + err.message);
-    }
-  }
-
-  function restoreDataFromFile(event) {
-    const file = event?.target?.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      try {
-        const json = JSON.parse(e.target.result);
-        if (!json.id) json.id = FIX_ID;
-        await saveDataToDB(json);
-        alert("✅ Data berhasil direstore dari file!\nHalaman akan dimuat ulang...");
-        location.reload();
-      } catch (err) {
-        console.error("Restore error:", err);
-        alert("❌ Gagal membaca file JSON. Pastikan file valid.");
-      }
-    };
-    reader.readAsText(file);
-  }
-
-  /* =========================
-     Simpan & Load Semua
-     ========================= */
-  async function simpanSemua() {
-    const identitas = {
-      namaRestoran: document.getElementById("restoName")?.value || "",
-      nomorWA:     document.getElementById("restoWA")?.value   || "",
-      logo:        document.getElementById("logoPreview")?.src || "",
-    };
-
-    const menus = [
-      ...(window.ambilMenu ? window.ambilMenu("menuFoodContainer")  : []),
-      ...(window.ambilMenu ? window.ambilMenu("menuSnackContainer") : []),
-      ...(window.ambilMenu ? window.ambilMenu("menuDrinkContainer") : []),
-    ];
-
-    const rooms = window.ambilSemuaRoom ? window.ambilSemuaRoom() : [];
-
-    const data = {
-      id: FIX_ID,
-      identitas,
-      menu: menus,
-      promo: window.menuPromo || [],
-      rooms,
-      flipbookRuangan: window.flipbookRuanganImages || [],
-      flipbookMenu:    window.flipbookMenuImages    || []
-    };
-
-    try {
-      await saveDataToDB(data);     // IndexedDB
-      await saveToFirestore(data);  // Firestore
-      alert("✅ Data tersimpan di IndexedDB + Firestore");
-    } catch (err) {
-      console.error(err);
-      alert("❌ Gagal simpan data");
-    }
-  }
-
-  async function loadSemuaData() {
-    try {
-      const data = await loadDataFromDB();
-      if (!data || Object.keys(data).length === 0) return;
-
-      const restoName = document.getElementById("restoName");
-      const restoWA   = document.getElementById("restoWA");
-      const logoPrev  = document.getElementById("logoPreview");
-
-      if (restoName) restoName.value = data.identitas?.namaRestoran || "";
-      if (restoWA)   restoWA.value   = data.identitas?.nomorWA      || "";
-      if (logoPrev && data.identitas?.logo) logoPrev.src = data.identitas.logo;
-
-      window.menuPromo = data.promo || [];
-      if (typeof window.renderPromoUI === "function") window.renderPromoUI();
-
-      ["menuFoodContainer","menuSnackContainer","menuDrinkContainer"].forEach(id=>{
-        const el = document.getElementById(id);
-        if (el) el.innerHTML = "";
-      });
-
-      (data.menu || []).forEach(m => {
-        if (typeof window.tambahMenu === "function") window.tambahMenu(m.kategori, m.nama, m.harga);
-      });
-
-      if (typeof window.restoreRoomFromData === "function") {
-        window.restoreRoomFromData(data.rooms || []);
-      }
-
-      window.flipbookRuanganImages = data.flipbookRuangan || [];
-      window.flipbookMenuImages    = data.flipbookMenu    || [];
-
-      if (typeof window.renderImagePreview === "function") {
-        (window.flipbookRuanganImages).forEach(url => window.renderImagePreview("ruangan", url));
-        (window.flipbookMenuImages).forEach(url    => window.renderImagePreview("menu",    url));
-      }
-
-      console.log("Data berhasil dimuat ✅");
-    } catch (err) {
-      console.error("Gagal load data", err);
-    }
-  }
-
-  /* =========================
-     Upload → Preview
-     HTML contoh:
-       <input type="file" id="logoInput" onchange="handleImageUpload(event,'logoPreview')">
-       <img id="logoPreview">
-     ========================= */
-  function handleImageUpload(e, previewId) {
-    const file = e?.target?.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const img = document.getElementById(previewId);
-      if (img) img.src = reader.result;
-    };
-    reader.readAsDataURL(file);
-  }
-
-  /* =========================
-     Auto-init + Global Error Log
-     ========================= */
-  document.addEventListener("DOMContentLoaded", () => {
-    loadSemuaData();
   });
+}
 
-  window.addEventListener("error", (e) => {
-    console.error("Global error:", e?.error || e?.message);
+function loadDataFromDB() {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const db = await openDB();
+      const tx = db.transaction(STORE, "readonly");
+      const store = tx.objectStore(STORE);
+      const getReq = store.get(FIX_ID);
+      getReq.onsuccess = () => { db.close(); resolve(getReq.result || null); };
+      getReq.onerror   = () => { db.close(); reject(getReq.error); };
+    } catch (err) {
+      reject(err);
+    }
   });
+}
 
-  // Fungsi-fungsi di atas otomatis global (non-module).
-  // Pastikan tombol HTML memanggil nama-nama ini:
-  // - backupData()
-  // - restoreDataFromFile(event)
-  // - simpanSemua()
-  // - handleImageUpload(event,'logoPreview')
+/* =========================
+   Firestore Save (Compat)
+========================= */
+async function saveToFirestore(data) {
+  try {
+    await firestore.collection("menuva").doc("data").set(data);
+    console.log("Data tersimpan di Firestore ✅");
+  } catch (err) {
+    console.error("Gagal simpan Firestore", err);
+  }
+}
+
+/* =========================
+   Backup & Restore
+========================= */
+async function backupData() {
+  try {
+    const data = await loadDataFromDB();
+    if (!data) { alert("Tidak ada data untuk di-backup!"); return; }
+    const filename = `menuva-backup-${Date.now()}.json`;
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url  = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+    const statusDiv = document.getElementById("backupDownloadLink");
+    if (statusDiv) {
+      statusDiv.innerHTML = `
+        ✅ Backup berhasil! File <strong>${filename}</strong> siap di-download.<br>
+        <a href="${url}" download="${filename}" style="margin-top:10px;display:inline-block;padding:10px 16px;background:#007bff;color:white;text-decoration:none;border-radius:6px;">
+          📥 Klik di sini jika download tidak dimulai otomatis
+        </a>
+      `;
+    }
+  } catch (err) {
+    alert("❌ Gagal backup data: " + err.message);
+  }
+}
+
+function restoreDataFromFile(event) {
+  const file = event?.target?.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const json = JSON.parse(e.target.result);
+      if (!json.id) json.id = FIX_ID;
+      await saveDataToDB(json);
+      alert("✅ Data berhasil direstore dari file!\nHalaman akan dimuat ulang...");
+      location.reload();
+    } catch (err) {
+      console.error("Restore error:", err);
+      alert("❌ Gagal membaca file JSON. Pastikan file valid.");
+    }
+  };
+  reader.readAsText(file);
+}
+
+/* =========================
+   Upload → Preview
+========================= */
+function handleImageUpload(e, previewId) {
+  const file = e?.target?.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = document.getElementById(previewId);
+    if (img) img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+/* =========================
+   Fungsi Global (Stub)
+========================= */
+window.tambahPromo = function(nama, harga, deskripsi) { console.log("Tambah promo:", nama, harga, deskripsi); };
+window.tambahMenu = function(kategori, nama, harga) { console.log("Tambah menu:", kategori, nama, harga); };
+window.tambahGambar = function(url, type) { console.log("Tambah gambar:", type, url); };
+window.renderPromoUI = function() { console.log("Render promo UI"); };
+window.renderImagePreview = function(type, url) { console.log("Render image preview:", type, url); };
+window.ambilMenu = function(containerId) { console.log("Ambil menu dari:", containerId); return []; };
+window.ambilSemuaRoom = function() { console.log("Ambil semua room"); return []; };
+window.restoreRoomFromData = function(rooms) { console.log("Restore rooms:", rooms); };
+
+/* =========================
+   Simpan & Load Semua
+========================= */
+async function simpanSemua() {
+  const identitas = {
+    namaRestoran: document.getElementById("restoName")?.value || "",
+    nomorWA:     document.getElementById("restoWA")?.value   || "",
+    logo:        document.getElementById("logoPreview")?.src || "",
+  };
+  const menus = [
+    ...(window.ambilMenu ? window.ambilMenu("menuFoodContainer")  : []),
+    ...(window.ambilMenu ? window.ambilMenu("menuSnackContainer") : []),
+    ...(window.ambilMenu ? window.ambilMenu("menuDrinkContainer") : []),
+  ];
+  const rooms = window.ambilSemuaRoom ? window.ambilSemuaRoom() : [];
+  const data = {
+    id: FIX_ID,
+    identitas,
+    menu: menus,
+    promo: window.menuPromo || [],
+    rooms,
+    flipbookRuangan: window.flipbookRuanganImages || [],
+    flipbookMenu:    window.flipbookMenuImages    || []
+  };
+  try {
+    await saveDataToDB(data);
+    await saveToFirestore(data);
+    alert("✅ Data tersimpan di IndexedDB + Firestore");
+  } catch (err) {
+    console.error(err);
+    alert("❌ Gagal simpan data");
+  }
+}
+
+async function loadSemuaData() {
+  try {
+    const data = await loadDataFromDB();
+    if (!data || Object.keys(data).length === 0) return;
+
+    const restoName = document.getElementById("restoName");
+    const restoWA   = document.getElementById("restoWA");
+    const logoPrev  = document.getElementById("logoPreview");
+    if (restoName) restoName.value = data.identitas?.namaRestoran || "";
+    if (restoWA)   restoWA.value   = data.identitas?.nomorWA      || "";
+    if (logoPrev && data.identitas?.logo) logoPrev.src = data.identitas.logo;
+
+    window.menuPromo = data.promo || [];
+    if (typeof window.renderPromoUI === "function") window.renderPromoUI();
+
+    ["menuFoodContainer","menuSnackContainer","menuDrinkContainer"].forEach(id=>{
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = "";
+    });
+    (data.menu || []).forEach(m => { if (window.tambahMenu) window.tambahMenu(m.kategori, m.nama, m.harga); });
+    if (window.restoreRoomFromData) window.restoreRoomFromData(data.rooms || []);
+    window.flipbookRuanganImages = data.flipbookRuangan || [];
+    window.flipbookMenuImages    = data.flipbookMenu    || [];
+    if (window.renderImagePreview) {
+      window.flipbookRuanganImages.forEach(url => window.renderImagePreview("ruangan", url));
+      window.flipbookMenuImages.forEach(url    => window.renderImagePreview("menu",    url));
+    }
+
+    console.log("Data berhasil dimuat ✅");
+  } catch (err) {
+    console.error("Gagal load data", err);
+  }
+}
+
+/* =========================
+   Auto Init
+========================= */
+document.addEventListener("DOMContentLoaded", () => { loadSemuaData(); });
+window.addEventListener("error", (e) => { console.error("Global error:", e?.error || e?.message); });
+
+/* =========================
+   Expose fungsi penting ke HTML
+========================= */
+window.backupData = backupData;
+window.restoreDataFromFile = restoreDataFromFile;
+window.simpanSemua = simpanSemua;
+window.handleImageUpload = handleImageUpload;
+
 </script>
-
 
   <div class="fixed-bar">
   <button onclick="window.location.href='index.html'" class="btn-success">🔒 Logout</button>
@@ -701,6 +687,7 @@
   
 </body>
 </html>
+
 
 
 
