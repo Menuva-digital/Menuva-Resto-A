@@ -1,438 +1,161 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>Admin Panel - Menuva</title>
-  <style>
-    * { box-sizing: border-box; }
-       body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      padding-bottom: 10px;
-      background-color: #f4f4f4;
-      margin: 0;
-      position: relative; /* pastikan body bisa nampung fixed element */
-      padding-bottom: 20px; /* kasih ruang supaya konten gak ketiban tombol */
-      overflow-x: hidden; /* hindari horizontal scroll */
-    }
-    .menuva-logo {
-      text-align: center;
-      margin-bottom: 10px;
-    }
-    .menuva-logo img {
-      height: 90px;
-    }
-    h1, h2,h3 {
-      text-align: center;
-      margin: 10px 0;
-    }
-    .section {
-      background: #fff;
-      padding: 20px;
-      margin-bottom: 20px;
-      border-radius: 10px;
-      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-    }
-    input, button {
-      padding: 10px;
-      margin: 5px 0;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      width: 100%;
-      font-size: 1rem;
-    }
-    .menu-item {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-    .menu-item input {
-      flex: 1 1 40%;
-    }
-    .menu-item button {
-      flex: 1 1 auto;
-      white-space: nowrap;
-      background: linear-gradient(135deg, #7f5af0, #2cb5e8);
-    }
-    .btn-danger {
-      background-color: #e74c3c;
-      color: white;
-    }
-    .btn-success {
-      background-color: #2ecc71;
-      color: white;
-    }
-    .btn-secondary {
-      background-color: #3498db;
-      color: white;
-    }
-    .preview img {
-      max-width: 100px;
-      margin: 5px;
-      border-radius: 5px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-    }
-    @media (max-width: 600px) {
-      .menu-item input, .menu-item button {
-        width: 100%;
-      }
-    }
-    .btn-orange {
-  background-color: orange;
-  color: white;
-  border: none;
-}
-.room-section > div:nth-child(2) button {
-  padding: 6px 14px;
-  border-radius: 6px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-.room-section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-.room-form {
-  padding: 10px;
-  border: 1px dashed #ccc;
-  margin-bottom: 12px;
-  border-radius: 6px;
-  background-color: #fff;
-}
-.room-form input[type="text"],
-.room-form input[type="number"],
-.room-form input[type="file"] {
-  display: block;
-  margin-bottom: 8px;
-  width: 100%;
-  padding: 6px;
-  font-size: 14px;
-}
-.room-form .room-preview img {
-  max-height: 80px;
-  margin-top: 4px;
-}
-
-.gambar-preview-wrapper {
-  position: relative;
-  display: inline-block;
-  margin-top: 10px;
-}
-
-.gambar-preview {
-  height: auto !important;
-  width: auto !important;
-  max-height: 200px !important; /* Ubah sesuai keinginan */
-  max-width: 100% !important;
-  display: block;
-}
-.hapus-gambar {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  background: red;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  font-size: 14px;
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  transition: background 0.2s;
-}
-
-.hapus-gambar:hover {
-  background: #cc0000;
-}
-  .btn-hapus-gambar {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: none;
-  background: red;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  padding: 0;
-  font-size: 14px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  transition: background 0.2s, transform 0.1s ease;
-}
-
-.btn-hapus-gambar:hover {
-  background: #cc0000;
-  transform: scale(1.05);
-}
-
-.section-box {
-  border: none;
-  padding: 16px;
-  margin-bottom: 24px;
-  border-radius: 8px;
-  background: #fff;
-}
-
-.section-box h2,
-.section-box h3 {
-  margin-top: 0;
-}
-
-.room-section {
-  margin-bottom: 20px;
-}
-
-.room-section button {
-  margin-bottom: 10px;
-  background-color: #17a2b8;
-}
-.btn-simpan {
-    background-color: #17a2b8;
-    color: white;
-    font-weight: bold;
-    border: none;
-    padding: 10px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-  }
-    
-.btn-tambah-room {
-  background: linear-gradient(135deg, #7f5af0, #2cb5e8);
-  color: #fff;
-  padding: 8px 14px;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  box-shadow: 0 4px 10px rgba(127, 90, 240, 0.3);
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-.btn-tambah-room:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(44, 181, 232, 0.5);
-}
-
-
-.btn-hapus-room {
-  background: linear-gradient(135deg, #ff6b6b, #fbc687);
-  color: #fff;
-  padding: 8px 14px;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  box-shadow: 0 4px 10px rgba(255, 107, 107, 0.3);
-  margin-top: 10px;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-.btn-hapus-room:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(251, 198, 135, 0.5);
-}
-
-/* 🖼️ Upload Gambar - Sky Blue Gradient */
-.btn-upload-gambar {
-  background: linear-gradient(135deg, #00c6ff, #0072ff);
-  color: white;
-  padding: 6px 12px;
-  border: none;
-  border-radius: 6px;
-  margin-top: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: opacity 0.3s ease;
-}
-.btn-upload-gambar:hover {
-  opacity: 0.85;
-}
-.fixed-bar {
-  position: fixed !important;
-  bottom: 0;
-  left: 0;
-  width: 100vw;
-  background: #fff;
-  border-top: 1px solid #ddd;
-  box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  padding: 10px 20px;
-  z-index: 9999;
-}
-
-.fixed-bar button {
-  flex: 1;
-  padding: 12px;
-  font-size: 16px;
-  font-weight: bold;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  color: white;
-}
-
-.btn-order {
-  background-color: #007bff;
-}
-.btn-order:hover {
-  background-color: #0056b3;
-}
-.btn-room {
-  background-color: #e74c3c;
-}
-.btn-room:hover {
-  background-color: #c0392b;
-}
-
-    
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin Panel - Menuva</title>
+<style>
+/* ==== CSS Tetap Sama ==== */
+* { box-sizing: border-box; }
+body { font-family: Arial, sans-serif; padding: 20px; background:#f4f4f4; margin:0; overflow-x:hidden; }
+.menuva-logo { text-align:center; margin-bottom:10px; }
+.menuva-logo img { height:90px; }
+h1,h2,h3 { text-align:center; margin:10px 0; }
+.section { background:#fff; padding:20px; margin-bottom:20px; border-radius:10px; box-shadow:0 3px 6px rgba(0,0,0,0.1); }
+input,button,textarea { padding:10px; margin:5px 0; border-radius:5px; border:1px solid #ccc; width:100%; font-size:1rem; }
+.menu-item { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:10px; }
+.menu-item input { flex:1 1 40%; }
+.menu-item button { flex:1 1 auto; white-space:nowrap; background:linear-gradient(135deg, #7f5af0, #2cb5e8); }
+.btn-danger{background:#e74c3c;color:#fff;} .btn-success{background:#2ecc71;color:#fff;} .btn-secondary{background:#3498db;color:#fff;}
+.preview img { max-width:100px; margin:5px; border-radius:5px; box-shadow:0 1px 4px rgba(0,0,0,0.1);}
+@media (max-width:600px){.menu-item input,.menu-item button{width:100%;}}
+.btn-orange{background:orange;color:white;border:none;}
+.room-section>div:nth-child(2) button{padding:6px 14px;border-radius:6px;background-color:#007bff;color:white;border:none;cursor:pointer;}
+.room-section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.room-form{padding:10px;border:1px dashed #ccc;margin-bottom:12px;border-radius:6px;background-color:#fff;}
+.room-form input[type=text], .room-form input[type=number], .room-form input[type=file], .room-form textarea { display:block; margin-bottom:8px; width:100%; padding:6px; font-size:14px;}
+.room-form .room-preview img{max-height:80px;margin-top:4px;}
+.gambar-preview-wrapper{position:relative; display:inline-block; margin-top:10px;}
+.gambar-preview{height:auto!important;width:auto!important; max-height:200px!important; max-width:100%!important; display:block;}
+.hapus-gambar{position:absolute; top:-8px; right:-8px; background:red; color:white; border:none; border-radius:50%; font-size:14px; width:24px; height:24px; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.2);}
+.hapus-gambar:hover{background:#cc0000;}
+.btn-hapus-gambar{width:24px;height:24px;border-radius:50%;border:none;background:red;color:white;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,0.2);transition:background 0.2s, transform 0.1s ease;}
+.btn-hapus-gambar:hover{background:#cc0000; transform:scale(1.05);}
+.section-box{border:none;padding:16px;margin-bottom:24px;border-radius:8px;background:#fff;}
+.section-box h2,h3{margin-top:0;}
+.room-section{margin-bottom:20px;}
+.room-section button{margin-bottom:10px;background-color:#17a2b8;}
+.btn-simpan{background-color:#17a2b8;color:white;font-weight:bold;border:none;padding:10px 16px;border-radius:6px;cursor:pointer;}
+.btn-tambah-room{background:linear-gradient(135deg,#7f5af0,#2cb5e8);color:#fff;padding:8px 14px;border:none;border-radius:8px;font-weight:bold;box-shadow:0 4px 10px rgba(127,90,240,0.3);cursor:pointer;transition:transform 0.2s ease;}
+.btn-tambah-room:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(44,181,232,0.5);}
+.btn-hapus-room{background:linear-gradient(135deg,#ff6b6b,#fbc687);color:#fff;padding:8px 14px;border:none;border-radius:8px;font-weight:bold;box-shadow:0 4px 10px rgba(255,107,107,0.3);margin-top:10px;cursor:pointer;transition:transform 0.2s ease;}
+.btn-hapus-room:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(251,198,135,0.5);}
+.btn-upload-gambar{background:linear-gradient(135deg,#00c6ff,#0072ff);color:white;padding:6px 12px;border:none;border-radius:6px;margin-top:6px;font-weight:500;cursor:pointer;transition:opacity 0.3s ease;}
+.btn-upload-gambar:hover{opacity:0.85;}
+.fixed-bar{position:fixed!important;bottom:0;left:0;width:100vw;background:#fff;border-top:1px solid #ddd;box-shadow:0 -2px 6px rgba(0,0,0,0.1);display:flex;justify-content:center;gap:15px;padding:10px 20px;z-index:9999;}
+.fixed-bar button{flex:1;padding:12px;font-size:16px;font-weight:bold;border-radius:8px;border:none;cursor:pointer;transition:background-color 0.3s ease;color:white;}
+.btn-order{background-color:#007bff;}
+.btn-order:hover{background-color:#0056b3;}
+.btn-room{background-color:#e74c3c;}
+.btn-room:hover{background-color:#c0392b;}
+</style>
 </head>
 <body>
 
-  <div class="menuva-logo">
-    <img src="menuva-logo.png" alt="Logo Menuva">
-  </div>
-    
-    <div class="section">
-    <h2>📇 Identitas Restoran</h2>
-    <input type="file" id="logoInput" accept="image/*" />
-    <img id="previewLogo" src="" alt="Logo Restoran" style="max-height: 80px; margin-top: 10px;" />
-    <input type="text" id="namaRestoran" placeholder="Nama Restoran" />
-    <label for="restoAddress">Alamat Restoran</label>
-    <input id="restoAddress" type="text" placeholder="Jl. Sudirman No. 10, Jakarta" />
-    <label for="restoPhone">No. Telepon</label>
-    <input id="restoPhone" type="text" placeholder="08xx-xxxx-xxxx" />
-  </div>
-
-  <div class="section">
-    <h2>🔥 Menu Promo</h2>
-    <div id="promoContainer"></div>
-    <button class="btn-orange" onclick="tambahPromo()">+ Tambah Menu Promo</button>
-  </div>
-
-  <div class="section">
-    <h2>📋 FOOD MENU</h2>
-    <div id="menuFoodContainer"></div>
-    <button class="btn-success" onclick="tambahMenu('food')">+ Tambah Menu</button>
-  </div>
-  
-  <div class="section">
-    <h2>📋 SNACK & DESSERT</h2>
-    <div id="menuSnackContainer"></div>
-    <button class="btn-success" onclick="tambahMenu('snack')">+ Tambah Menu</button>
-  </div>
-  
-  <div class="section">
-    <h2>📋 DRINK</h2>
-    <div id="menuDrinkContainer"></div>
-    <button class="btn-success" onclick="tambahMenu('drink')">+ Tambah Menu</button>
-  </div>
-  
-  <!-- 📱 Nomor WhatsApp Admin -->
-<div class="section-box" id="waContainerBox">
-  <h3>📱 Nomor WhatsApp Admin (Penerima Pesanan/Reservasi)</h3>
-  <div id="nomorWaContainer">
-    <input type="text" class="nomor-wa" placeholder="Contoh: 6281234567890">
-  </div>
-  <button onclick="tambahNomorWa()">+ Tambah Nomor WA</button>
+<div class="menuva-logo">
+<img src="menuva-logo.png" alt="Logo Menuva">
 </div>
-  
- <div class="section">
-  <h2>📸 Galeri Ruangan</h2>
-  <button onclick="tambahGambar('ruangan')">+ Tambah Gambar Ruangan</button>
-  <input type="file" id="flipbookRuanganUpload" accept="image/*" multiple style="display:none;" />
-  <div id="flipbookRuanganPreview"></div>
+
+<!-- Identitas Restoran -->
+<div class="section">
+<h2>📇 Identitas Restoran</h2>
+<input type="file" id="logoInput" accept="image/*" />
+<img id="previewLogo" src="" alt="Logo Restoran" style="max-height: 80px; margin-top:10px;" />
+<input type="text" id="namaRestoran" placeholder="Nama Restoran" />
+<label>Alamat Restoran</label>
+<input id="restoAddress" type="text" placeholder="Jl. Sudirman No. 10, Jakarta" />
+<label>No. Telepon</label>
+<input id="restoPhone" type="text" placeholder="08xx-xxxx-xxxx" />
+</div>
+
+<!-- Menu Promo -->
+<div class="section">
+<h2>🔥 Menu Promo</h2>
+<div id="promoContainer"></div>
+<button class="btn-orange" onclick="tambahPromo()">+ Tambah Menu Promo</button>
+</div>
+
+<!-- Menu Food -->
+<div class="section">
+<h2>📋 FOOD MENU</h2>
+<div id="menuFoodContainer"></div>
+<button class="btn-success" onclick="tambahMenu('food')">+ Tambah Menu</button>
 </div>
 
 <div class="section">
-  <h2>📖 Menu Restoran</h2>
-  <button onclick="tambahGambar('menu')">+ Tambah Gambar Menu</button>
-  <input type="file" id="flipbookMenuUpload" accept="image/*" multiple style="display:none;" />
-  <div id="flipbookMenuPreview"></div>
+<h2>📋 SNACK & DESSERT</h2>
+<div id="menuSnackContainer"></div>
+<button class="btn-success" onclick="tambahMenu('snack')">+ Tambah Menu</button>
 </div>
 
-<!-- 🏨 Room / Package -->
+<div class="section">
+<h2>📋 DRINK</h2>
+<div id="menuDrinkContainer"></div>
+<button class="btn-success" onclick="tambahMenu('drink')">+ Tambah Menu</button>
+</div>
+
+<!-- Nomor WA -->
+<div class="section-box" id="waContainerBox">
+<h3>📱 Nomor WhatsApp Admin</h3>
+<div id="nomorWaContainer">
+<input type="text" class="nomor-wa" placeholder="Contoh: 6281234567890">
+</div>
+<button onclick="tambahNomorWa()">+ Tambah Nomor WA</button>
+</div>
+
+<!-- Galeri Ruangan -->
+<div class="section">
+<h2>📸 Galeri Ruangan</h2>
+<button onclick="tambahGambar('ruangan')">+ Tambah Gambar Ruangan</button>
+<input type="file" id="flipbookRuanganUpload" accept="image/*" multiple style="display:none;" />
+<div id="flipbookRuanganPreview"></div>
+</div>
+
+<!-- Flipbook Menu -->
+<div class="section">
+<h2>📖 Menu Restoran</h2>
+<button onclick="tambahGambar('menu')">+ Tambah Gambar Menu</button>
+<input type="file" id="flipbookMenuUpload" accept="image/*" multiple style="display:none;" />
+<div id="flipbookMenuPreview"></div>
+</div>
+
+<!-- Room / Package -->
 <div class="section-box" id="roomContainerBox">
-  <h2>🏨 Room / Package</h2>
+<h2>🏨 Room / Package</h2>
 
-  <!-- Room Hotel -->
-  <div class="room-section">
-    <h3>🛏️ Room Hotel</h3>
-    <button onclick="tambahRoom('hotel')">+ Tambah Room Hotel</button>
-    <div id="roomHotelContainer"></div>
-  </div>
+<div class="room-section">
+<h3>🛏️ Room Hotel</h3>
+<button onclick="tambahRoom('hotel')">+ Tambah Room Hotel</button>
+<div id="roomHotelContainer"></div>
+</div>
 
-  <!-- Meeting Room -->
-  <div class="room-section">
-    <h3>💼 Meeting Room</h3>
-    <button onclick="tambahRoom('meeting')">+ Tambah Meeting Room</button>
-    <div id="meetingRoomContainer"></div>
-  </div>
+<div class="room-section">
+<h3>💼 Meeting Room</h3>
+<button onclick="tambahRoom('meeting')">+ Tambah Meeting Room</button>
+<div id="meetingRoomContainer"></div>
+</div>
 
-  <!-- Package -->
-  <div class="room-section">
-    <h3>🎁 Package</h3>
-    <button onclick="tambahRoom('package')">+ Tambah Package</button>
-    <div id="packageContainer"></div>
-  </div>
+<div class="room-section">
+<h3>🎁 Package</h3>
+<button onclick="tambahRoom('package')">+ Tambah Package</button>
+<div id="packageContainer"></div>
+</div>
 </div>
 
 <hr>
-  <div class="section">
-    <button class="btn-simpan" onclick="simpanData()">💾 Simpan Semua</button>
-    <button onclick="window.open('menu.html')" style="margin-top: 10px;" class="btn-orange">👁️ Lihat Halaman Customer</button>
-    <button id="btnSalinLink" onclick="salinLinkMenu()" style="display:none; background-color: rgb(58, 82, 219); color: white; padding: 10px; border: none; border-radius: 8px; margin-top: 10px;">
-      📋 Copy Link Untuk Dibagikan Ke Customers
-    </button>
-    
-    <!-- Backup dan Restore -->
+<div class="section">
+<button class="btn-simpan" onclick="simpanData()">💾 Simpan Semua</button>
+<button class="btn-danger" onclick="resetData()">🗑️ Reset Semua</button>
+<button class="btn-secondary" onclick="backupData()">📦 Backup Data</button>
+<input type="file" accept=".json" onchange="restoreDataFromFile(event)" />
+<div id="backupDownloadLink"></div>
+</div>
 
-    <div class="section">
-      <h2>🔁 Backup & Restore Data</h2>
-     <button onclick="backupData()">📦 Backup Data</button>
-
-     <!-- Tempat status -->
-     <div id="backupDownloadLink" style="margin-top:10px;"></div>
-
-      
-      <!-- Input Restore -->
-      <label for="restoreInput" style="margin-top: 20px; display: block;">
-        📂 Pilih File JSON untuk Restore:
-      </label>
-      <input type="file" id="restoreInput" accept=".json" onchange="restoreDataFromFile(event)" />
-    </div>
-  
-  <div style="background: #fef9e7; padding: 10px; border-left: 5px solid #f1c40f; margin-top: 10px; font-size: 14px;">
-    <strong>Panduan Penggunaan:</strong><br>
-    PENTING!!<br>
-    🔹 Klik <strong>⬇️ Backup Data</strong> untuk menyimpan semua data restoran ke file berformat <strong>.json</strong>.<br>
-    🔹 Simpan file tersebut dengan baik dan aman di perangkat Anda.<br>
-    🔹 Klik <strong>📂 Pilih File</strong untuk me-restore data dari file <strong>.json</strong> hasil backup.<br>
-    ⚠️ Proses restore akan menggantikan seluruh data yang ada saat ini dan tidak bisa dibatalkan.<br>
-    💡 Gunakan fitur ini sebelum mengganti perangkat atau membersihkan data browser.
-  </div>
-
-    <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
 
-<script type="text/javascript">
-/* =========================
-   Firebase Init
-========================= */
+<script>
+/* ==== Firebase Config ==== */
 const firebaseConfig = {
   apiKey: "AIzaSyBxKnIO_cIX8B94608zdx5uGs_o4M7ctEk",
   authDomain: "menuvaresto.firebaseapp.com",
@@ -444,155 +167,58 @@ const firebaseConfig = {
 const app = firebase.initializeApp(firebaseConfig);
 const firestore = firebase.firestore(app);
 
-/* =========================
-   Variabel Global
-========================= */
+/* ==== IndexedDB ==== */
+let db;
+async function initDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("menuvaDB", 1);
+    request.onerror = (e) => reject(e);
+    request.onsuccess = (e) => {
+      db = e.target.result;
+      resolve();
+    };
+    request.onupgradeneeded = (e) => {
+      db = e.target.result;
+      if (!db.objectStoreNames.contains("menuvaData")) {
+        const store = db.createObjectStore("menuvaData", { keyPath:"id" });
+      }
+    };
+  });
+}
+async function saveDataToDB(data) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("menuvaData", "readwrite");
+    const store = tx.objectStore("menuvaData");
+    store.put({ id: "main", ...data });
+    tx.oncomplete = () => resolve();
+    tx.onerror = (e) => reject(e);
+  });
+}
+async function loadDataFromDB() {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("menuvaData", "readonly");
+    const store = tx.objectStore("menuvaData");
+    const req = store.get("main");
+    req.onsuccess = (e) => resolve(e.target.result || {});
+    req.onerror = (e) => reject(e);
+  });
+}
+async function clearDataDB() {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("menuvaData", "readwrite");
+    const store = tx.objectStore("menuvaData");
+    const req = store.clear();
+    req.onsuccess = () => resolve();
+    req.onerror = (e) => reject(e);
+  });
+}
+
+/* ==== Global Vars ==== */
 let flipbookRuanganImages = [];
 let flipbookMenuImages = [];
 let menuPromo = [];
 
-/* =========================
-   Room / Package Functions
-========================= */
-function tambahRoom(kategori) {
-  const containerId = {
-    hotel: "roomHotelContainer",
-    meeting: "meetingRoomContainer",
-    package: "packageContainer"
-  }[kategori];
-
-  const container = document.getElementById(containerId);
-
-  const wrapper = document.createElement("div");
-  wrapper.className = "room-form";
-  wrapper.innerHTML = `
-    <input type="text" class="room-nama" placeholder="Nama" />
-    <input type="number" class="room-harga" placeholder="Harga" />
-    <textarea class="room-deskripsi" placeholder="Deskripsi"></textarea>
-
-    <div class="gambar-preview-wrapper">
-      <img class="gambar-preview" style="display:none;" />
-      <button class="hapus-gambar" onclick="hapusGambarRoom(this)" style="display:none;">×</button>
-    </div>
-
-    <button class="btn-upload-gambar room-image-upload" onclick="uploadGambarRoom(this)">🖼️ Upload Gambar</button>
-    <button class="btn-hapus-room" onclick="hapusFormRoom(this)">🗑️ Hapus Room</button>
-  `;
-  container.appendChild(wrapper);
-}
-
-function hapusGambarRoom(button) {
-  const wrapper = button.closest(".room-form");
-  const preview = wrapper.querySelector(".gambar-preview");
-  const uploadBtn = wrapper.querySelector(".room-image-upload");
-
-  preview.src = "";
-  preview.style.display = "none";
-  button.style.display = "none";
-  if (uploadBtn) uploadBtn.removeAttribute("data-image");
-}
-
-function hapusFormRoom(button) {
-  const form = button.closest(".room-form");
-  if (form) form.remove();
-}
-
-function ambilSemuaRoom() {
-  const kategoriIds = [
-    { id: "roomHotelContainer", kategori: "hotel" },
-    { id: "meetingRoomContainer", kategori: "meeting" },
-    { id: "packageContainer", kategori: "package" }
-  ];
-
-  const hasil = [];
-
-  kategoriIds.forEach(({ id, kategori }) => {
-    const container = document.getElementById(id);
-    if (!container) return;
-
-    const forms = container.querySelectorAll(".room-form");
-    forms.forEach(form => {
-      const nama = form.querySelector(".room-nama")?.value || "";
-      const deskripsi = form.querySelector(".room-deskripsi")?.value || "";
-      const harga = parseInt(form.querySelector(".room-harga")?.value || "0");
-      const image = form.querySelector(".room-image-upload")?.getAttribute("data-image") || "";
-
-      if (nama && harga) {
-        hasil.push({ nama, deskripsi, harga, image, kategori });
-      }
-    });
-  });
-
-  return hasil;
-}
-
-function restoreRoomFromData(rooms = []) {
-  rooms.forEach(room => {
-    tambahRoom(room.kategori);
-    const containerId = {
-      hotel: "roomHotelContainer",
-      meeting: "meetingRoomContainer",
-      package: "packageContainer"
-    }[room.kategori];
-
-    const container = document.getElementById(containerId);
-    const forms = container.querySelectorAll(".room-form");
-    const lastForm = forms[forms.length - 1];
-
-    lastForm.querySelector(".room-nama").value = room.nama || "";
-    lastForm.querySelector(".room-deskripsi").value = room.deskripsi || "";
-    lastForm.querySelector(".room-harga").value = room.harga || "";
-
-    const preview = lastForm.querySelector(".gambar-preview");
-    const hapusBtn = lastForm.querySelector(".hapus-gambar");
-    const uploadBtn = lastForm.querySelector(".room-image-upload");
-
-    if (room.image) {
-      preview.src = room.image;
-      preview.style.display = "block";
-      hapusBtn.style.display = "flex";
-      uploadBtn.setAttribute("data-image", room.image);
-    }
-  });
-}
-
-/* =========================
-   Nomor WA Admin
-========================= */
-function tambahNomorWa() {
-  const container = document.getElementById("nomorWaContainer");
-  const input = document.createElement("input");
-  input.type = "text";
-  input.className = "nomor-wa";
-  input.placeholder = "Contoh: 6281234567890";
-  container.appendChild(input);
-}
-
-/* =========================
-   Menu Functions
-========================= */
-function ambilMenu(containerId) {
-  const container = document.getElementById(containerId);
-  const items = container.querySelectorAll(".menu-item");
-  const result = [];
-
-  items.forEach((item) => {
-    const inputs = item.querySelectorAll("input, select");
-    const nama = inputs[0]?.value || "";
-    const harga = parseInt(inputs[1]?.value || "0");
-    const kategori = inputs[2]?.value || "food";
-
-    if (nama && harga) {
-      result.push({ nama, harga, kategori });
-    }
-  });
-
-  return result;
-}
-
-/* =========================
-   Gambar / Flipbook
-========================= */
+/* ==== Fungsi Helper ==== */
 function resizeIfNeeded(file, maxSizeMB = 0.7, maxWidth = 1280, quality = 0.9) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -603,10 +229,8 @@ function resizeIfNeeded(file, maxSizeMB = 0.7, maxWidth = 1280, quality = 0.9) {
         const canvas = document.createElement("canvas");
         canvas.width = img.width * scale;
         canvas.height = img.height * scale;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        const resized = canvas.toDataURL("image/jpeg", quality);
-        resolve(resized);
+        canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", quality));
       };
       img.onerror = reject;
       img.src = e.target.result;
@@ -616,320 +240,239 @@ function resizeIfNeeded(file, maxSizeMB = 0.7, maxWidth = 1280, quality = 0.9) {
   });
 }
 
-document.getElementById("logoInput").addEventListener("change", async function (e) {
+/* ==== Fungsi Upload Logo ==== */
+document.getElementById("logoInput").addEventListener("change", async function(e){
   const file = e.target.files[0];
   if (!file) return;
-  try {
-    const logoUrl = await resizeIfNeeded(file);
-    document.getElementById("previewLogo").src = logoUrl;
-  } catch (err) {
-    alert("❌ Gagal memproses gambar logo.");
-    console.error("Logo error:", err);
-  }
+  try{
+    const url = await resizeIfNeeded(file);
+    document.getElementById("previewLogo").src = url;
+  } catch(err){ console.error(err); alert("Gagal upload logo!"); }
 });
 
-function renderImagePreview(tipe, url) {
-  const img = document.createElement("img");
-  img.src = url;
-  img.style.maxWidth = "100px";
-  img.style.margin = "5px";
-  img.style.borderRadius = "5px";
-  img.style.boxShadow = "0 1px 4px rgba(0,0,0,0.1)";
-
+/* ==== Tambah / Hapus Room ==== */
+function tambahRoom(kategori){
+  const containerId = {
+    hotel:"roomHotelContainer",
+    meeting:"meetingRoomContainer",
+    package:"packageContainer"
+  }[kategori];
+  const container = document.getElementById(containerId);
   const wrapper = document.createElement("div");
-  wrapper.style.display = "inline-block";
-  wrapper.style.position = "relative";
-  wrapper.style.margin = "5px";
-
-  const btnHapus = document.createElement("button");
-  btnHapus.className = "btn-hapus-gambar";
-  btnHapus.setAttribute("aria-label", "Hapus Gambar");
-
-  btnHapus.innerHTML = `
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <line x1="18" y1="6" x2="6" y2="18" />
-      <line x1="6" y1="6" x2="18" y2="18" />
-    </svg>
+  wrapper.className = "room-form";
+  wrapper.innerHTML=`
+    <input type="text" class="room-nama" placeholder="Nama Room" />
+    <input type="number" class="room-harga" placeholder="Harga" />
+    <textarea class="room-deskripsi" placeholder="Deskripsi"></textarea>
+    <div class="gambar-preview-wrapper">
+      <img class="gambar-preview" style="display:none;" />
+      <button class="hapus-gambar" onclick="hapusGambarRoom(this)" style="display:none;">×</button>
+    </div>
+    <button class="btn-upload-gambar room-image-upload" onclick="uploadGambarRoom(this)">🖼️ Upload Gambar</button>
+    <button class="btn-hapus-room" onclick="hapusFormRoom(this)">🗑️ Hapus Room</button>
   `;
-  btnHapus.style.position = "absolute";
-  btnHapus.style.top = "4px";
-  btnHapus.style.right = "4px";
-
-  btnHapus.onclick = function () {
-    wrapper.remove();
-    if (tipe === "ruangan") {
-      flipbookRuanganImages = flipbookRuanganImages.filter((src) => src !== url);
-    } else {
-      flipbookMenuImages = flipbookMenuImages.filter((src) => src !== url);
-    }
+  container.appendChild(wrapper);
+}
+function hapusFormRoom(btn){ btn.closest(".room-form")?.remove(); }
+function hapusGambarRoom(btn){
+  const wrapper=btn.closest(".room-form");
+  wrapper.querySelector(".gambar-preview").style.display="none";
+  wrapper.querySelector(".gambar-preview").src="";
+  btn.style.display="none";
+  wrapper.querySelector(".room-image-upload")?.removeAttribute("data-image");
+}
+function uploadGambarRoom(button){
+  const input=document.createElement("input");
+  input.type="file"; input.accept="image/*"; input.style.display="none";
+  input.onchange=function(e){
+    const file=e.target.files[0]; if(!file) return;
+    const reader=new FileReader();
+    reader.onload=function(ev){
+      const wrapper=button.closest(".room-form");
+      const preview=wrapper.querySelector(".gambar-preview");
+      const hapusBtn=wrapper.querySelector(".hapus-gambar");
+      preview.src=ev.target.result; preview.style.display="block"; hapusBtn.style.display="flex";
+      button.setAttribute("data-image",ev.target.result);
+    }; reader.readAsDataURL(file);
   };
-
-  wrapper.appendChild(img);
-  wrapper.appendChild(btnHapus);
-
-  const previewContainer = tipe === "ruangan" ? "flipbookRuanganPreview" : "flipbookMenuPreview";
-  document.getElementById(previewContainer).appendChild(wrapper);
+  document.body.appendChild(input); input.click(); document.body.removeChild(input);
+}
+function ambilSemuaRoom(){
+  const kategoriIds=[{id:"roomHotelContainer",kategori:"hotel"},{id:"meetingRoomContainer",kategori:"meeting"},{id:"packageContainer",kategori:"package"}];
+  const hasil=[];
+  kategoriIds.forEach(({id,kategori})=>{
+    const container=document.getElementById(id);
+    if(!container) return;
+    container.querySelectorAll(".room-form").forEach(f=>{
+      const nama=f.querySelector(".room-nama")?.value||"";
+      const deskripsi=f.querySelector(".room-deskripsi")?.value||"";
+      const harga=parseInt(f.querySelector(".room-harga")?.value||"0");
+      const image=f.querySelector(".room-image-upload")?.getAttribute("data-image")||"";
+      if(nama && harga) hasil.push({nama,deskripsi,harga,image,kategori});
+    });
+  });
+  return hasil;
 }
 
-function tambahGambar(tipe) {
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = "image/*";
-  input.style.display = "none";
-
-  input.onchange = async function (e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    try {
-      const imageUrl = await resizeIfNeeded(file);
-      renderImagePreview(tipe, imageUrl);
-
-      if (tipe === "ruangan") flipbookRuanganImages.push(imageUrl);
-      else flipbookMenuImages.push(imageUrl);
-    } catch (err) {
-      alert("❌ Gagal memproses gambar.");
-      console.error("Error resize:", err);
-    }
-  };
-
-  document.body.appendChild(input);
-  input.click();
-  document.body.removeChild(input);
+/* ==== Nomor WA ==== */
+function tambahNomorWa(){
+  const container=document.getElementById("nomorWaContainer");
+  const input=document.createElement("input");
+  input.type="text"; input.className="nomor-wa"; input.placeholder="Contoh: 6281234567890";
+  container.appendChild(input);
 }
 
-function uploadGambarRoom(button) {
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = "image/*";
-  input.style.display = "none";
+/* ==== Menu ==== */
+function ambilMenu(containerId){
+  const container=document.getElementById(containerId);
+  const items=container.querySelectorAll(".menu-item");
+  const result=[];
+  items.forEach(item=>{
+    const inputs=item.querySelectorAll("input,select");
+    const nama=inputs[0]?.value||"";
+    const harga=parseInt(inputs[1]?.value||"0");
+    const kategori=inputs[2]?.value||"food";
+    if(nama && harga) result.push({nama,harga,kategori});
+  });
+  return result;
+}
+function tambahMenu(kategori="food",nama="",harga=0){
+  const container=document.getElementById({food:"menuFoodContainer",snack:"menuSnackContainer",drink:"menuDrinkContainer"}[kategori]);
+  const div=document.createElement("div"); div.className="menu-item";
+  div.innerHTML=`<input value="${nama}" placeholder="Nama Menu"/><input type="number" value="${harga}" placeholder="Harga"/><input value="${kategori}" placeholder="Kategori"/><button onclick="this.parentElement.remove()">Hapus</button>`;
+  container.appendChild(div);
+}
 
-  input.onchange = function (e) {
-    const file = e.target.files[0];
-    if (!file) return;
+/* ==== Flipbook ==== */
+function renderImagePreview(tipe,url){
+  const img=document.createElement("img"); img.src=url;
+  img.style.maxWidth="100px"; img.style.margin="5px"; img.style.borderRadius="5px"; img.style.boxShadow="0 1px 4px rgba(0,0,0,0.1)";
+  const wrapper=document.createElement("div"); wrapper.style.display="inline-block"; wrapper.style.position="relative"; wrapper.style.margin="5px";
+  const btnHapus=document.createElement("button"); btnHapus.className="btn-hapus-gambar"; btnHapus.innerHTML="×"; btnHapus.onclick=()=>{wrapper.remove(); if(tipe==="ruangan") flipbookRuanganImages=flipbookRuanganImages.filter(s=>s!==url); else flipbookMenuImages=flipbookMenuImages.filter(s=>s!==url);};
+  wrapper.appendChild(img); wrapper.appendChild(btnHapus);
+  document.getElementById(tipe==="ruangan"?"flipbookRuanganPreview":"flipbookMenuPreview").appendChild(wrapper);
+}
+function tambahGambar(tipe){
+  const input=document.createElement("input"); input.type="file"; input.accept="image/*"; input.style.display="none";
+  input.onchange=async function(e){
+    const file=e.target.files[0]; if(!file) return;
+    try{
+      const url=await resizeIfNeeded(file);
+      renderImagePreview(tipe,url);
+      if(tipe==="ruangan") flipbookRuanganImages.push(url); else flipbookMenuImages.push(url);
+    } catch(err){ console.error(err); alert("Gagal memproses gambar"); }
+  };
+  document.body.appendChild(input); input.click(); document.body.removeChild(input);
+}
 
-    const reader = new FileReader();
-    reader.onload = function (event) {
-      const wrapper = button.closest(".room-form");
-      const preview = wrapper.querySelector(".gambar-preview");
-      const hapusBtn = wrapper.querySelector(".hapus-gambar");
+/* ==== Menu Promo ==== */
+function tambahPromo(nama="",harga="",desc=""){
+  const container=document.getElementById("promoContainer");
+  const div=document.createElement("div");
+  div.className="menu-item";
+  div.innerHTML=`<input value="${nama}" placeholder="Nama Promo"/><input value="${harga}" placeholder="Harga"/><input value="${desc}" placeholder="Deskripsi"/><button onclick="this.parentElement.remove()">Hapus</button>`;
+  container.appendChild(div);
+}
 
-      const imageUrl = event.target.result;
-
-      preview.src = imageUrl;
-      preview.style.display = "block";
-      hapusBtn.style.display = "flex";
-      button.setAttribute("data-image", imageUrl);
+/* ==== Simpan & Load Data ==== */
+async function simpanData(){
+  try{
+    const data={
+      namaRestoran:document.getElementById("namaRestoran").value,
+      restoAddress:document.getElementById("restoAddress").value,
+      restoPhone:document.getElementById("restoPhone").value,
+      logo:document.getElementById("previewLogo").src||"",
+      nomorWaAdmin:Array.from(document.querySelectorAll(".nomor-wa")).map(i=>i.value),
+      menuPromo:Array.from(document.getElementById("promoContainer").querySelectorAll(".menu-item")).map(d=>{
+        const inputs=d.querySelectorAll("input"); return {nama:inputs[0].value,harga:inputs[1].value,deskripsi:inputs[2].value};
+      }),
+      menu:[...ambilMenu("menuFoodContainer"),...ambilMenu("menuSnackContainer"),...ambilMenu("menuDrinkContainer")],
+      rooms:ambilSemuaRoom(),
+      flipbookRuanganImages, flipbookMenuImages
     };
-    reader.readAsDataURL(file);
-  };
-
-  document.body.appendChild(input);
-  input.click();
-  document.body.removeChild(input);
-}
-
-/* =========================
-   Firestore + IndexedDB Save
-========================= */
-async function simpanData() {
-  try {
-    const namaRestoran = document.getElementById("namaRestoran").value;
-    const restoAddress = document.getElementById("restoAddress").value.trim();
-    const restoPhone = document.getElementById("restoPhone").value.trim();
-    const logo = document.getElementById("previewLogo").src || "";
-    const nomorWaInputs = document.querySelectorAll(".nomor-wa");
-    const nomorWaAdmin = Array.from(nomorWaInputs).map((input) => input.value);
-
-    const menuData = [
-      ...ambilMenu("menuFoodContainer"),
-      ...ambilMenu("menuSnackContainer"),
-      ...ambilMenu("menuDrinkContainer"),
-    ];
-
-    const data = {
-      namaRestoran,
-      restoAddress,
-      restoPhone,
-      logo,
-      nomorWaAdmin,
-      menuPromo,
-      flipbookRuanganImages,
-      flipbookMenuImages,
-      menu: menuData,
-      rooms: ambilSemuaRoom()
-    };
-
-    // Simpan ke IndexedDB
     await saveDataToDB(data);
-
-    // Simpan ke Firestore
-    try {
-      const docRef = firestore.collection("restoranData").doc(namaRestoran);
-      await docRef.set(data);
-      console.log("✅ Data berhasil disimpan ke Firestore!");
-    } catch (err) {
-      console.error("❌ Gagal push ke Firestore:", err);
-      alert("⚠️ Data tersimpan di browser tapi gagal ke Firestore. Cek console.");
-    }
-
     alert("✅ Semua data berhasil disimpan!");
-  } catch (error) {
-    console.error("❌ Gagal menyimpan data:", error);
-    alert("❌ Gagal menyimpan data. Lihat console (F12) untuk detail.");
-  }
+  } catch(err){ console.error(err); alert("❌ Gagal simpan data"); }
 }
-
-/* =========================
-   Load / Restore / Reset / Backup
-========================= */
-async function loadData() {
-  try {
+async function loadData(){
+  try{
     await initDB();
-    const data = await loadDataFromDB();
-
-    document.getElementById("namaRestoran").value = data.namaRestoran || "";
-    document.getElementById("restoAddress").value = data.restoAddress || "";
-    document.getElementById("restoPhone").value = data.restoPhone || "";
-    if (data.logo) document.getElementById("previewLogo").src = data.logo;
-
-    if (Array.isArray(data.nomorWaAdmin)) {
-      const container = document.getElementById("nomorWaContainer");
-      container.innerHTML = "";
-      data.nomorWaAdmin.forEach(() => tambahNomorWa());
-      const nomorInputs = document.querySelectorAll(".nomor-wa");
-      data.nomorWaAdmin.forEach((no, i) => {
-        if (nomorInputs[i]) nomorInputs[i].value = no;
-      });
+    const data=await loadDataFromDB();
+    document.getElementById("namaRestoran").value=data.namaRestoran||"";
+    document.getElementById("restoAddress").value=data.restoAddress||"";
+    document.getElementById("restoPhone").value=data.restoPhone||"";
+    if(data.logo) document.getElementById("previewLogo").src=data.logo;
+    if(Array.isArray(data.nomorWaAdmin)){
+      document.getElementById("nomorWaContainer").innerHTML="";
+      data.nomorWaAdmin.forEach(()=>tambahNomorWa());
+      document.querySelectorAll(".nomor-wa").forEach((input,i)=>{ input.value=data.nomorWaAdmin[i]; });
     }
-
-    if (Array.isArray(data.menuPromo)) {
-      menuPromo = data.menuPromo;
-      renderPromoUI();
-    }
-
-    if (Array.isArray(data.menu)) {
-      data.menu.forEach((m) => tambahMenu(m.kategori || "food", m.nama, m.harga));
-    }
-
-    if (Array.isArray(data.rooms)) {
-      const grouped = {
-        hotel: document.getElementById("roomHotelContainer"),
-        meeting: document.getElementById("meetingRoomContainer"),
-        package: document.getElementById("packageContainer"),
-      };
-
-      data.rooms.forEach((room) => {
-        tambahRoom(room.kategori);
-        const forms = grouped[room.kategori].querySelectorAll(".room-form");
-        const lastForm = forms[forms.length - 1];
-        if (!lastForm) return;
-
-        lastForm.querySelector(".room-nama").value = room.nama;
-        lastForm.querySelector(".room-deskripsi").value = room.deskripsi;
-        lastForm.querySelector(".room-harga").value = room.harga;
-
-        if (room.image) {
-          const preview = lastForm.querySelector(".gambar-preview");
-          const hapusBtn = lastForm.querySelector(".hapus-gambar");
-          const uploadBtn = lastForm.querySelector(".room-image-upload");
-
-          preview.src = room.image;
-          preview.style.display = "block";
-          hapusBtn.style.display = "flex";
-          uploadBtn.setAttribute("data-image", room.image);
+    if(Array.isArray(data.menuPromo)){ menuPromo=data.menuPromo; data.menuPromo.forEach(p=>tambahPromo(p.nama,p.harga,p.deskripsi)); }
+    if(Array.isArray(data.menu)){ data.menu.forEach(m=>tambahMenu(m.kategori,m.nama,m.harga)); }
+    if(Array.isArray(data.rooms)){
+      const grouped={hotel:document.getElementById("roomHotelContainer"),meeting:document.getElementById("meetingRoomContainer"),package:document.getElementById("packageContainer")};
+      data.rooms.forEach(r=>{
+        tambahRoom(r.kategori);
+        const forms=grouped[r.kategori].querySelectorAll(".room-form");
+        const lastForm=forms[forms.length-1];
+        lastForm.querySelector(".room-nama").value=r.nama;
+        lastForm.querySelector(".room-deskripsi").value=r.deskripsi;
+        lastForm.querySelector(".room-harga").value=r.harga;
+        if(r.image){
+          const preview=lastForm.querySelector(".gambar-preview");
+          const hapusBtn=lastForm.querySelector(".hapus-gambar");
+          const uploadBtn=lastForm.querySelector(".room-image-upload");
+          preview.src=r.image; preview.style.display="block"; hapusBtn.style.display="flex"; uploadBtn.setAttribute("data-image",r.image);
         }
       });
     }
-
-    flipbookRuanganImages = data.flipbookRuanganImages || [];
-    flipbookRuanganImages.forEach((src) => renderImagePreview("ruangan", src));
-
-    flipbookMenuImages = data.flipbookMenuImages || [];
-    flipbookMenuImages.forEach((src) => renderImagePreview("menu", src));
-
-  } catch (err) {
-    console.error("❌ Gagal load data IndexedDB:", err);
-  }
+    flipbookRuanganImages=data.flipbookRuanganImages||[];
+    flipbookRuanganImages.forEach(s=>renderImagePreview("ruangan",s));
+    flipbookMenuImages=data.flipbookMenuImages||[];
+    flipbookMenuImages.forEach(s=>renderImagePreview("menu",s));
+  } catch(err){ console.error(err); alert("❌ Gagal load data"); }
 }
 
-async function resetData() {
-  if (!confirm("Yakin ingin menghapus semua data?")) return;
-  try {
-    await clearDataDB();
-    location.reload();
-  } catch (err) {
-    alert("❌ Gagal hapus data: " + err.message);
-  }
+/* ==== Reset / Backup / Restore ==== */
+async function resetData(){ if(confirm("Yakin ingin hapus semua data?")){ await clearDataDB(); location.reload(); } }
+async function backupData(){ 
+  try{
+    const data=await loadDataFromDB();
+    if(!data){ alert("Tidak ada data untuk di-backup!"); return; }
+    const filename=`menuva-backup-${Date.now()}.json`;
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement("a"); link.href=url; link.download=filename;
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    document.getElementById("backupDownloadLink").innerHTML=`✅ Backup berhasil! File <strong>${filename}</strong> siap di-download.`;
+  } catch(err){ alert("❌ Gagal backup: "+err.message); }
 }
-
-async function backupData() {
-  try {
-    const data = await loadDataFromDB();
-    if (!data) {
-      alert("Tidak ada data untuk di-backup!");
-      return;
-    }
-
-    const filename = `menuva-backup-${Date.now()}.json`;
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    const statusDiv = document.getElementById("backupDownloadLink");
-    statusDiv.innerHTML = `
-      ✅ Backup berhasil! File <strong>${filename}</strong> siap di-download.<br>
-      <a href="${url}" download="${filename}" style="margin-top:10px;display:inline-block;padding:10px 16px;background:#007bff;color:white;text-decoration:none;border-radius:6px;">
-        📥 Klik di sini jika download tidak dimulai otomatis
-      </a>
-    `;
-  } catch (err) {
-    alert("❌ Gagal backup data: " + err.message);
-  }
-}
-
-function restoreDataFromFile(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = async function (e) {
-    try {
-      const json = JSON.parse(e.target.result);
+function restoreDataFromFile(event){
+  const file=event.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=async function(e){
+    try{
+      const json=JSON.parse(e.target.result);
       await saveDataToDB(json);
-      alert("✅ Data berhasil direstore dari file!\nHalaman akan dimuat ulang...");
+      alert("✅ Data berhasil direstore!\nHalaman akan dimuat ulang...");
       location.reload();
-    } catch (err) {
-      alert("❌ Gagal membaca file JSON. Pastikan file valid.");
-      console.error("Restore error:", err);
-    }
+    } catch(err){ console.error(err); alert("❌ Gagal restore file JSON"); }
   };
   reader.readAsText(file);
 }
 
-/* =========================
-   Inisialisasi Halaman
-========================= */
-window.addEventListener("DOMContentLoaded", async () => {
+/* ==== Auto Load ==== */
+window.addEventListener("DOMContentLoaded", async ()=>{
   await initDB();
   await loadData();
-  tampilkanListRoom();
 });
 </script>
 
-    <div class="fixed-bar">
+ <div class="fixed-bar">
   <button onclick="window.location.href='index.html'" class="btn-success">🔒 Logout</button>
   <button onclick="resetData()" class="btn-danger">🗑️ Reset Semua Data</button>
   </div>
-   
+
 </body>
 </html>
-
-
