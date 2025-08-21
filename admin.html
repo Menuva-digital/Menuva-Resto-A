@@ -443,6 +443,41 @@
       )
     ">+ Tambah Package</button>
   </div>
+
+  <hr>
+  <div class="section">
+    <button class="btn-simpan" onclick="simpanData()">💾 Simpan Semua</button>
+    <button onclick="window.open('menu.html')" style="margin-top: 10px;" class="btn-orange">👁️ Lihat Halaman Customer</button>
+    <button id="btnSalinLink" onclick="salinLinkMenu()" style="display:none; background-color: rgb(58, 82, 219); color: white; padding: 10px; border: none; border-radius: 8px; margin-top: 10px;">
+      📋 Copy Link Untuk Dibagikan Ke Customers
+    </button>
+    
+    <!-- Backup dan Restore -->
+
+    <div class="section">
+      <h2>🔁 Backup & Restore Data</h2>
+     <button onclick="backupData()">📦 Backup Data</button>
+
+     <!-- Tempat status -->
+     <div id="backupDownloadLink" style="margin-top:10px;"></div>
+
+      
+      <!-- Input Restore -->
+      <label for="restoreInput" style="margin-top: 20px; display: block;">
+        📂 Pilih File JSON untuk Restore:
+      </label>
+      <input type="file" id="restoreInput" accept=".json" onchange="restoreDataFromFile(event)" />
+    </div>
+  
+  <div style="background: #fef9e7; padding: 10px; border-left: 5px solid #f1c40f; margin-top: 10px; font-size: 14px;">
+    <strong>Panduan Penggunaan:</strong><br>
+    PENTING!!<br>
+    🔹 Klik <strong>⬇️ Backup Data</strong> untuk menyimpan semua data restoran ke file berformat <strong>.json</strong>.<br>
+    🔹 Simpan file tersebut dengan baik dan aman di perangkat Anda.<br>
+    🔹 Klik <strong>📂 Pilih File</strong untuk me-restore data dari file <strong>.json</strong> hasil backup.<br>
+    ⚠️ Proses restore akan menggantikan seluruh data yang ada saat ini dan tidak bisa dibatalkan.<br>
+    💡 Gunakan fitur ini sebelum mengganti perangkat atau membersihkan data browser.
+  </div>
 </div>
 <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
@@ -757,6 +792,7 @@ window.addEventListener("error",(e)=>{console.error("Global error:",e?.error||e?
   
 </body>
 </html>
+
 
 
 
