@@ -587,7 +587,7 @@ function restoreDataFromFile(event){
 }
 
 /* =========================
-   Upload → Preview
+   Upload → Preview helper
 ========================= */
 function handleImageUpload(e,previewId){
   const file = e?.target?.files?.[0];
@@ -616,7 +616,7 @@ window.tambahPromo = function(){
   const deskripsi = prompt("Deskripsi Promo:");
   window.menuPromo.push({nama,harga,deskripsi});
   renderPromoUI();
-}
+};
 
 window.renderPromoUI = function(){
   const promoContainer = document.getElementById("promoContainer");
@@ -624,22 +624,23 @@ window.renderPromoUI = function(){
   promoContainer.innerHTML="";
   window.menuPromo.forEach(p=>{
     const div=document.createElement("div");
-    div.innerText=`${p.nama} - ${p.harga} - ${p.deskripsi}`;
+    div.innerText=`${p.nama} - ${p.harga||""} - ${p.deskripsi||""}`;
     promoContainer.appendChild(div);
   });
-}
+};
 
 window.tambahMenu = function(kategori){
   const nama = prompt("Nama Menu:");
   if(!nama) return alert("Nama menu kosong!");
   const harga = prompt("Harga Menu:");
-  const container=document.getElementById("menu"+kategori.charAt(0).toUpperCase()+kategori.slice(1)+"Container");
+  const id = "menu"+kategori.charAt(0).toUpperCase()+kategori.slice(1)+"Container";
+  const container=document.getElementById(id);
   if(container){
     const div=document.createElement("div");
-    div.innerText=`${nama} - ${harga}`;
+    div.innerText=`${nama} - ${harga||""}`;
     container.appendChild(div);
   }
-}
+};
 
 window.tambahNomorWa = function(){
   const input = document.querySelector("#nomorWaContainer input");
@@ -651,7 +652,7 @@ window.tambahNomorWa = function(){
   div.innerText=nomor;
   container.appendChild(div);
   input.value="";
-}
+};
 
 window.tambahRoom = function(tipe){
   const nama = prompt("Nama "+tipe+" :");
@@ -668,33 +669,40 @@ window.tambahRoom = function(tipe){
     div.innerText=nama;
     container.appendChild(div);
   }
+};
+
+/* =========================
+   Gambar Ruangan & Menu (pakai file input tersembunyi)
+========================= */
+window.tambahGambar = function(type){
+  const inputId = type === "ruangan" ? "flipbookRuanganUpload" : "flipbookMenuUpload";
+  const inputEl = document.getElementById(inputId);
+  if(!inputEl) return;
+  inputEl.click();
+};
+
+function bacaFileListKeDataURL(fileList){
+  return Promise.all(
+    Array.from(fileList).map(f => new Promise((res,rej)=>{
+      const r = new FileReader();
+      r.onload = ()=>res(r.result);
+      r.onerror = rej;
+      r.readAsDataURL(f);
+    }))
+  );
 }
 
-window.tambahGambar = function(url,type){
-  if(type==="ruangan") window.flipbookRuanganImages.push(url);
-  if(type==="menu") window.flipbookMenuImages.push(url);
-  renderImagePreview(type,url);
-}
-
-window.renderImagePreview = function(type,url){
+function renderImagePreview(type, arr){
   const containerId = (type==="ruangan") ? "flipbookRuanganPreview" : "flipbookMenuPreview";
   const container=document.getElementById(containerId);
   if(!container) return;
-
-  if(Array.isArray(url)){
-    container.innerHTML="";
-    url.forEach(u=>{
-      const img=document.createElement("img");
-      img.src=u;
-      img.style.width="80px"; img.style.height="80px"; img.style.margin="4px";
-      container.appendChild(img);
-    });
-  } else {
+  container.innerHTML="";
+  (arr||[]).forEach(u=>{
     const img=document.createElement("img");
-    img.src=url;
+    img.src=u;
     img.style.width="80px"; img.style.height="80px"; img.style.margin="4px";
     container.appendChild(img);
-  }
+  });
 }
 
 /* =========================
@@ -730,22 +738,29 @@ async function loadSemuaData(){
     if(!data) return;
 
     // Identitas
-    document.getElementById("namaRestoran").value = data.identitas?.namaRestoran || "";
-    document.getElementById("previewLogo").src = data.identitas?.logo || "";
+    const namaInput = document.getElementById("namaRestoran");
+    const logoImg   = document.getElementById("previewLogo");
+    if(namaInput) namaInput.value = data.identitas?.namaRestoran || "";
+    if(logoImg)   logoImg.src     = data.identitas?.logo || "";
 
     // Promo
     window.menuPromo = data.promo || [];
     renderPromoUI();
 
     // Nomor WA
-    window.nomorWAList = data.nomorWA || [];
+    window.nomorWAList = data.identitas?.nomorWA || data.nomorWA || [];
     const waContainer = document.getElementById("nomorWaContainer");
-    waContainer.innerHTML = "";
-    window.nomorWAList.forEach(n => {
-      const div = document.createElement("div");
-      div.innerText = n;
-      waContainer.appendChild(div);
-    });
+    if(waContainer){
+      // pertahankan 1 input pertama, hapus sisanya
+      const firstInput = waContainer.querySelector("input");
+      waContainer.innerHTML = "";
+      if(firstInput) waContainer.appendChild(firstInput);
+      window.nomorWAList.forEach(n => {
+        const div = document.createElement("div");
+        div.innerText = n;
+        waContainer.appendChild(div);
+      });
+    }
 
     // Rooms
     window.roomsList = data.rooms || [];
@@ -754,6 +769,7 @@ async function loadSemuaData(){
       meeting: document.getElementById("meetingRoomContainer"),
       package: document.getElementById("packageContainer")
     };
+    Object.values(roomContainers).forEach(c=>{ if(c) c.innerHTML=""; });
     window.roomsList.forEach(r => {
       const container = roomContainers[r.tipe];
       if(container){
@@ -774,16 +790,92 @@ async function loadSemuaData(){
 }
 
 /* =========================
-   Auto Init
+   Util lain (biar gak error tombol bawah)
+========================= */
+async function resetData(){
+  const ok = confirm("Yakin reset semua data? Tindakan ini tidak bisa dibatalkan.");
+  if(!ok) return;
+  // Bersihkan IndexedDB
+  const db = await openDB();
+  await new Promise((res,rej)=>{
+    const tx = db.transaction(STORE,"readwrite");
+    tx.objectStore(STORE).clear().onsuccess = ()=>{db.close();res()};
+    tx.onerror = ()=>{db.close();rej(tx.error)};
+  });
+  // Bersihkan state & UI
+  window.menuPromo=[];
+  window.flipbookRuanganImages=[];
+  window.flipbookMenuImages=[];
+  window.nomorWAList=[];
+  window.roomsList=[];
+  document.getElementById("namaRestoran").value="";
+  document.getElementById("previewLogo").src="";
+  ["promoContainer","roomHotelContainer","meetingRoomContainer","packageContainer",
+   "flipbookRuanganPreview","flipbookMenuPreview"].forEach(id=>{
+     const el=document.getElementById(id); if(el) el.innerHTML="";
+  });
+  const waContainer=document.getElementById("nomorWaContainer");
+  if(waContainer){
+    waContainer.innerHTML="";
+    const input=document.createElement("input");
+    input.type="text"; input.className="nomor-wa"; input.placeholder="Contoh: 6281234567890";
+    waContainer.appendChild(input);
+  }
+  alert("Data sudah direset.");
+}
+
+function salinLinkMenu(){
+  const url = location.origin + "/menu.html";
+  navigator.clipboard?.writeText(url).then(()=>{
+    alert("Link disalin: " + url);
+  }).catch(()=>{
+    prompt("Salin link berikut:", url);
+  });
+}
+
+/* =========================
+   Auto Init & Event Binding
 ========================= */
 window.backupData = backupData;
 window.restoreDataFromFile = restoreDataFromFile;
 window.handleImageUpload = handleImageUpload;
 window.simpanData = simpanData;
+window.resetData = resetData;
+window.salinLinkMenu = salinLinkMenu;
 
-document.addEventListener("DOMContentLoaded",()=>{loadSemuaData();});
+// Bind input logo → preview
+document.addEventListener("DOMContentLoaded",()=>{
+  const logoInput = document.getElementById("logoInput");
+  if(logoInput){
+    logoInput.addEventListener("change",(e)=>handleImageUpload(e,"previewLogo"));
+  }
+
+  // Bind upload ruangan/menu → simpan ke array + render
+  const rInput = document.getElementById("flipbookRuanganUpload");
+  const mInput = document.getElementById("flipbookMenuUpload");
+  if(rInput){
+    rInput.addEventListener("change", async (e)=>{
+      const urls = await bacaFileListKeDataURL(e.target.files||[]);
+      window.flipbookRuanganImages.push(...urls);
+      renderImagePreview("ruangan", window.flipbookRuanganImages);
+      rInput.value = "";
+    });
+  }
+  if(mInput){
+    mInput.addEventListener("change", async (e)=>{
+      const urls = await bacaFileListKeDataURL(e.target.files||[]);
+      window.flipbookMenuImages.push(...urls);
+      renderImagePreview("menu", window.flipbookMenuImages);
+      mInput.value = "";
+    });
+  }
+
+  loadSemuaData();
+});
+
 window.addEventListener("error",(e)=>{console.error("Global error:",e?.error||e?.message);});
 </script>
+
 
   <div class="fixed-bar">
   <button onclick="window.location.href='index.html'" class="btn-success">🔒 Logout</button>
@@ -792,6 +884,7 @@ window.addEventListener("error",(e)=>{console.error("Global error:",e?.error||e?
   
 </body>
 </html>
+
 
 
 
