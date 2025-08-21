@@ -444,10 +444,8 @@
     ">+ Tambah Package</button>
   </div>
 </div>
-
-
-  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
 
 <script type="text/javascript">
 /* =========================
@@ -565,7 +563,7 @@ function handleImageUpload(e,previewId){
 }
 
 /* =========================
-   Fungsi Admin Lengkap
+   Global Variables
 ========================= */
 window.menuPromo=[];
 window.flipbookRuanganImages=[];
@@ -573,26 +571,16 @@ window.flipbookMenuImages=[];
 window.nomorWAList=[];
 window.roomsList=[];
 
-window.tambahPromo = function(nama,harga,deskripsi){
+/* =========================
+   Promo / Menu / WA / Rooms
+========================= */
+window.tambahPromo = function(){
+  const nama = prompt("Nama Promo:");
   if(!nama) return alert("Nama promo kosong!");
+  const harga = prompt("Harga Promo:");
+  const deskripsi = prompt("Deskripsi Promo:");
   window.menuPromo.push({nama,harga,deskripsi});
   renderPromoUI();
-}
-
-window.tambahMenu = function(kategori,nama,harga){
-  if(!kategori || !nama) return alert("Kategori atau nama kosong!");
-  const container=document.getElementById(kategori+"Container");
-  if(container){
-    const div=document.createElement("div");
-    div.innerText=`${nama} - ${harga}`;
-    container.appendChild(div);
-  }
-}
-
-window.tambahGambar = function(url,type){
-  if(type==="ruangan") window.flipbookRuanganImages.push(url);
-  if(type==="menu") window.flipbookMenuImages.push(url);
-  renderImagePreview(type,url);
 }
 
 window.renderPromoUI = function(){
@@ -606,32 +594,40 @@ window.renderPromoUI = function(){
   });
 }
 
-window.renderImagePreview = function(type,url){
-  const container=document.getElementById(type+"PreviewContainer");
-  if(!container) return;
-  const img=document.createElement("img");
-  img.src=url;
-  img.style.width="80px";
-  img.style.height="80px";
-  img.style.margin="4px";
-  container.appendChild(img);
-}
-
-window.tambahNomorWa = function(nomor){
-  if(!nomor) return alert("Nomor WA kosong!");
-  window.nomorWAList.push(nomor);
-  const container=document.getElementById("nomorWAContainer");
+window.tambahMenu = function(kategori){
+  const nama = prompt("Nama Menu:");
+  if(!nama) return alert("Nama menu kosong!");
+  const harga = prompt("Harga Menu:");
+  const container=document.getElementById("menu"+kategori.charAt(0).toUpperCase()+kategori.slice(1)+"Container");
   if(container){
     const div=document.createElement("div");
-    div.innerText=nomor;
+    div.innerText=`${nama} - ${harga}`;
     container.appendChild(div);
   }
 }
 
-window.tambahRoom = function(nama){
+window.tambahNomorWa = function(){
+  const input = document.querySelector("#nomorWaContainer input");
+  const nomor = input?.value.trim();
+  if(!nomor) return alert("Nomor WA kosong!");
+  window.nomorWAList.push(nomor);
+  const container=document.getElementById("nomorWaContainer");
+  const div=document.createElement("div");
+  div.innerText=nomor;
+  container.appendChild(div);
+  input.value="";
+}
+
+window.tambahRoom = function(tipe){
+  const nama = prompt("Nama "+tipe+" :");
   if(!nama) return alert("Nama room kosong!");
-  window.roomsList.push(nama);
-  const container=document.getElementById("roomContainer");
+  window.roomsList.push({tipe,nama});
+  const containerMap={
+    hotel: document.getElementById("roomHotelContainer"),
+    meeting: document.getElementById("meetingRoomContainer"),
+    package: document.getElementById("packageContainer")
+  };
+  const container=containerMap[tipe];
   if(container){
     const div=document.createElement("div");
     div.innerText=nama;
@@ -639,23 +635,49 @@ window.tambahRoom = function(nama){
   }
 }
 
+window.tambahGambar = function(url,type){
+  if(type==="ruangan") window.flipbookRuanganImages.push(url);
+  if(type==="menu") window.flipbookMenuImages.push(url);
+  renderImagePreview(type,url);
+}
+
+window.renderImagePreview = function(type,url){
+  const containerId = (type==="ruangan") ? "flipbookRuanganPreview" : "flipbookMenuPreview";
+  const container=document.getElementById(containerId);
+  if(!container) return;
+
+  if(Array.isArray(url)){
+    container.innerHTML="";
+    url.forEach(u=>{
+      const img=document.createElement("img");
+      img.src=u;
+      img.style.width="80px"; img.style.height="80px"; img.style.margin="4px";
+      container.appendChild(img);
+    });
+  } else {
+    const img=document.createElement("img");
+    img.src=url;
+    img.style.width="80px"; img.style.height="80px"; img.style.margin="4px";
+    container.appendChild(img);
+  }
+}
+
 /* =========================
    Simpan Semua Data
 ========================= */
-async function simpanSemua(){
+async function simpanData(){
   const identitas={
-    namaRestoran:document.getElementById("restoName")?.value||"",
-    nomorWA:document.getElementById("restoWA")?.value||"",
-    logo:document.getElementById("logoPreview")?.src||""
+    namaRestoran: document.getElementById("namaRestoran")?.value||"",
+    nomorWA: window.nomorWAList,
+    logo: document.getElementById("previewLogo")?.src||""
   };
   const data={
     id:FIX_ID,
     identitas,
-    menu:[], // bisa diisi ambilMenu()
-    promo:window.menuPromo,
-    rooms:window.roomsList,
-    flipbookRuangan:window.flipbookRuanganImages,
-    flipbookMenu:window.flipbookMenuImages
+    promo: window.menuPromo,
+    rooms: window.roomsList,
+    flipbookRuangan: window.flipbookRuanganImages,
+    flipbookMenu: window.flipbookMenuImages
   };
   try{
     await saveDataToDB(data);
@@ -671,35 +693,58 @@ async function loadSemuaData(){
   try{
     const data=await loadDataFromDB();
     if(!data) return;
-    document.getElementById("restoName").value=data.identitas?.namaRestoran||"";
-    document.getElementById("restoWA").value=data.identitas?.nomorWA||"";
-    if(data.identitas?.logo) document.getElementById("logoPreview").src=data.identitas.logo;
 
-    window.menuPromo=data.promo||[];
+    // Identitas
+    document.getElementById("namaRestoran").value = data.identitas?.namaRestoran || "";
+    document.getElementById("previewLogo").src = data.identitas?.logo || "";
+
+    // Promo
+    window.menuPromo = data.promo || [];
     renderPromoUI();
 
-    window.roomsList=data.rooms||[];
-    const roomContainer=document.getElementById("roomContainer");
-    if(roomContainer) roomContainer.innerHTML="",window.roomsList.forEach(r=>{
-      const div=document.createElement("div"); div.innerText=r; roomContainer.appendChild(div);
+    // Nomor WA
+    window.nomorWAList = data.nomorWA || [];
+    const waContainer = document.getElementById("nomorWaContainer");
+    waContainer.innerHTML = "";
+    window.nomorWAList.forEach(n => {
+      const div = document.createElement("div");
+      div.innerText = n;
+      waContainer.appendChild(div);
     });
 
-    window.flipbookRuanganImages=data.flipbookRuangan||[];
-    window.flipbookMenuImages=data.flipbookMenu||[];
-    renderImagePreview("ruangan",window.flipbookRuanganImages);
-    renderImagePreview("menu",window.flipbookMenuImages);
+    // Rooms
+    window.roomsList = data.rooms || [];
+    const roomContainers = {
+      hotel: document.getElementById("roomHotelContainer"),
+      meeting: document.getElementById("meetingRoomContainer"),
+      package: document.getElementById("packageContainer")
+    };
+    window.roomsList.forEach(r => {
+      const container = roomContainers[r.tipe];
+      if(container){
+        const div = document.createElement("div");
+        div.innerText = r.nama;
+        container.appendChild(div);
+      }
+    });
+
+    // Flipbook
+    window.flipbookRuanganImages = data.flipbookRuangan || [];
+    window.flipbookMenuImages = data.flipbookMenu || [];
+    renderImagePreview("ruangan", window.flipbookRuanganImages);
+    renderImagePreview("menu", window.flipbookMenuImages);
 
     console.log("Data berhasil dimuat ✅");
   }catch(err){console.error("Gagal load data",err);}
 }
 
 /* =========================
-   Auto Init + Expose Global
+   Auto Init
 ========================= */
-window.backupData=backupData;
-window.restoreDataFromFile=restoreDataFromFile;
-window.handleImageUpload=handleImageUpload;
-window.simpanSemua=simpanSemua;
+window.backupData = backupData;
+window.restoreDataFromFile = restoreDataFromFile;
+window.handleImageUpload = handleImageUpload;
+window.simpanData = simpanData;
 
 document.addEventListener("DOMContentLoaded",()=>{loadSemuaData();});
 window.addEventListener("error",(e)=>{console.error("Global error:",e?.error||e?.message);});
@@ -712,6 +757,7 @@ window.addEventListener("error",(e)=>{console.error("Global error:",e?.error||e?
   
 </body>
 </html>
+
 
 
 
