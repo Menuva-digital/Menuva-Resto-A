@@ -413,22 +413,18 @@
       📋 Copy Link Untuk Dibagikan Ke Customers
     </button>
     
-     <!-- Backup dan Restore -->
+     <h2>🔁 Backup & Restore Data</h2>
+  <button onclick="backupData()">📦 Backup Data</button>
 
-    <div class="section">
-      <h2>🔁 Backup & Restore Data</h2>
-     <button onclick="backupData()">📦 Backup Data</button>
+  <!-- Tempat status -->
+  <div id="backupDownloadLink" style="margin-top:10px;"></div>
 
-     <!-- Tempat status -->
-     <div id="backupDownloadLink" style="margin-top:10px;"></div>
-
-      
-      <!-- Input Restore -->
-      <label for="restoreInput" style="margin-top: 20px; display: block;">
-        📂 Pilih File JSON untuk Restore:
-      </label>
-      <input type="file" id="restoreInput" accept=".json" onchange="restoreDataFromFile(event)" />
-    </div>
+  <!-- Input Restore -->
+  <label for="restoreInput" style="margin-top: 20px; display: block;">
+    📂 Pilih File JSON untuk Restore:
+  </label>
+  <input type="file" id="restoreInput" accept=".json" onchange="restoreDataFromFile(event)" />
+</div>
   
   <div style="background: #fef9e7; padding: 10px; border-left: 5px solid #f1c40f; margin-top: 10px; font-size: 14px;">
     <strong>Panduan Penggunaan:</strong><br>
@@ -679,108 +675,124 @@ function renderImagePreview(tipe,url){
   if(tipe==="ruangan") flipbookRuanganImages.push(url);
   else flipbookMenuImages.push(url);
 }
-
-// ───────────── FIRESTORE SAVE ─────────────
-async function saveToFirestore(data){
-  try{
-    await setDoc(doc(firestore,"menuva","data"),data);
-    console.log("Data tersimpan di Firestore ✅");
-  }catch(err){console.error("Gagal simpan Firestore",err);}
-}
-
-// ───────────── SAVE ALL ─────────────
-async function simpanSemua(){
-  const identitas={
-    namaRestoran: document.getElementById("restoName")?.value||"",
-    nomorWA: document.getElementById("restoWA")?.value||"",
-    logo: document.getElementById("logoPreview")?.src||"",
-  };
-  const menus=[
-    ...ambilMenu("menuFoodContainer"),
-    ...ambilMenu("menuSnackContainer"),
-    ...ambilMenu("menuDrinkContainer"),
-  ];
-  const rooms=ambilSemuaRoom();
-  const data={identitas,menu:menus,promo:menuPromo,rooms,flipbookRuangan:flipbookRuanganImages,flipbookMenu:flipbookMenuImages};
-  try{
-    await saveDataToDB(data);
-    await saveToFirestore(data);
-    alert("✅ Data tersimpan di IndexedDB + Firestore");
-  }catch(err){console.error(err);alert("❌ Gagal simpan data");}
-}
-
-// ───────────── LOAD DATA ─────────────
-async function loadSemuaData(){
-  try{
-    const data=await loadDataFromDB();
-    if(!data||Object.keys(data).length===0) return;
-    document.getElementById("restoName").value=data.identitas?.namaRestoran||"";
-    document.getElementById("restoWA").value=data.identitas?.nomorWA||"";
-    if(data.identitas?.logo) document.getElementById("logoPreview").src=data.identitas.logo;
-    menuPromo=data.promo||[];
-    renderPromoUI();
-    ["menuFoodContainer","menuSnackContainer","menuDrinkContainer"].forEach(id=>document.getElementById(id).innerHTML="");
-    (data.menu||[]).forEach(m=>tambahMenu(m.kategori,m.nama,m.harga));
-    restoreRoomFromData(data.rooms||[]);
-    flipbookRuanganImages=data.flipbookRuangan||[];
-    flipbookMenuImages=data.flipbookMenu||[];
-    flipbookRuanganImages.forEach(url=>renderImagePreview("ruangan",url));
-    flipbookMenuImages.forEach(url=>renderImagePreview("menu",url));
-    console.log("Data berhasil dimuat ✅");
-  }catch(err){console.error("Gagal load data",err);}
-}
-
- // Backup data ke file JSON
-    async function backupData() {
-      try {
-        const data = await loadDataFromDB();
-        if (!data) {
-          alert("Tidak ada data untuk di-backup!");
-          return;
-        }
-  
-        const filename = `menuva-backup-${Date.now()}.json`;
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-  
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-  
-        const statusDiv = document.getElementById("backupDownloadLink");
-        statusDiv.innerHTML = `
-          ✅ Backup berhasil! File <strong>${filename}</strong> siap di-download.<br>
-          <a href="${url}" download="${filename}" style="margin-top:10px;display:inline-block;padding:10px 16px;background:#007bff;color:white;text-decoration:none;border-radius:6px;">
-            📥 Klik di sini jika download tidak dimulai otomatis
-          </a>
-        `;
-      } catch (err) {
-        alert("❌ Gagal backup data: " + err.message);
+// ───────────── BACKUP DATA ─────────────
+  async function backupData() {
+    try {
+      const data = await loadDataFromDB();
+      if (!data) {
+        alert("Tidak ada data untuk di-backup!");
+        return;
       }
+
+      const filename = `menuva-backup-${Date.now()}.json`;
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      const statusDiv = document.getElementById("backupDownloadLink");
+      statusDiv.innerHTML = `
+        ✅ Backup berhasil! File <strong>${filename}</strong> siap di-download.<br>
+        <a href="${url}" download="${filename}" style="margin-top:10px;display:inline-block;padding:10px 16px;background:#007bff;color:white;text-decoration:none;border-radius:6px;">
+          📥 Klik di sini jika download tidak dimulai otomatis
+        </a>
+      `;
+    } catch (err) {
+      alert("❌ Gagal backup data: " + err.message);
     }
-  
-    // Restore data dari file JSON
-    function restoreDataFromFile(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-  
-      const reader = new FileReader();
-      reader.onload = async function (e) {
-        try {
-          const json = JSON.parse(e.target.result);
-          await saveDataToDB(json);
-          alert("✅ Data berhasil direstore dari file!\nHalaman akan dimuat ulang...");
-          location.reload();
-        } catch (err) {
-          alert("❌ Gagal membaca file JSON. Pastikan file valid.");
-          console.error("Restore error:", err);
-        }
+  }
+
+  // ───────────── RESTORE DATA ─────────────
+  function restoreDataFromFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async function (e) {
+      try {
+        const json = JSON.parse(e.target.result);
+        if (!json.id) json.id = "menuvaData"; // 🔑 fix restore
+
+        await saveDataToDB(json);
+        alert("✅ Data berhasil direstore dari file!\nHalaman akan dimuat ulang...");
+        location.reload();
+      } catch (err) {
+        alert("❌ Gagal membaca file JSON. Pastikan file valid.");
+        console.error("Restore error:", err);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // ───────────── SAVE ALL ─────────────
+  async function simpanSemua() {
+    const identitas = {
+      namaRestoran: document.getElementById("restoName")?.value || "",
+      nomorWA: document.getElementById("restoWA")?.value || "",
+      logo: document.getElementById("logoPreview")?.src || "",
+    };
+
+    const menus = [
+      ...ambilMenu("menuFoodContainer"),
+      ...ambilMenu("menuSnackContainer"),
+      ...ambilMenu("menuDrinkContainer"),
+    ];
+
+    const rooms = ambilSemuaRoom();
+
+    const data = {
+      id: "menuvaData",   // 🔑 WAJIB ada kalau keyPath: "id"
+      identitas,
+      menu: menus,
+      promo: menuPromo,
+      rooms,
+      flipbookRuangan: flipbookRuanganImages,
+      flipbookMenu: flipbookMenuImages
+    };
+
+    try {
+      await saveDataToDB(data);
+      await saveToFirestore(data);
+      alert("✅ Data tersimpan di IndexedDB + Firestore");
+    } catch (err) {
+      console.error(err);
+      alert("❌ Gagal simpan data");
+    }
+  }
+
+  // ───────────── SAVE DATA TO INDEXEDDB ─────────────
+  function saveDataToDB(data) {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open("menuvaDB", 1);
+
+      request.onsuccess = function (event) {
+        const db = event.target.result;
+        const tx = db.transaction("menuvaData", "readwrite");
+        const store = tx.objectStore("menuvaData");
+
+        // kosongkan dulu biar bersih
+        store.clear().onsuccess = () => {
+          if (!data.id) data.id = "menuvaData"; // 🔑 safety net
+          const putReq = store.put(data);
+
+          putReq.onsuccess = () => resolve(true);
+          putReq.onerror = () => reject(putReq.error);
+        };
+
+        tx.oncomplete = () => db.close();
       };
-      reader.readAsText(file);
-    }
+
+      request.onerror = function (event) {
+        reject("DB open error: " + event.target.errorCode);
+      };
+    });
+  }
+
 // ───────────── INIT ─────────────
 window.onload=async()=>{
   await initDB();
@@ -800,6 +812,7 @@ window.onload=async()=>{
   
 </body>
 </html>
+
 
 
 
