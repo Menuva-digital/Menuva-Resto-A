@@ -425,7 +425,8 @@
     ⚠️ Proses restore akan menggantikan seluruh data yang ada saat ini dan tidak bisa dibatalkan.<br>
     💡 Gunakan fitur ini sebelum mengganti perangkat atau membersihkan data browser.
   </div>
-  <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
 
 <script type="text/javascript">
@@ -443,90 +444,43 @@ const firebaseConfig = {
 const app = firebase.initializeApp(firebaseConfig);
 const firestore = firebase.firestore(app);
 
+/* =========================
+   Variabel Global
+========================= */
+let flipbookRuanganImages = [];
+let flipbookMenuImages = [];
+let menuPromo = [];
 
+/* =========================
+   Room / Package Functions
+========================= */
+function tambahRoom(kategori) {
+  const containerId = {
+    hotel: "roomHotelContainer",
+    meeting: "meetingRoomContainer",
+    package: "packageContainer"
+  }[kategori];
 
   const container = document.getElementById(containerId);
 
   const wrapper = document.createElement("div");
-  wrapper.className = "room-form"; // ✅ ini penting
+  wrapper.className = "room-form";
   wrapper.innerHTML = `
-  <input type="text" class="room-nama" placeholder="Nama" />
-  <input type="number" class="room-harga" placeholder="Harga" />
-  <textarea class="room-deskripsi" placeholder="Deskripsi"></textarea>
+    <input type="text" class="room-nama" placeholder="Nama" />
+    <input type="number" class="room-harga" placeholder="Harga" />
+    <textarea class="room-deskripsi" placeholder="Deskripsi"></textarea>
 
-  <div class="gambar-preview-wrapper">
-    <img class="gambar-preview" style="display:none;" />
-    <button class="hapus-gambar" onclick="hapusGambarRoom(this)" style="display:none;">×</button>
-  </div>
+    <div class="gambar-preview-wrapper">
+      <img class="gambar-preview" style="display:none;" />
+      <button class="hapus-gambar" onclick="hapusGambarRoom(this)" style="display:none;">×</button>
+    </div>
 
-  <button class="btn-upload-gambar room-image-upload" onclick="uploadGambarRoom(this)">🖼️ Upload Gambar</button>
-  <button class="btn-hapus-room" onclick="hapusFormRoom(this)">🗑️ Hapus Room</button>
-`;
+    <button class="btn-upload-gambar room-image-upload" onclick="uploadGambarRoom(this)">🖼️ Upload Gambar</button>
+    <button class="btn-hapus-room" onclick="hapusFormRoom(this)">🗑️ Hapus Room</button>
+  `;
   container.appendChild(wrapper);
-
-
-  async function tampilkanListRoom() {
-  try {
-    const data = await loadDataFromDB();
-    const listContainer = document.getElementById("listRuangan");
-    listContainer.innerHTML = ""; // Kosongkan sebelum render ulang
-
-    if (!data.room || data.room.length === 0) {
-      listContainer.innerHTML = "<p>Tidak ada ruangan yang tersedia.</p>";
-      return;
-    }
-
-    data.room.forEach((room, index) => {
-      const item = document.createElement("div");
-      item.classList.add("room-card");
-      item.innerHTML = `
-        <strong>Ruangan ${index + 1}</strong><br>
-        🏷️ Nama: ${room.nama}<br>
-        💼 Kategori: ${room.kategori}<br>
-        💰 Harga: Rp${room.harga}<br>
-        📝 Deskripsi: ${room.deskripsi || "-"}
-        <hr>
-      `;
-      listContainer.appendChild(item);
-    });
-  } catch (err) {
-    console.error("Gagal menampilkan daftar ruangan:", err);
-  }
 }
 
-   
-function uploadGambarRoom(button) {
-  const input = document.createElement("input");
-  input.type = "file";
-  input.accept = "image/*";
-  input.style.display = "none";
-
-  input.onchange = function (e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function (event) {
-      const wrapper = button.closest(".room-form");
-      const preview = wrapper.querySelector(".gambar-preview");
-      const hapusBtn = wrapper.querySelector(".hapus-gambar");
-
-      const imageUrl = event.target.result;
-
-      preview.src = imageUrl;
-      preview.style.display = "block";
-      hapusBtn.style.display = "flex";
-      button.setAttribute("data-image", imageUrl); // simpan base64 ke atribut!
-    };
-    reader.readAsDataURL(file);
-  };
-
-  document.body.appendChild(input);
-  input.click();
-  document.body.removeChild(input);
-}
-
-    
 function hapusGambarRoom(button) {
   const wrapper = button.closest(".room-form");
   const preview = wrapper.querySelector(".gambar-preview");
@@ -535,18 +489,15 @@ function hapusGambarRoom(button) {
   preview.src = "";
   preview.style.display = "none";
   button.style.display = "none";
-
-  // ✅ hapus data-image juga
   if (uploadBtn) uploadBtn.removeAttribute("data-image");
 }
 
-    function hapusFormRoom(button) {
+function hapusFormRoom(button) {
   const form = button.closest(".room-form");
   if (form) form.remove();
 }
 
-
-    function ambilSemuaRoom() {
+function ambilSemuaRoom() {
   const kategoriIds = [
     { id: "roomHotelContainer", kategori: "hotel" },
     { id: "meetingRoomContainer", kategori: "meeting" },
@@ -575,11 +526,9 @@ function hapusGambarRoom(button) {
   return hasil;
 }
 
-    function restoreRoomFromData(rooms = []) {
+function restoreRoomFromData(rooms = []) {
   rooms.forEach(room => {
-    // Buat ulang form berdasarkan kategori
     tambahRoom(room.kategori);
-
     const containerId = {
       hotel: "roomHotelContainer",
       meeting: "meetingRoomContainer",
@@ -588,13 +537,12 @@ function hapusGambarRoom(button) {
 
     const container = document.getElementById(containerId);
     const forms = container.querySelectorAll(".room-form");
-    const lastForm = forms[forms.length - 1]; // ambil form yang baru dibuat
+    const lastForm = forms[forms.length - 1];
 
     lastForm.querySelector(".room-nama").value = room.nama || "";
     lastForm.querySelector(".room-deskripsi").value = room.deskripsi || "";
     lastForm.querySelector(".room-harga").value = room.harga || "";
 
-    // restore gambar
     const preview = lastForm.querySelector(".gambar-preview");
     const hapusBtn = lastForm.querySelector(".hapus-gambar");
     const uploadBtn = lastForm.querySelector(".room-image-upload");
@@ -608,79 +556,79 @@ function hapusGambarRoom(button) {
   });
 }
 
+/* =========================
+   Nomor WA Admin
+========================= */
+function tambahNomorWa() {
+  const container = document.getElementById("nomorWaContainer");
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "nomor-wa";
+  input.placeholder = "Contoh: 6281234567890";
+  container.appendChild(input);
+}
 
+/* =========================
+   Menu Functions
+========================= */
+function ambilMenu(containerId) {
+  const container = document.getElementById(containerId);
+  const items = container.querySelectorAll(".menu-item");
+  const result = [];
 
-    // Tambah nomor WA admin
-    function tambahNomorWa() {
-      const container = document.getElementById("nomorWaContainer");
-      const input = document.createElement("input");
-      input.type = "text";
-      input.className = "nomor-wa";
-      input.placeholder = "Contoh: 6281234567890";
-      container.appendChild(input);
+  items.forEach((item) => {
+    const inputs = item.querySelectorAll("input, select");
+    const nama = inputs[0]?.value || "";
+    const harga = parseInt(inputs[1]?.value || "0");
+    const kategori = inputs[2]?.value || "food";
+
+    if (nama && harga) {
+      result.push({ nama, harga, kategori });
     }
-  
-    // Ambil data menu dari UI
-    function ambilMenu(containerId) {
-      const container = document.getElementById(containerId);
-      const items = container.querySelectorAll(".menu-item");
-      const result = [];
-  
-      items.forEach((item) => {
-        const inputs = item.querySelectorAll("input, select");
-        const nama = inputs[0]?.value || "";
-        const harga = parseInt(inputs[1]?.value || "0");
-        const kategori = inputs[2]?.value || "food";
-  
-        if (nama && harga) {
-          result.push({ nama, harga, kategori });
-        }
-      });
-  
-      return result;
-    }
-  
-    // Resize gambar kalau perlu
-    function resizeIfNeeded(file, maxSizeMB = 0.7, maxWidth = 1280, quality = 0.9) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const img = new Image();
-          img.onload = () => {
-            const scale = Math.min(maxWidth / img.width, 1);
-            const canvas = document.createElement("canvas");
-            canvas.width = img.width * scale;
-            canvas.height = img.height * scale;
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            const resized = canvas.toDataURL("image/jpeg", quality);
-            resolve(resized);
-          };
-          img.onerror = reject;
-          img.src = e.target.result;
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-  
-    // Upload logo handler
-    document
-      .getElementById("logoInput")
-      .addEventListener("change", async function (e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        try {
-          const logoUrl = await resizeIfNeeded(file);
-          document.getElementById("previewLogo").src = logoUrl;
-        } catch (err) {
-          alert("❌ Gagal memproses gambar logo.");
-          console.error("Logo error:", err);
-        }
-      });
-  
-    // Render preview gambar flipbook
-    function renderImagePreview(tipe, url) {
+  });
+
+  return result;
+}
+
+/* =========================
+   Gambar / Flipbook
+========================= */
+function resizeIfNeeded(file, maxSizeMB = 0.7, maxWidth = 1280, quality = 0.9) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(maxWidth / img.width, 1);
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const resized = canvas.toDataURL("image/jpeg", quality);
+        resolve(resized);
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+document.getElementById("logoInput").addEventListener("change", async function (e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const logoUrl = await resizeIfNeeded(file);
+    document.getElementById("previewLogo").src = logoUrl;
+  } catch (err) {
+    alert("❌ Gagal memproses gambar logo.");
+    console.error("Logo error:", err);
+  }
+});
+
+function renderImagePreview(tipe, url) {
   const img = document.createElement("img");
   img.src = url;
   img.style.maxWidth = "100px";
@@ -704,7 +652,6 @@ function hapusGambarRoom(button) {
       <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
   `;
-
   btnHapus.style.position = "absolute";
   btnHapus.style.top = "4px";
   btnHapus.style.right = "4px";
@@ -725,40 +672,67 @@ function hapusGambarRoom(button) {
   document.getElementById(previewContainer).appendChild(wrapper);
 }
 
-  
-    // Tambah gambar flipbook
-    function tambahGambar(tipe) {
-      const input = document.createElement("input");
-      input.type = "file";
-      input.accept = "image/*";
-      input.style.display = "none";
-  
-      input.onchange = async function (e) {
-        const file = e.target.files[0];
-        if (!file) return;
-  
-        try {
-          const imageUrl = await resizeIfNeeded(file);
-          renderImagePreview(tipe, imageUrl);
-  
-          if (tipe === "ruangan") {
-            flipbookRuanganImages.push(imageUrl);
-          } else {
-            flipbookMenuImages.push(imageUrl);
-          }
-        } catch (err) {
-          alert("❌ Gagal memproses gambar.");
-          console.error("Error resize:", err);
-        }
-      };
-  
-      document.body.appendChild(input);
-      input.click();
-      document.body.removeChild(input);
+function tambahGambar(tipe) {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.style.display = "none";
+
+  input.onchange = async function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      const imageUrl = await resizeIfNeeded(file);
+      renderImagePreview(tipe, imageUrl);
+
+      if (tipe === "ruangan") flipbookRuanganImages.push(imageUrl);
+      else flipbookMenuImages.push(imageUrl);
+    } catch (err) {
+      alert("❌ Gagal memproses gambar.");
+      console.error("Error resize:", err);
     }
-  
-    // Simpan semua data ke IndexedDB
-  // Simpan semua data ke IndexedDB + Firestore
+  };
+
+  document.body.appendChild(input);
+  input.click();
+  document.body.removeChild(input);
+}
+
+function uploadGambarRoom(button) {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.style.display = "none";
+
+  input.onchange = function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (event) {
+      const wrapper = button.closest(".room-form");
+      const preview = wrapper.querySelector(".gambar-preview");
+      const hapusBtn = wrapper.querySelector(".hapus-gambar");
+
+      const imageUrl = event.target.result;
+
+      preview.src = imageUrl;
+      preview.style.display = "block";
+      hapusBtn.style.display = "flex";
+      button.setAttribute("data-image", imageUrl);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  document.body.appendChild(input);
+  input.click();
+  document.body.removeChild(input);
+}
+
+/* =========================
+   Firestore + IndexedDB Save
+========================= */
 async function simpanData() {
   try {
     const namaRestoran = document.getElementById("namaRestoran").value;
@@ -787,10 +761,10 @@ async function simpanData() {
       rooms: ambilSemuaRoom()
     };
 
-    // ✅ Simpan ke IndexedDB
+    // Simpan ke IndexedDB
     await saveDataToDB(data);
 
-    // ✅ Simpan juga ke Firestore
+    // Simpan ke Firestore
     try {
       const docRef = firestore.collection("restoranData").doc(namaRestoran);
       await docRef.set(data);
@@ -807,19 +781,19 @@ async function simpanData() {
   }
 }
 
-    // Load data saat halaman dibuka
+/* =========================
+   Load / Restore / Reset / Backup
+========================= */
 async function loadData() {
   try {
     await initDB();
     const data = await loadDataFromDB();
 
-    // Data umum restoran
     document.getElementById("namaRestoran").value = data.namaRestoran || "";
     document.getElementById("restoAddress").value = data.restoAddress || "";
     document.getElementById("restoPhone").value = data.restoPhone || "";
     if (data.logo) document.getElementById("previewLogo").src = data.logo;
 
-    // Nomor WA Admin
     if (Array.isArray(data.nomorWaAdmin)) {
       const container = document.getElementById("nomorWaContainer");
       container.innerHTML = "";
@@ -830,19 +804,16 @@ async function loadData() {
       });
     }
 
-    // Promo
     if (Array.isArray(data.menuPromo)) {
       menuPromo = data.menuPromo;
       renderPromoUI();
     }
 
-    // Menu utama
     if (Array.isArray(data.menu)) {
       data.menu.forEach((m) => tambahMenu(m.kategori || "food", m.nama, m.harga));
     }
 
-    // Room/Package
-        if (Array.isArray(data.rooms)) {
+    if (Array.isArray(data.rooms)) {
       const grouped = {
         hotel: document.getElementById("roomHotelContainer"),
         meeting: document.getElementById("meetingRoomContainer"),
@@ -851,7 +822,6 @@ async function loadData() {
 
       data.rooms.forEach((room) => {
         tambahRoom(room.kategori);
-
         const forms = grouped[room.kategori].querySelectorAll(".room-form");
         const lastForm = forms[forms.length - 1];
         if (!lastForm) return;
@@ -873,12 +843,9 @@ async function loadData() {
       });
     }
 
-
-    // Flipbook Ruangan
     flipbookRuanganImages = data.flipbookRuanganImages || [];
     flipbookRuanganImages.forEach((src) => renderImagePreview("ruangan", src));
 
-    // Flipbook Menu
     flipbookMenuImages = data.flipbookMenuImages || [];
     flipbookMenuImages.forEach((src) => renderImagePreview("menu", src));
 
@@ -886,75 +853,77 @@ async function loadData() {
     console.error("❌ Gagal load data IndexedDB:", err);
   }
 }
-    // Reset semua data
-    async function resetData() {
-      if (!confirm("Yakin ingin menghapus semua data?")) return;
-      try {
-        await clearDataDB();
-        location.reload();
-      } catch (err) {
-        alert("❌ Gagal hapus data: " + err.message);
-      }
+
+async function resetData() {
+  if (!confirm("Yakin ingin menghapus semua data?")) return;
+  try {
+    await clearDataDB();
+    location.reload();
+  } catch (err) {
+    alert("❌ Gagal hapus data: " + err.message);
+  }
+}
+
+async function backupData() {
+  try {
+    const data = await loadDataFromDB();
+    if (!data) {
+      alert("Tidak ada data untuk di-backup!");
+      return;
     }
-  
-    // Backup data ke file JSON
-    async function backupData() {
-      try {
-        const data = await loadDataFromDB();
-        if (!data) {
-          alert("Tidak ada data untuk di-backup!");
-          return;
-        }
-  
-        const filename = `menuva-backup-${Date.now()}.json`;
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-  
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-  
-        const statusDiv = document.getElementById("backupDownloadLink");
-        statusDiv.innerHTML = `
-          ✅ Backup berhasil! File <strong>${filename}</strong> siap di-download.<br>
-          <a href="${url}" download="${filename}" style="margin-top:10px;display:inline-block;padding:10px 16px;background:#007bff;color:white;text-decoration:none;border-radius:6px;">
-            📥 Klik di sini jika download tidak dimulai otomatis
-          </a>
-        `;
-      } catch (err) {
-        alert("❌ Gagal backup data: " + err.message);
-      }
+
+    const filename = `menuva-backup-${Date.now()}.json`;
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    const statusDiv = document.getElementById("backupDownloadLink");
+    statusDiv.innerHTML = `
+      ✅ Backup berhasil! File <strong>${filename}</strong> siap di-download.<br>
+      <a href="${url}" download="${filename}" style="margin-top:10px;display:inline-block;padding:10px 16px;background:#007bff;color:white;text-decoration:none;border-radius:6px;">
+        📥 Klik di sini jika download tidak dimulai otomatis
+      </a>
+    `;
+  } catch (err) {
+    alert("❌ Gagal backup data: " + err.message);
+  }
+}
+
+function restoreDataFromFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async function (e) {
+    try {
+      const json = JSON.parse(e.target.result);
+      await saveDataToDB(json);
+      alert("✅ Data berhasil direstore dari file!\nHalaman akan dimuat ulang...");
+      location.reload();
+    } catch (err) {
+      alert("❌ Gagal membaca file JSON. Pastikan file valid.");
+      console.error("Restore error:", err);
     }
-  
-    // Restore data dari file JSON
-    function restoreDataFromFile(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-  
-      const reader = new FileReader();
-      reader.onload = async function (e) {
-        try {
-          const json = JSON.parse(e.target.result);
-          await saveDataToDB(json);
-          alert("✅ Data berhasil direstore dari file!\nHalaman akan dimuat ulang...");
-          location.reload();
-        } catch (err) {
-          alert("❌ Gagal membaca file JSON. Pastikan file valid.");
-          console.error("Restore error:", err);
-        }
-      };
-      reader.readAsText(file);
-    }
-  
-  window.addEventListener("DOMContentLoaded", async () => {
+  };
+  reader.readAsText(file);
+}
+
+/* =========================
+   Inisialisasi Halaman
+========================= */
+window.addEventListener("DOMContentLoaded", async () => {
   await initDB();
   await loadData();
-  tampilkanListRoom(); // ini kunci
+  tampilkanListRoom();
 });
-  </script>
+</script>
+
     <div class="fixed-bar">
   <button onclick="window.location.href='index.html'" class="btn-success">🔒 Logout</button>
   <button onclick="resetData()" class="btn-danger">🗑️ Reset Semua Data</button>
@@ -962,4 +931,5 @@ async function loadData() {
    
 </body>
 </html>
+
 
