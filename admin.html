@@ -366,71 +366,206 @@ function tambahGambar(tipe){
 }
 
 /* ==== Menu Promo ==== */
-function tambahPromo(nama="",harga="",desc=""){
-  const container=document.getElementById("promoContainer");
-  const div=document.createElement("div");
-  div.className="menu-item";
-  div.innerHTML=`<input value="${nama}" placeholder="Nama Promo"/><input value="${harga}" placeholder="Harga"/><input value="${desc}" placeholder="Deskripsi"/><button onclick="this.parentElement.remove()">Hapus</button>`;
+function tambahPromo(nama="", harga="", desc="", gambar="", countdown="") {
+  const container = document.getElementById("promoContainer");
+  const div = document.createElement("div");
+  div.className = "menu-item";
+
+  div.innerHTML = `
+    <input value="${nama}" placeholder="Nama Promo" class="promo-nama"/>
+    <input value="${harga}" placeholder="Harga" class="promo-harga"/>
+    <input value="${desc}" placeholder="Deskripsi" class="promo-desc"/>
+    <input type="file" accept="image/*" class="promo-gambar" onchange="previewPromoImage(this)"/>
+    <img src="${gambar}" class="promo-preview" style="max-width:100px; display:${gambar ? 'block' : 'none'}"/>
+    <input type="datetime-local" value="${countdown}" class="promo-countdown"/>
+    <button onclick="this.parentElement.remove()">Hapus</button>
+  `;
+
   container.appendChild(div);
 }
 
-/* ==== Simpan & Load Data ==== */
-async function simpanData(){
-  try{
-    const data={
-      namaRestoran:document.getElementById("namaRestoran").value,
-      restoAddress:document.getElementById("restoAddress").value,
-      restoPhone:document.getElementById("restoPhone").value,
-      logo:document.getElementById("previewLogo").src||"",
-      nomorWaAdmin:Array.from(document.querySelectorAll(".nomor-wa")).map(i=>i.value),
-      menuPromo:Array.from(document.getElementById("promoContainer").querySelectorAll(".menu-item")).map(d=>{
-        const inputs=d.querySelectorAll("input"); return {nama:inputs[0].value,harga:inputs[1].value,deskripsi:inputs[2].value};
-      }),
-      menu:[...ambilMenu("menuFoodContainer"),...ambilMenu("menuSnackContainer"),...ambilMenu("menuDrinkContainer")],
-      rooms:ambilSemuaRoom(),
-      flipbookRuanganImages, flipbookMenuImages
+// preview gambar sebelum disimpan
+function previewPromoImage(input) {
+  const file = input.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      input.nextElementSibling.src = e.target.result;
+      input.nextElementSibling.style.display = "block";
     };
+    reader.readAsDataURL(file);
+  }
+}
+
+// ambil semua promo dari form
+function getAllPromo() {
+  const promos = [];
+  document.querySelectorAll("#promoContainer .menu-item").forEach(div => {
+    promos.push({
+      nama: div.querySelector(".promo-nama").value,
+      harga: div.querySelector(".promo-harga").value,
+      desc: div.querySelector(".promo-desc").value,
+      gambar: div.querySelector(".promo-preview").src || "",
+      countdown: div.querySelector(".promo-countdown").value
+    });
+  });
+  return promos;
+}
+
+// render ulang promo dari data
+function renderPromoFromData(promos) {
+  document.getElementById("promoContainer").innerHTML = "";
+  promos.forEach(p => tambahPromo(p.nama, p.harga, p.desc, p.gambar, p.countdown));
+}
+
+/* ==== IndexedDB integration ==== */
+function savePromoToDB(promos) {
+  const request = indexedDB.open("menuvaDB", 1);
+  request.onsuccess = function(e) {
+    const db = e.target.result;
+    const tx = db.transaction("menuvaData", "readwrite");
+    const store = tx.objectStore("menuvaData");
+    store.put({ id: "promoData", promos });
+  };
+}
+
+function loadPromoFromDB() {
+  const request = indexedDB.open("menuvaDB", 1);
+  request.onsuccess = function(e) {
+    const db = e.target.result;
+    const tx = db.transaction("menuvaData", "readonly");
+    const store = tx.objectStore("menuvaData");
+    const getReq = store.get("promoData");
+    getReq.onsuccess = function() {
+      if (getReq.result && getReq.result.promos) {
+        renderPromoFromData(getReq.result.promos);
+      }
+    };
+  };
+}
+/* ==== Simpan & Load Data ==== */
+async function simpanData() {
+  try {
+    const data = {
+      namaRestoran: document.getElementById("namaRestoran").value,
+      restoAddress: document.getElementById("restoAddress").value,
+      restoPhone: document.getElementById("restoPhone").value,
+      logo: document.getElementById("previewLogo").src || "",
+      nomorWaAdmin: Array.from(document.querySelectorAll(".nomor-wa")).map(i => i.value),
+
+      // Ambil semua promo
+      menuPromo: Array.from(document.getElementById("promoContainer").querySelectorAll(".menu-item")).map(d => {
+        return {
+          namaPromo: d.querySelector(".nama-promo")?.value || "",
+          gambarPromo: d.querySelector("img")?.src || "", 
+          namaMenu: d.querySelector(".nama-menu-promo")?.value || "",
+          deskripsi: d.querySelector(".deskripsi-promo")?.value || "",
+          harga: d.querySelector(".harga-promo")?.value || "",
+          kategori: d.querySelector(".kategori-promo")?.value || "",
+          countdown: d.querySelector(".countdown-promo")?.value || "" // misal input type datetime-local
+        };
+      }),
+
+      // Menu biasa
+      menu: [
+        ...ambilMenu("menuFoodContainer"),
+        ...ambilMenu("menuSnackContainer"),
+        ...ambilMenu("menuDrinkContainer")
+      ],
+
+      rooms: ambilSemuaRoom(),
+      flipbookRuanganImages,
+      flipbookMenuImages
+    };
+
     await saveDataToDB(data);
     alert("✅ Semua data berhasil disimpan!");
-  } catch(err){ console.error(err); alert("❌ Gagal simpan data"); }
+  } catch (err) {
+    console.error(err);
+    alert("❌ Gagal simpan data");
+  }
 }
-async function loadData(){
-  try{
+
+async function loadData() {
+  try {
     await initDB();
-    const data=await loadDataFromDB();
-    document.getElementById("namaRestoran").value=data.namaRestoran||"";
-    document.getElementById("restoAddress").value=data.restoAddress||"";
-    document.getElementById("restoPhone").value=data.restoPhone||"";
-    if(data.logo) document.getElementById("previewLogo").src=data.logo;
-    if(Array.isArray(data.nomorWaAdmin)){
-      document.getElementById("nomorWaContainer").innerHTML="";
-      data.nomorWaAdmin.forEach(()=>tambahNomorWa());
-      document.querySelectorAll(".nomor-wa").forEach((input,i)=>{ input.value=data.nomorWaAdmin[i]; });
+    const data = await loadDataFromDB();
+
+    // Identitas Restoran
+    document.getElementById("namaRestoran").value = data.namaRestoran || "";
+    document.getElementById("restoAddress").value = data.restoAddress || "";
+    document.getElementById("restoPhone").value = data.restoPhone || "";
+    if (data.logo) document.getElementById("previewLogo").src = data.logo;
+
+    // Nomor WA
+    if (Array.isArray(data.nomorWaAdmin)) {
+      document.getElementById("nomorWaContainer").innerHTML = "";
+      data.nomorWaAdmin.forEach(() => tambahNomorWa());
+      document.querySelectorAll(".nomor-wa").forEach((input, i) => {
+        input.value = data.nomorWaAdmin[i];
+      });
     }
-    if(Array.isArray(data.menuPromo)){ menuPromo=data.menuPromo; data.menuPromo.forEach(p=>tambahPromo(p.nama,p.harga,p.deskripsi)); }
-    if(Array.isArray(data.menu)){ data.menu.forEach(m=>tambahMenu(m.kategori,m.nama,m.harga)); }
-    if(Array.isArray(data.rooms)){
-      const grouped={hotel:document.getElementById("roomHotelContainer"),meeting:document.getElementById("meetingRoomContainer"),package:document.getElementById("packageContainer")};
-      data.rooms.forEach(r=>{
+
+    // === PROMO ===
+    if (Array.isArray(data.menuPromo)) {
+      document.getElementById("promoContainer").innerHTML = ""; // reset
+      data.menuPromo.forEach(p => {
+        tambahPromo(
+          p.namaPromo || "",
+          p.harga || "",
+          p.deskripsi || "",
+          p.gambarPromo || "",
+          p.namaMenu || "",
+          p.kategori || "",
+          p.countdown || ""
+        );
+      });
+    }
+
+    // === MENU ===
+    if (Array.isArray(data.menu)) {
+      data.menu.forEach(m => tambahMenu(m.kategori, m.nama, m.harga));
+    }
+
+    // === ROOMS ===
+    if (Array.isArray(data.rooms)) {
+      const grouped = {
+        hotel: document.getElementById("roomHotelContainer"),
+        meeting: document.getElementById("meetingRoomContainer"),
+        package: document.getElementById("packageContainer")
+      };
+
+      data.rooms.forEach(r => {
         tambahRoom(r.kategori);
-        const forms=grouped[r.kategori].querySelectorAll(".room-form");
-        const lastForm=forms[forms.length-1];
-        lastForm.querySelector(".room-nama").value=r.nama;
-        lastForm.querySelector(".room-deskripsi").value=r.deskripsi;
-        lastForm.querySelector(".room-harga").value=r.harga;
-        if(r.image){
-          const preview=lastForm.querySelector(".gambar-preview");
-          const hapusBtn=lastForm.querySelector(".hapus-gambar");
-          const uploadBtn=lastForm.querySelector(".room-image-upload");
-          preview.src=r.image; preview.style.display="block"; hapusBtn.style.display="flex"; uploadBtn.setAttribute("data-image",r.image);
+        const forms = grouped[r.kategori].querySelectorAll(".room-form");
+        const lastForm = forms[forms.length - 1];
+        lastForm.querySelector(".room-nama").value = r.nama;
+        lastForm.querySelector(".room-deskripsi").value = r.deskripsi;
+        lastForm.querySelector(".room-harga").value = r.harga;
+
+        if (r.image) {
+          const preview = lastForm.querySelector(".gambar-preview");
+          const hapusBtn = lastForm.querySelector(".hapus-gambar");
+          const uploadBtn = lastForm.querySelector(".room-image-upload");
+          preview.src = r.image;
+          preview.style.display = "block";
+          hapusBtn.style.display = "flex";
+          uploadBtn.setAttribute("data-image", r.image);
         }
       });
     }
-    flipbookRuanganImages=data.flipbookRuanganImages||[];
-    flipbookRuanganImages.forEach(s=>renderImagePreview("ruangan",s));
-    flipbookMenuImages=data.flipbookMenuImages||[];
-    flipbookMenuImages.forEach(s=>renderImagePreview("menu",s));
-  } catch(err){ console.error(err); alert("❌ Gagal load data"); }
+
+    // === FLIPBOOK ===
+    flipbookRuanganImages = data.flipbookRuanganImages || [];
+    flipbookRuanganImages.forEach(s => renderImagePreview("ruangan", s));
+
+    flipbookMenuImages = data.flipbookMenuImages || [];
+    flipbookMenuImages.forEach(s => renderImagePreview("menu", s));
+
+  } catch (err) {
+    console.error(err);
+    alert("❌ Gagal load data");
+  }
 }
 
 /* ==== Reset / Backup / Restore ==== */
@@ -476,3 +611,4 @@ window.addEventListener("DOMContentLoaded", async ()=>{
 
 </body>
 </html>
+
