@@ -52,6 +52,19 @@ input,button,textarea { padding:10px; margin:5px 0; border-radius:5px; border:1p
 body {
   padding-bottom: 80px; /* sesuaikan tinggi fixed-bar, default 80px */
 }
+  .fixed-bar {
+  padding: 6px 10px; /* lebih tipis dari 10px 20px */
+  gap: 8px;          /* jarak antar tombol lebih rapat */
+}
+
+.fixed-bar button {
+  flex: 0 1 auto;    /* jangan paksa tombol memenuhi seluruh bar */
+  min-width: 100px;  /* ukuran minimum tombol */
+  padding: 8px 12px; /* lebih kecil dari 12px */
+  font-size: 14px;   /* lebih kecil dari 16px */
+  border-radius: 6px;/* radius tombol lebih kecil */
+}
+
 </style>
 </head>
 <body>
@@ -154,6 +167,15 @@ body {
 <input type="file" accept=".json" onchange="restoreDataFromFile(event)" />
 <div id="backupDownloadLink"></div>
 </div>
+  <div style="background: #fef9e7; padding: 10px; border-left: 5px solid #f1c40f; margin-top: 10px; font-size: 14px;">
+    <strong>Panduan Penggunaan:</strong><br>
+    PENTING!!<br>
+    🔹 Klik <strong>⬇️ Backup Data</strong> untuk menyimpan semua data restoran ke file berformat <strong>.json</strong>.<br>
+    🔹 Simpan file tersebut dengan baik dan aman di perangkat Anda.<br>
+    🔹 Klik <strong>📂 Pilih File</strong untuk me-restore data dari file <strong>.json</strong> hasil backup.<br>
+    ⚠️ Proses restore akan menggantikan seluruh data yang ada saat ini dan tidak bisa dibatalkan.<br>
+    💡 Gunakan fitur ini sebelum mengganti perangkat atau membersihkan data browser.
+  </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
@@ -615,5 +637,6 @@ window.addEventListener("DOMContentLoaded", async ()=>{
 
 </body>
 </html>
+
 
 
