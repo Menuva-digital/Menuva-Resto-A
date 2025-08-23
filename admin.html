@@ -70,93 +70,94 @@ body {
 <body>
 
 <div class="menuva-logo">
-<img src="menuva-logo.png" alt="Logo Menuva">
+  <img src="menuva-logo.png" alt="Logo Menuva">
 </div>
 
 <!-- Identitas Restoran -->
 <div class="section">
-<h2>📇 Identitas Restoran</h2>
-<input type="file" id="logoInput" accept="image/*" />
-<img id="previewLogo" src="" alt="Logo Restoran" style="max-height: 80px; margin-top:10px;" />
-<input type="text" id="namaRestoran" placeholder="Nama Restoran" />
-<label>Alamat Restoran</label>
-<input id="restoAddress" type="text" placeholder="Jl. Sudirman No. 10, Jakarta" />
-<label>No. Telepon</label>
-<input id="restoPhone" type="text" placeholder="08xx-xxxx-xxxx" />
+  <h2>📇 Identitas Restoran</h2>
+  <input type="file" id="logoInput" accept="image/*" onchange="handleImageUpload(this, 'previewLogo')" />
+  <img id="previewLogo" src="" alt="Logo Restoran" style="max-height: 80px; margin-top:10px;" />
+  
+  <input type="text" id="namaRestoran" placeholder="Nama Restoran" />
+  <label>Alamat Restoran</label>
+  <input id="restoAddress" type="text" placeholder="Jl. Sudirman No. 10, Jakarta" />
+  <label>No. Telepon</label>
+  <input id="restoPhone" type="text" placeholder="08xx-xxxx-xxxx" />
 </div>
 
 <!-- Menu Promo -->
 <div class="section">
-<h2>🔥 Menu Promo</h2>
-<div id="promoContainer"></div>
-<button class="btn-orange" onclick="tambahPromo()">+ Tambah Menu Promo</button>
+  <h2>🔥 Menu Promo</h2>
+  <div id="promoContainer"></div>
+  <button class="btn-orange" onclick="tambahPromo()">+ Tambah Menu Promo</button>
 </div>
 
 <!-- Menu Food -->
 <div class="section">
-<h2>📋 FOOD MENU</h2>
-<div id="menuFoodContainer"></div>
-<button class="btn-success" onclick="tambahMenu('food')">+ Tambah Menu</button>
+  <h2>📋 FOOD MENU</h2>
+  <div id="menuFoodContainer"></div>
+  <button class="btn-success" onclick="tambahMenu('food')">+ Tambah Menu</button>
 </div>
 
 <div class="section">
-<h2>📋 SNACK & DESSERT</h2>
-<div id="menuSnackContainer"></div>
-<button class="btn-success" onclick="tambahMenu('snack')">+ Tambah Menu</button>
+  <h2>📋 SNACK & DESSERT</h2>
+  <div id="menuSnackContainer"></div>
+  <button class="btn-success" onclick="tambahMenu('snack')">+ Tambah Menu</button>
 </div>
 
 <div class="section">
-<h2>📋 DRINK</h2>
-<div id="menuDrinkContainer"></div>
-<button class="btn-success" onclick="tambahMenu('drink')">+ Tambah Menu</button>
+  <h2>📋 DRINK</h2>
+  <div id="menuDrinkContainer"></div>
+  <button class="btn-success" onclick="tambahMenu('drink')">+ Tambah Menu</button>
 </div>
 
 <!-- Nomor WA -->
 <div class="section-box" id="waContainerBox">
-<h3>📱 Nomor WhatsApp Admin</h3>
-<div id="nomorWaContainer">
-<input type="text" class="nomor-wa" placeholder="Contoh: 6281234567890">
-</div>
-<button onclick="tambahNomorWa()">+ Tambah Nomor WA</button>
+  <h3>📱 Nomor WhatsApp Admin</h3>
+  <div id="nomorWaContainer">
+    <input type="text" class="nomor-wa" placeholder="Contoh: 6281234567890">
+  </div>
+  <button onclick="tambahNomorWa()">+ Tambah Nomor WA</button>
 </div>
 
 <!-- Galeri Ruangan -->
 <div class="section">
-<h2>📸 Galeri Ruangan</h2>
-<button onclick="tambahGambar('ruangan')">+ Tambah Gambar Ruangan</button>
-<input type="file" id="flipbookRuanganUpload" accept="image/*" multiple style="display:none;" />
-<div id="flipbookRuanganPreview"></div>
+  <h2>📸 Galeri Ruangan</h2>
+  <button onclick="tambahGambar('ruangan')">+ Tambah Gambar Ruangan</button>
+  <input type="file" id="flipbookRuanganUpload" accept="image/*" multiple style="display:none;" onchange="handleMultipleUpload(this, 'flipbookRuanganPreview')" />
+  <div id="flipbookRuanganPreview"></div>
 </div>
 
 <!-- Flipbook Menu -->
 <div class="section">
-<h2>📖 Menu Restoran</h2>
-<button onclick="tambahGambar('menu')">+ Tambah Gambar Menu</button>
-<input type="file" id="flipbookMenuUpload" accept="image/*" multiple style="display:none;" />
-<div id="flipbookMenuPreview"></div>
+  <h2>📖 Menu Restoran</h2>
+  <button onclick="tambahGambar('menu')">+ Tambah Gambar Menu</button>
+  <input type="file" id="flipbookMenuUpload" accept="image/*" multiple style="display:none;" onchange="handleMultipleUpload(this, 'flipbookMenuPreview')" />
+  <div id="flipbookMenuPreview"></div>
 </div>
 
 <!-- Room / Package -->
 <div class="section-box" id="roomContainerBox">
-<h2>🏨 Room / Package</h2>
+  <h2>🏨 Room / Package</h2>
 
-<div class="room-section">
-<h3>🛏️ Room Hotel</h3>
-<button onclick="tambahRoom('hotel')">+ Tambah Room Hotel</button>
-<div id="roomHotelContainer"></div>
-</div>
+  <div class="room-section">
+    <h3>🛏️ Room Hotel</h3>
+    <button onclick="tambahRoom('hotel')">+ Tambah Room Hotel</button>
+    <div id="roomHotelContainer"></div>
+  </div>
 
-<div class="room-section">
-<h3>💼 Meeting Room</h3>
-<button onclick="tambahRoom('meeting')">+ Tambah Meeting Room</button>
-<div id="meetingRoomContainer"></div>
-</div>
+  <div class="room-section">
+    <h3>💼 Meeting Room</h3>
+    <button onclick="tambahRoom('meeting')">+ Tambah Meeting Room</button>
+    <div id="meetingRoomContainer"></div>
+  </div>
 
-<div class="room-section">
-<h3>🎁 Package</h3>
-<button onclick="tambahRoom('package')">+ Tambah Package</button>
-<div id="packageContainer"></div>
-</div>
+  <div class="room-section">
+    <h3>🎁 Package</h3>
+    <button onclick="tambahRoom('package')">+ Tambah Package</button>
+    <div id="packageContainer"></div>
+  </div>
 </div>
 
 <hr>
@@ -168,15 +169,16 @@ body {
   <div id="backupDownloadLink"></div>
 </div>
 
-  <div style="background: #fef9e7; padding: 10px; border-left: 5px solid #f1c40f; margin-top: 10px; font-size: 14px;">
-    <strong>Panduan Penggunaan:</strong><br>
-    PENTING!!<br>
-    🔹 Klik <strong>⬇️ Backup Data</strong> untuk menyimpan semua data restoran ke file berformat <strong>.json</strong>.<br>
-    🔹 Simpan file tersebut dengan baik dan aman di perangkat Anda.<br>
-    🔹 Klik <strong>📂 Pilih File</strong untuk me-restore data dari file <strong>.json</strong> hasil backup.<br>
-    ⚠️ Proses restore akan menggantikan seluruh data yang ada saat ini dan tidak bisa dibatalkan.<br>
-    💡 Gunakan fitur ini sebelum mengganti perangkat atau membersihkan data browser.
-  </div>
+<div style="background: #fef9e7; padding: 10px; border-left: 5px solid #f1c40f; margin-top: 10px; font-size: 14px;">
+  <strong>Panduan Penggunaan:</strong><br>
+  PENTING!!<br>
+  🔹 Klik <strong>⬇️ Backup Data</strong> untuk menyimpan semua data restoran ke file berformat <strong>.json</strong>.<br>
+  🔹 Simpan file tersebut dengan baik dan aman di perangkat Anda.<br>
+  🔹 Klik <strong>📂 Pilih File</strong> untuk me-restore data dari file <strong>.json</strong> hasil backup.<br>
+  ⚠️ Proses restore akan menggantikan seluruh data yang ada saat ini dan tidak bisa dibatalkan.<br>
+  💡 Gunakan fitur ini sebelum mengganti perangkat atau membersihkan data browser.
+</div>
+
 
 <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore-compat.js"></script>
@@ -245,19 +247,25 @@ let flipbookRuanganImages = [];
 let flipbookMenuImages = [];
 let menuPromo = [];
 
-/* ==== Fungsi Helper ==== */
-function resizeIfNeeded(file, maxSizeMB = 0.7, maxWidth = 1280, quality = 0.9) {
+/* ==== Fungsi Resize Image ==== */
+function resizeImage(file, maxWidth = 1280, maxSizeMB = 0.7, quality = 0.9) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = e => {
       const img = new Image();
       img.onload = () => {
         const scale = Math.min(maxWidth / img.width, 1);
         const canvas = document.createElement("canvas");
         canvas.width = img.width * scale;
         canvas.height = img.height * scale;
-        canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);
-        resolve(canvas.toDataURL("image/jpeg", quality));
+        canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+        let dataURL = canvas.toDataURL("image/jpeg", quality);
+
+        // jika masih besar dari maxSizeMB, kurangi quality
+        if ((dataURL.length * 3 / 4 / 1024 / 1024) > maxSizeMB) {
+          dataURL = canvas.toDataURL("image/jpeg", quality * 0.7);
+        }
+        resolve(dataURL);
       };
       img.onerror = reject;
       img.src = e.target.result;
@@ -267,6 +275,75 @@ function resizeIfNeeded(file, maxSizeMB = 0.7, maxWidth = 1280, quality = 0.9) {
   });
 }
 
+/* ==== Upload 1 Gambar ==== */
+async function handleImageUpload(inputElement, previewId) {
+  const file = inputElement.files[0];
+  if (!file) return;
+  try {
+    const resizedData = await resizeImage(file);
+    const preview = document.getElementById(previewId);
+    preview.src = resizedData;
+    preview.style.display = "block";
+
+    // Simpan otomatis ke IndexedDB (opsional: sesuaikan nama key)
+    // ex: saveSingleImage('logo', resizedData);
+  } catch (err) {
+    console.error("Gagal resize/upload gambar:", err);
+    alert("❌ Gagal upload gambar");
+  }
+}
+
+/* ==== Upload Multiple Gambar ==== */
+async function handleMultipleUpload(inputElement, containerId) {
+  const files = Array.from(inputElement.files);
+  const container = document.getElementById(containerId);
+  container.innerHTML = ""; // reset preview
+  for (let file of files) {
+    try {
+      const resizedData = await resizeImage(file);
+      const img = document.createElement("img");
+      img.src = resizedData;
+      img.style.maxHeight = "120px";
+      img.style.margin = "5px";
+      img.style.borderRadius = "5px";
+      container.appendChild(img);
+
+      // Simpan otomatis ke IndexedDB / array flipbook
+      // ex: addToFlipbookArray(containerId, resizedData);
+    } catch (err) {
+      console.error("Gagal resize/upload gambar:", err);
+    }
+  }
+}
+
+
+/* ==== Fungsi Handler Global ==== */
+async function handleImageUpload(input, previewId) {
+  if (!input.files.length) return;
+
+  const files = Array.from(input.files);
+  const results = await Promise.all(files.map(file => resizeIfNeeded(file)));
+
+  if (files.length === 1) {
+    // simpan hasil resize ke dataset (buat proses save ke IndexedDB nanti)
+    input.dataset.resized = results[0];
+    if (previewId) document.getElementById(previewId).src = results[0];
+  } else {
+    // multiple upload
+    input.dataset.resizedMultiple = JSON.stringify(results);
+    if (previewId) {
+      const container = document.getElementById(previewId);
+      container.innerHTML = "";
+      results.forEach(url => {
+        const img = document.createElement("img");
+        img.src = url;
+        img.style.width = "100px";
+        img.style.margin = "5px";
+        container.appendChild(img);
+      });
+    }
+  }
+}
 /* ==== Fungsi Upload Logo ==== */
 document.getElementById("logoInput").addEventListener("change", async function(e){
   const file = e.target.files[0];
@@ -638,6 +715,7 @@ window.addEventListener("DOMContentLoaded", async ()=>{
 
 </body>
 </html>
+
 
 
 
