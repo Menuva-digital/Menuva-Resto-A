@@ -247,74 +247,38 @@ let flipbookRuanganImages = [];
 let flipbookMenuImages = [];
 let menuPromo = [];
 
-/* ==== Fungsi Resize Image ==== */
-function resizeImage(file, maxWidth = 1280, maxSizeMB = 0.7, quality = 0.9) {
-  return new Promise((resolve, reject) => {
+/* ==== Resize & Upload Gambar ==== */
+async function uploadImage(input, previewContainerId) {
+  const files = Array.from(input.files);
+  const container = document.getElementById(previewContainerId);
+  container.innerHTML = ""; // reset preview
+  for (let file of files) {
     const reader = new FileReader();
-    reader.onload = e => {
+    reader.onload = async (e) => {
       const img = new Image();
       img.onload = () => {
-        const scale = Math.min(maxWidth / img.width, 1);
+        const scale = Math.min(1280 / img.width, 1);
         const canvas = document.createElement("canvas");
         canvas.width = img.width * scale;
         canvas.height = img.height * scale;
         canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
-        let dataURL = canvas.toDataURL("image/jpeg", quality);
+        const resizedData = canvas.toDataURL("image/jpeg", 0.9);
 
-        // jika masih besar dari maxSizeMB, kurangi quality
-        if ((dataURL.length * 3 / 4 / 1024 / 1024) > maxSizeMB) {
-          dataURL = canvas.toDataURL("image/jpeg", quality * 0.7);
-        }
-        resolve(dataURL);
+        const preview = document.createElement("img");
+        preview.src = resizedData;
+        preview.style.maxHeight = "120px";
+        preview.style.margin = "5px";
+        preview.style.borderRadius = "5px";
+        container.appendChild(preview);
+
+        // nanti bisa simpan ke IndexedDB
       };
-      img.onerror = reject;
       img.src = e.target.result;
     };
-    reader.onerror = reject;
     reader.readAsDataURL(file);
-  });
-}
-
-/* ==== Upload 1 Gambar ==== */
-async function handleImageUpload(inputElement, previewId) {
-  const file = inputElement.files[0];
-  if (!file) return;
-  try {
-    const resizedData = await resizeImage(file);
-    const preview = document.getElementById(previewId);
-    preview.src = resizedData;
-    preview.style.display = "block";
-
-    // Simpan otomatis ke IndexedDB (opsional: sesuaikan nama key)
-    // ex: saveSingleImage('logo', resizedData);
-  } catch (err) {
-    console.error("Gagal resize/upload gambar:", err);
-    alert("❌ Gagal upload gambar");
   }
 }
 
-/* ==== Upload Multiple Gambar ==== */
-async function handleMultipleUpload(inputElement, containerId) {
-  const files = Array.from(inputElement.files);
-  const container = document.getElementById(containerId);
-  container.innerHTML = ""; // reset preview
-  for (let file of files) {
-    try {
-      const resizedData = await resizeImage(file);
-      const img = document.createElement("img");
-      img.src = resizedData;
-      img.style.maxHeight = "120px";
-      img.style.margin = "5px";
-      img.style.borderRadius = "5px";
-      container.appendChild(img);
-
-      // Simpan otomatis ke IndexedDB / array flipbook
-      // ex: addToFlipbookArray(containerId, resizedData);
-    } catch (err) {
-      console.error("Gagal resize/upload gambar:", err);
-    }
-  }
-}
 
 
 /* ==== Fungsi Handler Global ==== */
@@ -715,6 +679,7 @@ window.addEventListener("DOMContentLoaded", async ()=>{
 
 </body>
 </html>
+
 
 
 
