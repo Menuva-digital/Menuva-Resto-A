@@ -184,7 +184,6 @@ body {
   ⚠️ Restore akan menggantikan seluruh data saat ini. Simpan backup sebelum mengganti perangkat atau membersihkan browser.
 </div>
 
-  <script src="backup.js"></script>
   <script>
 /* ==== IndexedDB ==== */
 let db;
@@ -218,16 +217,6 @@ async function loadDataFromDB() {
     const store = tx.objectStore("menuvaData");
     const req = store.get("main");
     req.onsuccess = (e) => resolve(e.target.result || {});
-    req.onerror = (e) => reject(e);
-  });
-}
-
-async function clearDataDB() {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction("menuvaData", "readwrite");
-    const store = tx.objectStore("menuvaData");
-    const req = store.clear();
-    req.onsuccess = () => resolve();
     req.onerror = (e) => reject(e);
   });
 }
@@ -406,7 +395,8 @@ function renderImagePreview(tipe,url){
   wrapper.appendChild(img); wrapper.appendChild(btnHapus);
   document.getElementById(tipe==="ruangan"?"flipbookRuanganPreview":"flipbookMenuPreview").appendChild(wrapper);
 }
-/* ==== Simpan Data + Push ke Proxy Online ==== */
+
+/* ==== Simpan Data + Push ke Proxy Online + Handle CORS ==== */
 async function simpanData() {
   try {
     const data = {
@@ -426,132 +416,98 @@ async function simpanData() {
       flipbookMenuImages
     };
 
-    // ==== 1️⃣ Simpan ke IndexedDB ====
+    // 1️⃣ Simpan ke IndexedDB
     await saveDataToDB(data);
 
-    // ==== 2️⃣ Push ke Proxy Online / Vercel ====
+    // 2️⃣ Push ke proxy online dengan fetch
     const res = await fetch('https://menuva-proxy-v1.vercel.app/api/backup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      method:'POST',
+      headers: { 'Content-Type':'application/json' },
+      body: JSON.stringify(data),
+      mode:'cors'  // penting supaya CORS ter-handle
     });
 
     const result = await res.json();
-
     if(result.success){
-      alert("✅ Data berhasil disimpan di IndexedDB & di-push ke server!\nURL katalog: " + result.url);
+      alert("✅ Data tersimpan di IndexedDB & di-push ke server online!\nURL katalog: " + result.url);
     } else {
-      alert("❌ Gagal push ke server: " + (result.error || "Unknown error"));
+      alert("❌ Gagal push ke server: " + (result.error||"Unknown error"));
     }
 
-  } catch (err) {
+  } catch(err){
     console.error(err);
-    alert("❌ Gagal simpan & push ke server: " + err.message);
+    alert("❌ Gagal simpan & push ke server: "+err.message);
   }
 }
-/* ==== Backup JSON ke Lokal ==== */
+
+/* ==== Backup / Restore Lokal ==== */
 async function backupData() {
   try {
     const data = await loadDataFromDB();
     if(!data){ alert("Tidak ada data untuk di-backup!"); return; }
-
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-
+    const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
     const a = document.createElement("a");
-    a.href = url;
+    a.href = URL.createObjectURL(blob);
     a.download = "menuva_backup.json";
     a.click();
-    URL.revokeObjectURL(url);
-
-    alert("✅ Backup berhasil diunduh ke perangkat!");
-  } catch(err){
-    console.error(err);
-    alert("❌ Gagal backup: "+err.message);
-  }
+    alert("✅ Backup berhasil diunduh!");
+  } catch(err){ console.error(err); alert("❌ Gagal backup: "+err.message); }
 }
 
-/* ==== Restore dari File Lokal ==== */
 async function restoreDataFromFile(event){
   try {
-    const file = event.target.files[0];
-    if(!file) return;
-
-    const text = await file.text();
-    const json = JSON.parse(text);
-
-    await saveDataToDB(json); // simpan ke IndexedDB
-    alert("✅ Restore berhasil!"); 
-    location.reload(); // reload supaya form terupdate
-  } catch(err) { 
-    console.error(err); 
-    alert("❌ Gagal restore: "+err.message); 
-  }
-}
-
-/* ==== Load Data Otomatis ==== */
-async function loadData(){
-  try{
-    await initDB();
-    const data=await loadDataFromDB();
-    if(!data) return;
-
-    document.getElementById("namaRestoran").value = data.namaRestoran || "";
-    document.getElementById("restoAddress").value = data.restoAddress || "";
-    document.getElementById("restoPhone").value = data.restoPhone || "";
-    if(data.logo) document.getElementById("previewLogo").src = data.logo;
-
-    if(Array.isArray(data.nomorWaAdmin)){
-      document.getElementById("nomorWaContainer").innerHTML = "";
-      data.nomorWaAdmin.forEach(() => tambahNomorWa());
-      document.querySelectorAll(".nomor-wa").forEach((input,i)=>{ input.value=data.nomorWaAdmin[i]; });
-    }
-
-    if(Array.isArray(data.menuPromo)) renderPromoFromData(data.menuPromo);
-    if(Array.isArray(data.menu)) data.menu.forEach(m=>tambahMenu(m.kategori,m.nama,m.harga));
-    if(Array.isArray(data.rooms)){
-      const grouped = {
-        hotel: document.getElementById("roomHotelContainer"),
-        meeting: document.getElementById("meetingRoomContainer"),
-        package: document.getElementById("packageContainer")
-      };
-      data.rooms.forEach(r=>{
-        tambahRoom(r.kategori);
-        const forms = grouped[r.kategori].querySelectorAll(".room-form");
-        const lastForm = forms[forms.length-1];
-        lastForm.querySelector(".room-nama").value = r.nama;
-        lastForm.querySelector(".room-deskripsi").value = r.deskripsi;
-        lastForm.querySelector(".room-harga").value = r.harga;
-        if(r.image){
-          const preview = lastForm.querySelector(".gambar-preview");
-          const hapusBtn = lastForm.querySelector(".hapus-gambar");
-          const uploadBtn = lastForm.querySelector(".room-image-upload");
-          preview.src = r.image; preview.style.display="block";
-          hapusBtn.style.display="flex";
-          uploadBtn.setAttribute("data-image",r.image);
-        }
-      });
-    }
-
-    flipbookRuanganImages = data.flipbookRuanganImages || [];
-    flipbookRuanganImages.forEach(s => renderImagePreview("ruangan", s));
-    flipbookMenuImages = data.flipbookMenuImages || [];
-    flipbookMenuImages.forEach(s => renderImagePreview("menu", s));
-
-  }catch(err){
-    console.error(err); 
-    alert("❌ Gagal load data: "+err.message);
-  }
+    const file=event.target.files[0]; if(!file) return;
+    const text=await file.text();
+    const json=JSON.parse(text);
+    await saveDataToDB(json);
+    alert("✅ Restore berhasil!"); location.reload();
+  } catch(err){ console.error(err); alert("❌ Gagal restore: "+err.message); }
 }
 
 /* ==== Auto Load Saat Page Dibuka ==== */
-window.addEventListener("DOMContentLoaded", async () => {
+window.addEventListener("DOMContentLoaded", async ()=>{
   await initDB();
-  await loadData();
+  const data = await loadDataFromDB();
+  if(!data) return;
+
+  document.getElementById("namaRestoran").value = data.namaRestoran || "";
+  document.getElementById("restoAddress").value = data.restoAddress || "";
+  document.getElementById("restoPhone").value = data.restoPhone || "";
+  if(data.logo) document.getElementById("previewLogo").src=data.logo;
+
+  if(Array.isArray(data.nomorWaAdmin)){
+    document.getElementById("nomorWaContainer").innerHTML="";
+    data.nomorWaAdmin.forEach(()=>tambahNomorWa());
+    document.querySelectorAll(".nomor-wa").forEach((i,j)=>i.value=data.nomorWaAdmin[j]);
+  }
+
+  if(Array.isArray(data.menuPromo)) renderPromoFromData(data.menuPromo);
+  if(Array.isArray(data.menu)) data.menu.forEach(m=>tambahMenu(m.kategori,m.nama,m.harga));
+  if(Array.isArray(data.rooms)){
+    const grouped={hotel:document.getElementById("roomHotelContainer"),meeting:document.getElementById("meetingRoomContainer"),package:document.getElementById("packageContainer")};
+    data.rooms.forEach(r=>{
+      tambahRoom(r.kategori);
+      const forms=grouped[r.kategori].querySelectorAll(".room-form");
+      const last=forms[forms.length-1];
+      last.querySelector(".room-nama").value=r.nama;
+      last.querySelector(".room-deskripsi").value=r.deskripsi;
+      last.querySelector(".room-harga").value=r.harga;
+      if(r.image){
+        const preview=last.querySelector(".gambar-preview");
+        const hapusBtn=last.querySelector(".hapus-gambar");
+        const uploadBtn=last.querySelector(".room-image-upload");
+        preview.src=r.image; preview.style.display="block"; hapusBtn.style.display="flex";
+        uploadBtn.setAttribute("data-image",r.image);
+      }
+    });
+  }
+
+  flipbookRuanganImages=data.flipbookRuanganImages||[];
+  flipbookRuanganImages.forEach(s=>renderImagePreview("ruangan",s));
+  flipbookMenuImages=data.flipbookMenuImages||[];
+  flipbookMenuImages.forEach(s=>renderImagePreview("menu",s));
 });
-
 </script>
-
 
  <div class="fixed-bar">
   <button onclick="window.location.href='index.html'" class="btn-success">🔒 Logout</button>
@@ -560,6 +516,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 </body>
 </html>
+
 
 
 
