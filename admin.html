@@ -184,6 +184,7 @@ body {
   ⚠️ Restore akan menggantikan seluruh data saat ini. Simpan backup sebelum mengganti perangkat atau membersihkan browser.
 </div>
 
+  <script src="backup.js"></script>
   <script>
 /* ==== IndexedDB ==== */
 let db;
@@ -429,7 +430,7 @@ async function simpanData() {
     await saveDataToDB(data);
 
     // ==== 2️⃣ Push ke Proxy Online / Vercel ====
-    const res = await fetch('https://menuva-proxy-v1.vercel.app/api/proxy/backup', {
+    const res = await fetch('https://menuva-proxy-v1.vercel.app/api/backup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -438,7 +439,7 @@ async function simpanData() {
     const result = await res.json();
 
     if(result.success){
-      alert("✅ Data berhasil disimpan di IndexedDB dan di-push ke server online!\nURL katalog: " + result.url);
+      alert("✅ Data berhasil disimpan di IndexedDB & di-push ke server!\nURL katalog: " + result.url);
     } else {
       alert("❌ Gagal push ke server: " + (result.error || "Unknown error"));
     }
@@ -448,7 +449,6 @@ async function simpanData() {
     alert("❌ Gagal simpan & push ke server: " + err.message);
   }
 }
-
 /* ==== Backup JSON ke Lokal ==== */
 async function backupData() {
   try {
@@ -560,6 +560,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 </body>
 </html>
+
 
 
 
