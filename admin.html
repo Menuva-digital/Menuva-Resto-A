@@ -407,17 +407,17 @@ function renderImagePreview(tipe,url){
   document.getElementById(tipe==="ruangan"?"flipbookRuanganPreview":"flipbookMenuPreview").appendChild(wrapper);
 }
 
-/* ==== Simpan Data ==== */
-async function simpanData(){
-  try{
-    const data={
+/* ==== Simpan Data + Auto Backup ke Gist ==== */
+async function simpanData() {
+  try {
+    const data = {
       namaRestoran: document.getElementById("namaRestoran").value,
       restoAddress: document.getElementById("restoAddress").value,
       restoPhone: document.getElementById("restoPhone").value,
       logo: document.getElementById("previewLogo").src || "",
-      nomorWaAdmin: Array.from(document.querySelectorAll(".nomor-wa")).map(i=>i.value),
+      nomorWaAdmin: Array.from(document.querySelectorAll(".nomor-wa")).map(i => i.value),
       menuPromo: getAllPromo(),
-      menu:[
+      menu: [
         ...ambilMenu("menuFoodContainer"),
         ...ambilMenu("menuSnackContainer"),
         ...ambilMenu("menuDrinkContainer")
@@ -426,13 +426,26 @@ async function simpanData(){
       flipbookRuanganImages,
       flipbookMenuImages
     };
+
+    // ==== 1️⃣ Simpan ke IndexedDB ====
     await saveDataToDB(data);
-    alert("✅ Semua data berhasil disimpan!");
-  }catch(err){
-    console.error(err); alert("❌ Gagal simpan data: "+err.message);
+
+    // ==== 2️⃣ Push ke Gist melalui proxy ====
+    const res = await fetch('http://localhost:3000/backup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+
+    // ==== Selesai ====
+    alert("✅ Data berhasil disimpan di IndexedDB dan di-push ke Gist!\nURL Gist: " + result.html_url);
+
+  } catch (err) {
+    console.error(err);
+    alert("❌ Gagal simpan & backup: " + err.message);
   }
 }
-
 /* ==== Load Data ==== */
 async function loadData(){
   try{
@@ -524,6 +537,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 </body>
 </html>
+
 
 
 
