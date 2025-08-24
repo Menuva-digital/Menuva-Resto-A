@@ -162,27 +162,26 @@ body {
 
 <hr>
 <div class="section">
+  <!-- Simpan Semua → IndexedDB + push Gist -->
   <button class="btn-simpan" onclick="simpanData()">💾 Simpan Semua</button>
+
+  <!-- Halaman Customer -->
   <button class="btn-orange" onclick="window.location.href='menu.html'">🛒 Halaman Customer</button>
 
-  <!-- Backup ke Gist -->
+  <!-- Backup → Download JSON Lokal -->
   <button class="btn-secondary" onclick="backupData()">📦 Backup Data</button>
-  <div id="backupDownloadLink"></div> <!-- untuk menampilkan URL Gist hasil backup -->
+  <div id="backupDownloadLink" style="margin-top:10px;"></div> <!-- optional untuk tampilkan Gist URL -->
 
-  <!-- Restore dari Gist -->
-  <input type="text" id="gistIdInput" placeholder="Masukkan Gist ID" style="margin-top:10px; padding:5px; width:200px;" />
-  <button class="btn-secondary" onclick="restoreData(document.getElementById('gistIdInput').value)">🔄 Restore Data</button>
+  <!-- Restore → dari file JSON lokal -->
+  <input type="file" id="restoreFileInput" accept=".json" style="margin-top:10px; padding:5px; width:220px;" onchange="restoreDataFromFile(event)" />
 </div>
-
 
 <div style="background: #fef9e7; padding: 10px; border-left: 5px solid #f1c40f; margin-top: 10px; font-size: 14px;">
   <strong>Panduan Penggunaan:</strong><br>
-  PENTING!!<br>
-  🔹 Klik <strong>⬇️ Backup Data</strong> untuk menyimpan semua data restoran ke file berformat <strong>.json</strong>.<br>
-  🔹 Simpan file tersebut dengan baik dan aman di perangkat Anda.<br>
-  🔹 Klik <strong>📂 Pilih File</strong> untuk me-restore data dari file <strong>.json</strong> hasil backup.<br>
-  ⚠️ Proses restore akan menggantikan seluruh data yang ada saat ini dan tidak bisa dibatalkan.<br>
-  💡 Gunakan fitur ini sebelum mengganti perangkat atau membersihkan data browser.
+  🔹 Klik <strong>💾 Simpan Semua</strong> untuk menyimpan data dan push ke Gist.<br>
+  🔹 Klik <strong>📦 Backup Data</strong> untuk mengunduh file <strong>.json</strong> ke perangkat.<br>
+  🔹 Gunakan <strong>📂 Pilih File</strong> untuk me-restore data dari file backup <strong>.json</strong>.<br>
+  ⚠️ Restore akan menggantikan seluruh data saat ini. Simpan backup sebelum mengganti perangkat atau membersihkan browser.
 </div>
 
   <script>
@@ -406,8 +405,7 @@ function renderImagePreview(tipe,url){
   wrapper.appendChild(img); wrapper.appendChild(btnHapus);
   document.getElementById(tipe==="ruangan"?"flipbookRuanganPreview":"flipbookMenuPreview").appendChild(wrapper);
 }
-
-/* ==== Simpan Data + Auto Backup ke Gist ==== */
+/* ==== Simpan Data + Push ke Gist ==== */
 async function simpanData() {
   try {
     const data = {
@@ -430,103 +428,130 @@ async function simpanData() {
     // ==== 1️⃣ Simpan ke IndexedDB ====
     await saveDataToDB(data);
 
-    // ==== 2️⃣ Push ke Gist melalui proxy ====
+    // ==== 2️⃣ Push ke Gist via proxy (update jika ada) ====
+    const gistId = localStorage.getItem("menuvaGistId") || null;
     const res = await fetch('http://localhost:3000/backup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      body: JSON.stringify({ data, gistId })
     });
     const result = await res.json();
 
-    // ==== Selesai ====
-    alert("✅ Data berhasil disimpan di IndexedDB dan di-push ke Gist!\nURL Gist: " + result.html_url);
+    if(result.success){
+      localStorage.setItem("menuvaGistId", result.gistId);
+      localStorage.setItem("menuvaGistUrl", result.gistUrl);
+      alert("✅ Data berhasil disimpan di IndexedDB dan di-push ke Gist!\nURL Gist: " + result.gistUrl);
+    } else {
+      alert("❌ Gagal push ke Gist: " + result.error);
+    }
 
   } catch (err) {
     console.error(err);
     alert("❌ Gagal simpan & backup: " + err.message);
   }
 }
-/* ==== Load Data ==== */
+
+/* ==== Backup JSON ke Lokal ==== */
+async function backupData() {
+  try {
+    const data = await loadDataFromDB();
+    if(!data){ alert("Tidak ada data untuk di-backup!"); return; }
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "menuva_backup.json";
+    a.click();
+    URL.revokeObjectURL(url);
+
+    alert("✅ Backup berhasil diunduh ke perangkat!");
+  } catch(err){
+    console.error(err);
+    alert("❌ Gagal backup: "+err.message);
+  }
+}
+
+/* ==== Restore dari File Lokal ==== */
+async function restoreDataFromFile(event){
+  try {
+    const file = event.target.files[0];
+    if(!file) return;
+
+    const text = await file.text();
+    const json = JSON.parse(text);
+
+    await saveDataToDB(json); // simpan ke IndexedDB
+    alert("✅ Restore berhasil!"); 
+    location.reload(); // reload supaya form terupdate
+  } catch(err) { 
+    console.error(err); 
+    alert("❌ Gagal restore: "+err.message); 
+  }
+}
+
+/* ==== Load Data Otomatis ==== */
 async function loadData(){
   try{
     await initDB();
     const data=await loadDataFromDB();
+    if(!data) return;
 
-    document.getElementById("namaRestoran").value=data.namaRestoran||"";
-    document.getElementById("restoAddress").value=data.restoAddress||"";
-    document.getElementById("restoPhone").value=data.restoPhone||"";
-    if(data.logo) document.getElementById("previewLogo").src=data.logo;
+    document.getElementById("namaRestoran").value = data.namaRestoran || "";
+    document.getElementById("restoAddress").value = data.restoAddress || "";
+    document.getElementById("restoPhone").value = data.restoPhone || "";
+    if(data.logo) document.getElementById("previewLogo").src = data.logo;
 
     if(Array.isArray(data.nomorWaAdmin)){
-      document.getElementById("nomorWaContainer").innerHTML="";
-      data.nomorWaAdmin.forEach(()=>tambahNomorWa());
-      document.querySelectorAll(".nomor-wa").forEach((input,i)=>{input.value=data.nomorWaAdmin[i];});
+      document.getElementById("nomorWaContainer").innerHTML = "";
+      data.nomorWaAdmin.forEach(() => tambahNomorWa());
+      document.querySelectorAll(".nomor-wa").forEach((input,i)=>{ input.value=data.nomorWaAdmin[i]; });
     }
 
     if(Array.isArray(data.menuPromo)) renderPromoFromData(data.menuPromo);
     if(Array.isArray(data.menu)) data.menu.forEach(m=>tambahMenu(m.kategori,m.nama,m.harga));
     if(Array.isArray(data.rooms)){
-      const grouped={
+      const grouped = {
         hotel: document.getElementById("roomHotelContainer"),
         meeting: document.getElementById("meetingRoomContainer"),
         package: document.getElementById("packageContainer")
       };
       data.rooms.forEach(r=>{
         tambahRoom(r.kategori);
-        const forms=grouped[r.kategori].querySelectorAll(".room-form");
-        const lastForm=forms[forms.length-1];
-        lastForm.querySelector(".room-nama").value=r.nama;
-        lastForm.querySelector(".room-deskripsi").value=r.deskripsi;
-        lastForm.querySelector(".room-harga").value=r.harga;
+        const forms = grouped[r.kategori].querySelectorAll(".room-form");
+        const lastForm = forms[forms.length-1];
+        lastForm.querySelector(".room-nama").value = r.nama;
+        lastForm.querySelector(".room-deskripsi").value = r.deskripsi;
+        lastForm.querySelector(".room-harga").value = r.harga;
         if(r.image){
-          const preview=lastForm.querySelector(".gambar-preview");
-          const hapusBtn=lastForm.querySelector(".hapus-gambar");
-          const uploadBtn=lastForm.querySelector(".room-image-upload");
-          preview.src=r.image; preview.style.display="block";
+          const preview = lastForm.querySelector(".gambar-preview");
+          const hapusBtn = lastForm.querySelector(".hapus-gambar");
+          const uploadBtn = lastForm.querySelector(".room-image-upload");
+          preview.src = r.image; preview.style.display="block";
           hapusBtn.style.display="flex";
           uploadBtn.setAttribute("data-image",r.image);
         }
       });
     }
 
-    flipbookRuanganImages=data.flipbookRuanganImages||[];
-    flipbookRuanganImages.forEach(s=>renderImagePreview("ruangan",s));
-    flipbookMenuImages=data.flipbookMenuImages||[];
-    flipbookMenuImages.forEach(s=>renderImagePreview("menu",s));
+    flipbookRuanganImages = data.flipbookRuanganImages || [];
+    flipbookRuanganImages.forEach(s => renderImagePreview("ruangan", s));
+    flipbookMenuImages = data.flipbookMenuImages || [];
+    flipbookMenuImages.forEach(s => renderImagePreview("menu", s));
+
   }catch(err){
-    console.error(err); alert("❌ Gagal load data: "+err.message);
+    console.error(err); 
+    alert("❌ Gagal load data: "+err.message);
   }
 }
 
-/* ==== Backup & Restore ==== */
-async function backupData(){
-  try{
-    const data=await loadDataFromDB();
-    if(!data){ alert("Tidak ada data untuk di-backup!"); return; }
-    const res=await fetch('http://localhost:3000/backup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
-    const result=await res.json();
-    alert("✅ Backup berhasil! URL Gist: "+result.html_url);
-  }catch(err){
-    console.error(err); alert("❌ Gagal backup: "+err.message);
-  }
-}
-
-async function restoreDataFromFile(event){
-  try{
-    const file=event.target.files[0];
-    if(!file) return;
-    const text=await file.text();
-    const json=JSON.parse(text);
-    await saveDataToDB(json);
-    alert("✅ Restore berhasil!"); location.reload();
-  }catch(err){ console.error(err); alert("❌ Gagal restore: "+err.message); }
-}
-
-/* ==== Auto Load ==== */
+/* ==== Auto Load Saat Page Dibuka ==== */
 window.addEventListener("DOMContentLoaded", async () => {
   await initDB();
   await loadData();
 });
+
 </script>
 
 
@@ -537,6 +562,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 </body>
 </html>
+
 
 
 
