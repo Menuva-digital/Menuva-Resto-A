@@ -405,7 +405,7 @@ function renderImagePreview(tipe,url){
   wrapper.appendChild(img); wrapper.appendChild(btnHapus);
   document.getElementById(tipe==="ruangan"?"flipbookRuanganPreview":"flipbookMenuPreview").appendChild(wrapper);
 }
-/* ==== Simpan Data + Push ke Gist ==== */
+/* ==== Simpan Data + Push ke Proxy Online ==== */
 async function simpanData() {
   try {
     const data = {
@@ -428,26 +428,24 @@ async function simpanData() {
     // ==== 1️⃣ Simpan ke IndexedDB ====
     await saveDataToDB(data);
 
-    // ==== 2️⃣ Push ke Gist via proxy (update jika ada) ====
-    const gistId = localStorage.getItem("menuvaGistId") || null;
-    const res = await fetch('http://localhost:3000/backup', {
+    // ==== 2️⃣ Push ke Proxy Online / Vercel ====
+    const res = await fetch('https://menuva-proxy-v1.vercel.app/api/proxy/backup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ data, gistId })
+      body: JSON.stringify(data)
     });
+
     const result = await res.json();
 
     if(result.success){
-      localStorage.setItem("menuvaGistId", result.gistId);
-      localStorage.setItem("menuvaGistUrl", result.gistUrl);
-      alert("✅ Data berhasil disimpan di IndexedDB dan di-push ke Gist!\nURL Gist: " + result.gistUrl);
+      alert("✅ Data berhasil disimpan di IndexedDB dan di-push ke server online!\nURL katalog: " + result.url);
     } else {
-      alert("❌ Gagal push ke Gist: " + result.error);
+      alert("❌ Gagal push ke server: " + (result.error || "Unknown error"));
     }
 
   } catch (err) {
     console.error(err);
-    alert("❌ Gagal simpan & backup: " + err.message);
+    alert("❌ Gagal simpan & push ke server: " + err.message);
   }
 }
 
@@ -562,6 +560,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 </body>
 </html>
+
 
 
 
