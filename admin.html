@@ -164,10 +164,16 @@ body {
 <div class="section">
   <button class="btn-simpan" onclick="simpanData()">💾 Simpan Semua</button>
   <button class="btn-orange" onclick="window.location.href='menu.html'">🛒 Halaman Customer</button>
+
+  <!-- Backup ke Gist -->
   <button class="btn-secondary" onclick="backupData()">📦 Backup Data</button>
-  <input type="file" accept=".json" onchange="restoreDataFromFile(event)" />
-  <div id="backupDownloadLink"></div>
+  <div id="backupDownloadLink"></div> <!-- untuk menampilkan URL Gist hasil backup -->
+
+  <!-- Restore dari Gist -->
+  <input type="text" id="gistIdInput" placeholder="Masukkan Gist ID" style="margin-top:10px; padding:5px; width:200px;" />
+  <button class="btn-secondary" onclick="restoreData(document.getElementById('gistIdInput').value)">🔄 Restore Data</button>
 </div>
+
 
 <div style="background: #fef9e7; padding: 10px; border-left: 5px solid #f1c40f; margin-top: 10px; font-size: 14px;">
   <strong>Panduan Penggunaan:</strong><br>
@@ -395,6 +401,7 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 </body>
 </html>
+
 
 
 
