@@ -395,11 +395,9 @@ function renderImagePreview(tipe,url){
   wrapper.appendChild(img); wrapper.appendChild(btnHapus);
   document.getElementById(tipe==="ruangan"?"flipbookRuanganPreview":"flipbookMenuPreview").appendChild(wrapper);
 }
-
-    /* ==== Simpan Semua Data + Push ke Proxy Online ==== */
+    
 async function simpanData() {
   try {
-    // 1️⃣ Ambil semua data dari form dan flipbook
     const data = {
       namaRestoran: document.getElementById("namaRestoran").value,
       restoAddress: document.getElementById("restoAddress").value,
@@ -417,33 +415,29 @@ async function simpanData() {
       flipbookMenuImages
     };
 
-    // 2️⃣ Simpan ke IndexedDB lokal
+    // Simpan ke IndexedDB
     await saveDataToDB(data);
 
-    // 3️⃣ Push ke proxy Vercel (token diambil dari ENV server-side)
-    const proxyUrl = "https://menuva-proxy-hhk8vl41f-menuvas-projects.vercel.app/api/backup"; // ganti sesuai URL Vercel
+    // Push ke proxy Vercel
+    const proxyUrl = "https://menuva-proxy-hhk8vl41f-menuvas-projects.vercel.app/api/backup";
 
     const res = await fetch(proxyUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        url: "https://api.github.com/gists", // endpoint Gist
-        data // data akan dikirim ke backup.js, token diambil server-side
-      })
+      body: JSON.stringify({ url: "https://api.github.com/gists", data })
     });
 
-    let result;
-    try { result = await res.json(); } catch(e){ result={success:false,error:"Invalid JSON response"}; }
+    const result = await res.json();
 
-    if(result.success){
-      alert("✅ Data tersimpan di IndexedDB & di-push ke server online!\nURL katalog: " + result.url);
+    if (result.success) {
+      alert("✅ Data tersimpan & push ke server online!\nURL katalog: " + result.url);
     } else {
-      alert("❌ Gagal push ke server: " + (result.error||"Unknown error"));
+      alert("❌ Gagal push ke server: " + (result.error || "Unknown error"));
     }
 
-  } catch(err){
+  } catch (err) {
     console.error(err);
-    alert("❌ Gagal simpan & push ke server: " + err.message);
+    alert("❌ Gagal simpan & push: " + err.message);
   }
 }
 
@@ -523,6 +517,7 @@ window.addEventListener("DOMContentLoaded", async ()=>{
 
 </body>
 </html>
+
 
 
 
