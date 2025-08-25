@@ -396,10 +396,10 @@ function renderImagePreview(tipe,url){
   document.getElementById(tipe==="ruangan"?"flipbookRuanganPreview":"flipbookMenuPreview").appendChild(wrapper);
 }
 
-/* ==== Simpan Data + Push ke Proxy Online ==== */
+    /* ==== Simpan Semua Data + Push ke Proxy Online ==== */
 async function simpanData() {
   try {
-    // 1️⃣ Ambil semua data dari form / IndexedDB
+    // 1️⃣ Ambil semua data dari form dan flipbook
     const data = {
       namaRestoran: document.getElementById("namaRestoran").value,
       restoAddress: document.getElementById("restoAddress").value,
@@ -417,18 +417,19 @@ async function simpanData() {
       flipbookMenuImages
     };
 
-    // 2️⃣ Simpan data ke IndexedDB lokal
+    // 2️⃣ Simpan ke IndexedDB lokal
     await saveDataToDB(data);
 
-    // 3️⃣ Push ke proxy online
-    const proxyUrl = "https://menuva-proxy-hhk8vl41f-menuvas-projects.vercel.app/api/backup"; // ganti sesuai URL Vercel lo
-    const gistUrl = "https://api.github.com/gists";
-    const token = "<GITHUB_PERSONAL_ACCESS_TOKEN>"; // Token aman dikirim ke proxy, jangan langsung ke GitHub
+    // 3️⃣ Push ke proxy Vercel (token diambil dari ENV server-side)
+    const proxyUrl = "https://menuva-proxy-hhk8vl41f-menuvas-projects.vercel.app/api/backup"; // ganti sesuai URL Vercel
 
     const res = await fetch(proxyUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url: gistUrl, data, token })
+      body: JSON.stringify({ 
+        url: "https://api.github.com/gists", // endpoint Gist
+        data // data akan dikirim ke backup.js, token diambil server-side
+      })
     });
 
     let result;
@@ -450,37 +451,25 @@ async function simpanData() {
 async function backupData() {
   try {
     const data = await loadDataFromDB();
-    if(!data){ 
-      alert("Tidak ada data untuk di-backup!"); 
-      return; 
-    }
+    if(!data){ alert("Tidak ada data untuk di-backup!"); return; }
     const blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = "menuva_backup.json";
     a.click();
     alert("✅ Backup berhasil diunduh!");
-  } catch(err){ 
-    console.error(err); 
-    alert("❌ Gagal backup: "+err.message); 
-  }
+  } catch(err){ console.error(err); alert("❌ Gagal backup: "+err.message); }
 }
 
 async function restoreDataFromFile(event){
   try {
-    const file = event.target.files[0]; 
-    if(!file) return;
-    const text = await file.text();
-    const json = JSON.parse(text);
+    const file=event.target.files[0]; if(!file) return;
+    const text=await file.text();
+    const json=JSON.parse(text);
     await saveDataToDB(json);
-    alert("✅ Restore berhasil!"); 
-    location.reload();
-  } catch(err){ 
-    console.error(err); 
-    alert("❌ Gagal restore: "+err.message); 
-  }
+    alert("✅ Restore berhasil!"); location.reload();
+  } catch(err){ console.error(err); alert("❌ Gagal restore: "+err.message); }
 }
-
 
 /* ==== Auto Load Saat Page Dibuka ==== */
 window.addEventListener("DOMContentLoaded", async ()=>{
@@ -534,6 +523,7 @@ window.addEventListener("DOMContentLoaded", async ()=>{
 
 </body>
 </html>
+
 
 
 
