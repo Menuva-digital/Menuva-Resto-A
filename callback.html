@@ -3,84 +3,74 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Menuva - Login Callback</title>
+  <title>Menuva - Callback</title>
   <style>
     body {
       margin: 0;
-      padding: 0;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #1e3c72, #2a5298);
-      height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0d1b2a, #1b263b, #415a77);
+      color: #fff;
       display: flex;
       justify-content: center;
       align-items: center;
-      color: white;
+      height: 100vh;
       text-align: center;
     }
     .container {
-      max-width: 350px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0px 8px 24px rgba(0,0,0,0.4);
       width: 90%;
+      max-width: 400px;
     }
-    .logo {
-      width: 90px;
+    img.logo {
+      width: 100px;
       margin-bottom: 20px;
-      border-radius: 20%;
-      background: white;
-      padding: 10px;
     }
-    .title {
-      font-size: 1.4em;
-      font-weight: bold;
-      margin-bottom: 10px;
+    h1 {
+      font-size: 22px;
+      margin-bottom: 15px;
     }
-    .subtitle {
-      font-size: 1em;
-      margin-bottom: 30px;
-      opacity: 0.9;
+    p {
+      font-size: 14px;
+      margin-bottom: 25px;
+      color: #cbd5e1;
     }
-    .loader {
-      border: 6px solid rgba(255, 255, 255, 0.2);
-      border-top: 6px solid #fff;
-      border-radius: 50%;
-      width: 45px;
-      height: 45px;
-      margin: 0 auto;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    .loading {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #93c5fd;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Ganti src logo sesuai file logo Menuva -->
-    <img src="logo.png" alt="menuva-logo.png" class="logo">
-    <div class="title">Login Berhasil</div>
-    <div class="subtitle">Mengalihkan ke halaman Admin...</div>
-    <div class="loader"></div>
+    <img src="menuva-logo.png" alt="Menuva Logo" class="logo">
+    <h1>Login Berhasil 🎉</h1>
+    <p>Sebentar ya, kamu akan diarahkan ke halaman admin...</p>
+    <div class="loading">⏳ Loading...</div>
   </div>
 
   <script>
-    // Ambil code dari URL
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
+    // Parsing token dari URL fragment
+    const hash = window.location.hash.substring(1);
+    const params = new URLSearchParams(hash);
+    const accessToken = params.get("access_token");
 
-    if (code) {
-      // Simpan kode di localStorage untuk dipakai nanti
-      localStorage.setItem("auth_code", code);
-
-      // Redirect ke admin setelah delay 1.5 detik biar kelihatan smooth
+    if (accessToken) {
+      console.log("Access Token:", accessToken);
+      // Simpan ke localStorage
+      localStorage.setItem("access_token", accessToken);
+      // Redirect ke admin.html
       setTimeout(() => {
         window.location.href = "admin.html";
-      }, 1500);
+      }, 2000);
     } else {
-      document.querySelector(".title").textContent = "Login Gagal";
-      document.querySelector(".subtitle").textContent = "Kode otorisasi tidak ditemukan.";
-      document.querySelector(".loader").style.display = "none";
+      document.querySelector("h1").innerText = "Login gagal ❌";
+      document.querySelector("p").innerText = "Silakan coba login lagi.";
+      document.querySelector(".loading").style.display = "none";
     }
   </script>
 </body>
 </html>
-
