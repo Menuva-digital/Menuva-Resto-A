@@ -396,8 +396,10 @@ function renderImagePreview(tipe,url){
   document.getElementById(tipe==="ruangan"?"flipbookRuanganPreview":"flipbookMenuPreview").appendChild(wrapper);
 }
     
+/* ==== Simpan Semua Data + Push ke Proxy Vercel ==== */
 async function simpanData() {
   try {
+    // 1️⃣ Ambil semua data dari form
     const data = {
       namaRestoran: document.getElementById("namaRestoran").value,
       restoAddress: document.getElementById("restoAddress").value,
@@ -415,29 +417,30 @@ async function simpanData() {
       flipbookMenuImages
     };
 
-    // Simpan ke IndexedDB
+    // 2️⃣ Simpan ke IndexedDB
     await saveDataToDB(data);
 
-    // Push ke proxy Vercel
-    const proxyUrl = "https://menuva-proxy-hhk8vl41f-menuvas-projects.vercel.app/api/backup";
+    // 3️⃣ Push ke proxy Vercel
+    const proxyUrl = "https://menuva-proxy-express-2dc5or1ki-menuvas-projects.vercel.app/backup";
 
     const res = await fetch(proxyUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url: "https://api.github.com/gists", data })
+      body: JSON.stringify({ data })
     });
 
     const result = await res.json();
 
+    // 4️⃣ Notifikasi hasil
     if (result.success) {
-      alert("✅ Data tersimpan & push ke server online!\nURL katalog: " + result.url);
+      alert("✅ Data tersimpan di IndexedDB & push ke server online!\nURL katalog: " + result.url);
     } else {
       alert("❌ Gagal push ke server: " + (result.error || "Unknown error"));
     }
 
   } catch (err) {
     console.error(err);
-    alert("❌ Gagal simpan & push: " + err.message);
+    alert("❌ Gagal simpan & push ke server: " + err.message);
   }
 }
 
@@ -517,6 +520,7 @@ window.addEventListener("DOMContentLoaded", async ()=>{
 
 </body>
 </html>
+
 
 
 
