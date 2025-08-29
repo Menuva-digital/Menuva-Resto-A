@@ -3,56 +3,61 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login Menuva</title>
+  <title>Menuva - Login</title>
   <style>
     body {
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
       margin: 0;
-      background: linear-gradient(135deg, #ff7e5f, #feb47b);
-      color: #333;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0d1b2a, #1b263b, #415a77);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
     }
     .container {
-      background: #fff;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-      text-align: center;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0px 8px 24px rgba(0,0,0,0.4);
       width: 90%;
       max-width: 400px;
     }
-    .logo {
-      width: 120px;
+    img.logo {
+      width: 100px;
       margin-bottom: 20px;
     }
     h1 {
-      margin-bottom: 15px;
-      font-size: 24px;
-      color: #444;
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+    p {
+      font-size: 14px;
+      margin-bottom: 30px;
+      color: #cbd5e1;
     }
     button {
-      background: #4285f4;
-      color: white;
+      background: #1e40af;
       border: none;
       padding: 12px 20px;
+      border-radius: 10px;
+      color: white;
       font-size: 16px;
-      border-radius: 8px;
       cursor: pointer;
-      transition: 0.3s;
+      transition: background 0.3s ease;
+      width: 100%;
     }
     button:hover {
-      background: #3367d6;
+      background: #3b82f6;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <img src="menuva-logo.png" alt="Menuva Logo" class="logo">
-    <h1>Login ke Menuva</h1>
+    <h1>Selamat Datang di Menuva</h1>
+    <p>Login untuk melanjutkan ke dashboard admin</p>
     <button onclick="login()">Login dengan Google</button>
   </div>
 
@@ -63,7 +68,11 @@
       const scope = "openid email profile";
       const responseType = "token";
 
-      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}`;
+      const authUrl =
+        `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}` +
+        `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+        `&response_type=${responseType}&scope=${encodeURIComponent(scope)}`;
+
       window.location.href = authUrl;
     }
   </script>
