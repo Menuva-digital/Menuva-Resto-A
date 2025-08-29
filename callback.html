@@ -42,34 +42,50 @@
       font-size: 14px;
       color: #93c5fd;
     }
+    button {
+      margin-top: 15px;
+      background: #1e40af;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      display: none; /* default hidden */
+    }
+    button:hover {
+      background: #3b82f6;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <img src="menuva-logo.png" alt="Menuva Logo" class="logo">
-    <h1>Login Berhasil 🎉</h1>
-    <p>Sebentar ya, kamu akan diarahkan ke halaman admin...</p>
-    <div class="loading">⏳ Loading...</div>
+    <h1 id="statusTitle">Login Berhasil 🎉</h1>
+    <p id="statusMsg">Sebentar ya, kamu akan diarahkan ke halaman admin...</p>
+    <div class="loading" id="loading">⏳ Loading...</div>
+    <button id="backBtn" onclick="window.location.href='index.html'">Back to Login</button>
   </div>
 
   <script>
-    // Parsing token dari URL fragment
     const hash = window.location.hash.substring(1);
     const params = new URLSearchParams(hash);
     const accessToken = params.get("access_token");
 
     if (accessToken) {
       console.log("Access Token:", accessToken);
-      // Simpan ke localStorage
       localStorage.setItem("access_token", accessToken);
-      // Redirect ke admin.html
+
+      // Auto redirect
       setTimeout(() => {
         window.location.href = "admin.html";
       }, 2000);
     } else {
-      document.querySelector("h1").innerText = "Login gagal ❌";
-      document.querySelector("p").innerText = "Silakan coba login lagi.";
-      document.querySelector(".loading").style.display = "none";
+      // Jika gagal login
+      document.getElementById("statusTitle").innerText = "Login Gagal ❌";
+      document.getElementById("statusMsg").innerText = "Silakan coba login lagi.";
+      document.getElementById("loading").style.display = "none";
+      document.getElementById("backBtn").style.display = "inline-block";
     }
   </script>
 </body>
