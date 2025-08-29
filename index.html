@@ -61,20 +61,21 @@
     <button onclick="login()">Login dengan Google</button>
   </div>
 
-  <script>
-    function login() {
-      const clientId = "808817220505-baqunc53h7c5p7t9ln8kiuetb3ciu66t.apps.googleusercontent.com";
-      const redirectUri = window.location.origin + "/callback.html";
-      const scope = "openid email profile";
-      const responseType = "token";
+<script>
+  function login() {
+    const clientId = "808817220505-baqunc53h7c5p7t9ln8kiuetb3ciu66t.apps.googleusercontent.com";
+    const redirectUri = "https://menuva-digital.github.io/Menuva-Resto-A/callback.html"; // FIXED
+    const scope = "openid email profile";
+    const responseType = "token";
 
-      const authUrl =
-        `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}` +
-        `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-        `&response_type=${responseType}&scope=${encodeURIComponent(scope)}`;
+    const authUrl =
+      `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}` +
+      `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+      `&response_type=${responseType}&scope=${encodeURIComponent(scope)}`;
 
-      window.location.href = authUrl;
-    }
-  </script>
+    window.location.href = authUrl;
+  }
+</script>
 </body>
 </html>
+
