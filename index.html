@@ -3,23 +3,69 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login Menuva</title>
+  <title>Test Login Google</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 100px;
+    }
+    #userInfo {
+      display: none;
+      margin-top: 20px;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      max-width: 300px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    img {
+      border-radius: 50%;
+    }
+  </style>
 </head>
 <body>
-  <h2>Login dengan Google</h2>
-  <button id="loginBtn">Login</button>
+
+  <h2>Test Login Google</h2>
+  <div id="g_id_onload"
+       data-client_id="808817220505-baqunc53h7c5p7t9ln8kiuetb3ciu66t.apps.googleusercontent.com"
+       data-callback="handleCredentialResponse">
+  </div>
+  
+  <div class="g_id_signin" data-type="standard"></div>
+
+  <div id="userInfo">
+    <h3>Data User</h3>
+    <img id="userImage" src="" width="80"><br><br>
+    <strong>Nama:</strong> <span id="userName"></span><br>
+    <strong>Email:</strong> <span id="userEmail"></span>
+  </div>
 
   <script>
-    document.getElementById("loginBtn").addEventListener("click", () => {
-      const clientId = "808817220505-baqunc53h7c5p7t9ln8kiuetb3ciu66t.apps.googleusercontent.com";
-      const redirectUri = "https://arifgithub.github.io/menuva/callback.html";
-      const scope = "openid profile email";
-      const responseType = "token"; 
+    function handleCredentialResponse(response) {
+      // Decode JWT token
+      const data = parseJwt(response.credential);
 
-      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=${responseType}&scope=${scope}&prompt=select_account`;
+      console.log("Token:", response.credential); // Debug
+      console.log("Decoded Data:", data); // Debug
 
-      window.location.href = authUrl;
-    });
+      document.getElementById("userInfo").style.display = "block";
+      document.getElementById("userName").innerText = data.name;
+      document.getElementById("userEmail").innerText = data.email;
+      document.getElementById("userImage").src = data.picture;
+    }
+
+    function parseJwt(token) {
+      let base64Url = token.split('.')[1];
+      let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      let jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    }
   </script>
+
 </body>
 </html>
