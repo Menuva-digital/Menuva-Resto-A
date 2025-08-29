@@ -3,42 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Callback</title>
+  <title>Menuva - Login Callback</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      text-align: center;
+    }
+    .container {
+      max-width: 350px;
+      width: 90%;
+    }
+    .logo {
+      width: 90px;
+      margin-bottom: 20px;
+      border-radius: 20%;
+      background: white;
+      padding: 10px;
+    }
+    .title {
+      font-size: 1.4em;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      font-size: 1em;
+      margin-bottom: 30px;
+      opacity: 0.9;
+    }
+    .loader {
+      border: 6px solid rgba(255, 255, 255, 0.2);
+      border-top: 6px solid #fff;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      margin: 0 auto;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
-  <h2>Memproses login...</h2>
+  <div class="container">
+    <!-- Ganti src logo sesuai file logo Menuva -->
+    <img src="logo.png" alt="Menuva Logo" class="logo">
+    <div class="title">Login Berhasil</div>
+    <div class="subtitle">Mengalihkan ke halaman Admin...</div>
+    <div class="loader"></div>
+  </div>
 
   <script>
-    function getAccessTokenFromUrl() {
-      const hash = window.location.hash.substring(1);
-      const params = new URLSearchParams(hash);
-      return params.get("access_token");
+    // Ambil code dari URL
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+
+    if (code) {
+      // Simpan kode di localStorage untuk dipakai nanti
+      localStorage.setItem("auth_code", code);
+
+      // Redirect ke admin setelah delay 1.5 detik biar kelihatan smooth
+      setTimeout(() => {
+        window.location.href = "admin.html";
+      }, 1500);
+    } else {
+      document.querySelector(".title").textContent = "Login Gagal";
+      document.querySelector(".subtitle").textContent = "Kode otorisasi tidak ditemukan.";
+      document.querySelector(".loader").style.display = "none";
     }
-
-    async function getUserInfo(token) {
-      const response = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-        headers: { "Authorization": `Bearer ${token}` }
-      });
-      return response.json();
-    }
-
-    (async () => {
-      const token = getAccessTokenFromUrl();
-      if (!token) {
-        alert("Login gagal!");
-        window.location.href = "index.html";
-        return;
-      }
-
-      const user = await getUserInfo(token);
-      console.log("User info:", user);
-
-      // Simpan user di localStorage
-      localStorage.setItem("menuvaUser", JSON.stringify(user));
-
-      // Redirect ke admin.html
-      window.location.href = "admin.html";
-    })();
   </script>
 </body>
 </html>
