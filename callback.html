@@ -2,47 +2,56 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Callback</title>
+  <title>Callback Google Login</title>
 </head>
 <body>
-  <p>Sedang memproses login...</p>
+  <h2>Proses Login...</h2>
+  <div id="userInfo"></div>
+  <button id="toAdmin" style="display:none;" onclick="goAdmin()">Lanjut ke Admin</button>
 
   <script>
-    function getAccessTokenFromUrl() {
-      const params = new URLSearchParams(window.location.hash.substring(1));
-      return params.get("access_token");
-    }
+    async function handleCallback() {
+      // Ambil hash token dari URL (setelah login Google)
+      const params = new URLSearchParams(window.location.hash.substr(1));
+      const accessToken = params.get("access_token");
 
-    async function getUserInfo(token) {
-      const response = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      return response.json();
-    }
-
-    (async () => {
-      const token = getAccessTokenFromUrl();
-      if (!token) {
-        alert("Login gagal!");
-        window.location.href = "index.html";
+      if (!accessToken) {
+        document.getElementById("userInfo").innerText = "Login gagal atau dibatalkan.";
         return;
       }
 
+      // Panggil Google API untuk ambil info user
       try {
-        const userInfo = await getUserInfo(token);
+        const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+          headers: { "Authorization": "Bearer " + accessToken }
+        });
+        const user = await res.json();
 
-        // Simpan user ke localStorage
-        localStorage.setItem("user", JSON.stringify(userInfo));
+        // Tampilkan info user
+        document.getElementById("userInfo").innerHTML = `
+          <p><b>Login Berhasil!</b></p>
+          <p>Nama: ${user.name}</p>
+          <p>Email: ${user.email}</p>
+          <img src="${user.picture}" width="100" style="border-radius:50%">
+        `;
 
-        // Redirect ke admin
-        window.location.href = "admin.html";
+        // Tampilkan tombol lanjut ke admin
+        document.getElementById("toAdmin").style.display = "block";
+
+        // Simpan email/token di localStorage agar bisa dipakai di admin.html
+        localStorage.setItem("userEmail", user.email);
+        localStorage.setItem("accessToken", accessToken);
+
       } catch (e) {
-        console.error("Error:", e);
-        alert("Gagal ambil data user!");
-        window.location.href = "index.html";
+        document.getElementById("userInfo").innerText = "Gagal mengambil data user.";
       }
-    })();
+    }
+
+    function goAdmin() {
+      window.location.href = "admin.html";
+    }
+
+    handleCallback();
   </script>
 </body>
 </html>
